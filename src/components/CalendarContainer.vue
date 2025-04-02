@@ -626,11 +626,11 @@ onMounted(() => {
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  grid-template-rows: 40px repeat(6, minmax(0, 1fr));
-  gap: 2px;
+  grid-template-rows: 36px repeat(6, minmax(0, 1fr));
+  gap: 1px;
   flex: 1;
   height: calc(100vh - 60px);
-  padding: 0 5px;
+  padding: 0 2px;
 }
 
 .calendar-weekday {
@@ -643,10 +643,15 @@ onMounted(() => {
   font-size: 15px;
 }
 
+.calendar-weekday:nth-child(6),
+.calendar-weekday:nth-child(7) {
+  color: #f56565;
+}
+
 .calendar-day {
   border: 1px solid #e2e8f0;
-  padding: 5px;
-  border-radius: 4px;
+  padding: 4px;
+  border-radius: 3px;
   display: flex;
   flex-direction: column;
   background: #ffffff;
@@ -654,9 +659,21 @@ onMounted(() => {
   min-height: 0;
 }
 
+.calendar-day:nth-child(7n),
+.calendar-day:nth-child(7n-1) {
+  background: #fef2f2;
+}
+
+.other-month:nth-child(7n),
+.other-month:nth-child(7n-1) {
+  background: #fef2f2;
+  opacity: 0.6;
+}
+
 .other-month {
-  background: #f7fafc;
-  opacity: 0.8;
+  background: #f8fafc;
+  opacity: 0.6;
+  color: #a0aec0;
 }
 
 .calendar-day:hover {
@@ -709,15 +726,15 @@ onMounted(() => {
 }
 
 .todo-item {
-  font-size: 0.85em;
-  padding: 6px 8px;
-  margin-bottom: 4px;
+  font-size: 0.82em;
+  padding: 4px 6px;
+  margin-bottom: 3px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   background: #f8fafc;
-  border-radius: 4px;
-  border-left: 3px solid #4a6cf7;
+  border-radius: 3px;
+  border-left: 2px solid #4a6cf7;
   transition: all 0.2s;
 }
 
@@ -858,34 +875,35 @@ onMounted(() => {
 /* 移动设备适配 */
 @media (max-width: 768px) {
   .calendar-container {
-    padding: 8px;
+    padding: 4px;
   }
 
   .calendar-header {
-    padding: 10px;
+    padding: 8px;
   }
 
   .calendar-header button {
-    padding: 6px 12px;
-    font-size: 13px;
+    padding: 4px 8px;
+    font-size: 12px;
   }
 
   .calendar-title {
-    font-size: 1.1rem;
+    font-size: 1rem;
   }
 
   .calendar-day {
-    padding: 6px;
+    padding: 3px;
   }
 
   .todo-item {
-    padding: 4px 6px;
-    font-size: 0.8em;
+    padding: 3px 4px;
+    font-size: 0.75em;
+    border-left-width: 1px;
   }
 
   .popup-content {
-    width: 85%;
-    padding: 20px;
+    width: 90%;
+    padding: 16px;
   }
 }
 </style>
