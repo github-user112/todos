@@ -484,37 +484,6 @@ const completeTodo = async () => {
   const todo = props.todos.find((t) => t.id === selectedTodo.value);
   if (!todo) return;
 
-  // 如果是重复事件，显示选择对话框
-  if (todo.repeat_type && todo.repeat_type !== 'none') {
-    const d = dialog.warning({
-      title: '完成重复事件',
-      content: '请选择操作范围',
-      positiveText: '完成所有重复事件',
-      negativeText: '仅完成当前事件',
-      onPositiveClick: async () => {
-        await emit('complete-todo', {
-          todoId: selectedTodo.value,
-          date: selectedTodoDate.value,
-          allInstances: true,
-        });
-        message.success('已完成所有重复事件');
-        showTodoActions.value = false;
-        d.destroy();
-      },
-      onNegativeClick: async () => {
-        await emit('complete-todo', {
-          todoId: selectedTodo.value,
-          date: selectedTodoDate.value,
-          allInstances: false,
-        });
-        message.success('已完成当前事件');
-        showTodoActions.value = false;
-        d.destroy();
-      },
-    });
-    return;
-  }
-
   // 非重复事件直接完成
   await emit('complete-todo', {
     todoId: selectedTodo.value,
@@ -711,7 +680,7 @@ onMounted(async () => {
 
 .calendar-day {
   border: 1px solid #e2e8f0;
-  padding: 4px;
+  padding: 8px 4px 4px 4px;
   border-radius: 3px;
   display: flex;
   flex-direction: column;
@@ -723,12 +692,25 @@ onMounted(async () => {
 
 .calendar-day:nth-child(7n),
 .calendar-day:nth-child(7n-1) {
-  background: #fef2f2;
+  background: #f0f9ff;
+}
+
+.calendar-day.holiday-rest {
+  background: #fff0f0;
+}
+
+.calendar-day.holiday-rest:hover {
+  background: #ffe8e8;
 }
 
 .other-month:nth-child(7n),
 .other-month:nth-child(7n-1) {
-  background: #fef2f2;
+  background: #f0f9ff;
+  opacity: 0.6;
+}
+
+.other-month.holiday-rest {
+  background: #fff0f0;
   opacity: 0.6;
 }
 
@@ -745,11 +727,12 @@ onMounted(async () => {
 
 .day-number {
   position: absolute;
-  top: 4px;
-  left: 4px;
+  top: 6px;
+  left: 6px;
   font-weight: 600;
   color: #2d3748;
   font-size: 15px;
+  z-index: 1;
 }
 
 .other-month .day-number {
@@ -772,12 +755,13 @@ onMounted(async () => {
 
 .special-date {
   position: absolute;
-  top: 4px;
-  right: 4px;
+  top: 6px;
+  right: 6px;
   font-size: 0.75em;
   font-weight: 600;
   padding: 0 4px;
   border-radius: 4px;
+  z-index: 1;
 }
 
 .holiday-rest {
@@ -793,7 +777,7 @@ onMounted(async () => {
 .todo-list {
   flex: 1;
   overflow-y: auto;
-  margin-top: 4px;
+  margin-top: 24px;
   padding-right: 2px;
   max-height: calc(100% - 30px);
 }
@@ -817,6 +801,7 @@ onMounted(async () => {
 
 .todo-item.completed {
   text-decoration: line-through;
+  text-decoration-thickness: 2px;
   color: #a0aec0;
   border-left-color: #48bb78;
 }

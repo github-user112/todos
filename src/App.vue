@@ -191,16 +191,26 @@ const handleAddTodo = async (todoData) => {
 };
 
 // 完成待办事项
-const handleCompleteTodo = async (todoId, todoDate) => {
+const handleCompleteTodo = async ({todoId, date: todoDate, allInstances}) => {
   try {
     const todo = todos.value.find((t) => t.id == todoId);
 
-    if (todo) {
-      if (
-          (!todo.repeat_type || todo.repeat_type === 'none') &&
-          todo.date === todoDate
-      ) {
-        // 非重复事项，直接修改原始待办事项
+    if (!todo) return false;
+
+    if ((!todo.repeat_type || todo.repeat_type === 'none') && todo.date === todoDate) {
+      // 非重复事项，直接修改原始待办事项
+      const result = await apiRequest('/api/todos', 'PUT', {
+        id: todoId,
+        completed: !todo.completed,
+      });
+
+      if (result.success) {
+        todo.completed = !todo.completed;
+        return true;
+      }
+    } else {
+      if (allInstances) {
+        // 完成所有重复实例
         const result = await apiRequest('/api/todos', 'PUT', {
           id: todoId,
           completed: !todo.completed,
@@ -208,9 +218,10 @@ const handleCompleteTodo = async (todoId, todoDate) => {
 
         if (result.success) {
           todo.completed = !todo.completed;
+          return true;
         }
       } else {
-        // 重复事项，记录特定实例的完成状态
+        // 完成单个重复实例
         const result = await apiRequest('/api/completed-instances', 'POST', {
           todoId,
           date: todoDate,
@@ -226,16 +237,15 @@ const handleCompleteTodo = async (todoId, todoDate) => {
           } else {
             // 移除完成记录
             const index = completedInstances.value.findIndex(
-                (instance) =>
-                    instance.todo_id == todoId && instance.date === todoDate
+              (instance) => instance.todo_id == todoId && instance.date === todoDate
             );
             if (index >= 0) {
               completedInstances.value.splice(index, 1);
             }
           }
+          return true;
         }
       }
-      return true;
     }
     return false;
   } catch (error) {
