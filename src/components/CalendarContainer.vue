@@ -36,7 +36,16 @@
 
         <!-- 合并农历和节日显示 -->
         <div v-if="day.lunarDate || day.holiday" class="special-date">
-          {{ day.holiday || day.lunarDate }}
+          <span
+            :class="
+              day.holiday === '休'
+                ? 'holiday-rest'
+                : day.holiday === '班'
+                ? 'holiday-work'
+                : ''
+            "
+            >{{ day.holiday || day.lunarDate }}</span
+          >
         </div>
 
         <div class="todo-list">
@@ -85,6 +94,9 @@ import { formatDate } from '../utils/dateUtils';
 import { useDialog } from 'naive-ui';
 const dialog = useDialog();
 const message = useMessage();
+
+// 状态
+const holidayDataFromFile = ref({});
 // 接收的属性
 const props = defineProps({
   todos: {
@@ -173,6 +185,15 @@ const calendarDays = computed(() => {
   const month = currentMonth.value;
   const result = [];
 
+  // 合并从文件加载的节假日数据
+  const mergedHolidayData = {
+    ...props.holidayData,
+    ...(holidayDataFromFile.value?.dates?.reduce((acc, item) => {
+      acc[item.date] = item.type === 'public_holiday' ? '休' : '班';
+      return acc;
+    }, {}) || {}),
+  };
+
   // 获取当前月第一天
   const firstDay = new Date(year, month, 1);
   // 获取当前月最后一天
@@ -206,7 +227,11 @@ const calendarDays = computed(() => {
       date,
       dateStr,
       lunarDate: getLunarDate(date),
-      holiday: getHoliday(date),
+      holiday: mergedHolidayData[dateStr]
+        ? mergedHolidayData[dateStr] === '休'
+          ? '休'
+          : '班'
+        : '',
       todos: getTodosForDate(date, dateStr),
     });
   }
@@ -224,7 +249,11 @@ const calendarDays = computed(() => {
       date,
       dateStr,
       lunarDate: getLunarDate(date),
-      holiday: getHoliday(date),
+      holiday: mergedHolidayData[dateStr]
+        ? mergedHolidayData[dateStr] === '休'
+          ? '休'
+          : '班'
+        : '',
       todos: getTodosForDate(date, dateStr),
     });
   }
@@ -244,7 +273,11 @@ const calendarDays = computed(() => {
       date,
       dateStr,
       lunarDate: getLunarDate(date),
-      holiday: getHoliday(date),
+      holiday: mergedHolidayData[dateStr]
+        ? mergedHolidayData[dateStr] === '休'
+          ? '休'
+          : '班'
+        : '',
       todos: getTodosForDate(date, dateStr),
     });
   }
@@ -258,7 +291,7 @@ function getLunarDate(date) {
   return props.lunarData[dateStr] || '';
 }
 
-// 获取节假日
+// 保留此函数作为兼容性备用
 function getHoliday(date) {
   const dateStr = formatDate(date);
   return props.holidayData[dateStr] || '';
@@ -362,6 +395,19 @@ watch(
   currentDate,
   async (newDate) => {
     await emit('fetch-calendar-data', newDate);
+
+    // 当年份变化时尝试加载新的节假日数据
+    try {
+      const response = await fetch(`/public/${newDate.getFullYear()}.json`);
+      if (response.ok) {
+        holidayDataFromFile.value = await response.json();
+      } else {
+        holidayDataFromFile.value = {};
+      }
+    } catch (error) {
+      console.error('加载节假日数据失败:', error);
+      holidayDataFromFile.value = {};
+    }
   },
   {
     immediate: true,
@@ -564,7 +610,7 @@ const handleTouchEnd = async (event) => {
 };
 
 // 初始化事件监听器
-onMounted(() => {
+onMounted(async () => {
   document.addEventListener('click', closeActionsOnOutsideClick);
 
   // 移动设备触摸事件
@@ -572,6 +618,16 @@ onMounted(() => {
   if (calendarEl) {
     calendarEl.addEventListener('touchstart', handleTouchStart);
     calendarEl.addEventListener('touchend', handleTouchEnd);
+  }
+
+  // 尝试加载当前年份的节假日数据
+  try {
+    const response = await fetch(`/public/${currentYear.value}.json`);
+    if (response.ok) {
+      holidayDataFromFile.value = await response.json();
+    }
+  } catch (error) {
+    console.error('加载节假日数据失败:', error);
   }
 });
 </script>
@@ -657,6 +713,7 @@ onMounted(() => {
   background: #ffffff;
   transition: all 0.2s;
   min-height: 0;
+  position: relative;
 }
 
 .calendar-day:nth-child(7n),
@@ -682,9 +739,10 @@ onMounted(() => {
 }
 
 .day-number {
+  position: absolute;
+  top: 4px;
+  left: 4px;
   font-weight: 600;
-  margin-bottom: 6px;
-  text-align: right;
   color: #2d3748;
   font-size: 15px;
 }
@@ -707,14 +765,24 @@ onMounted(() => {
   font-size: 1.1em;
 }
 
-.lunar-date,
-.holiday {
+.special-date {
+  position: absolute;
+  top: 4px;
+  right: 4px;
   font-size: 0.75em;
-  color: #718096;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-bottom: 2px;
+  font-weight: 600;
+  padding: 0 4px;
+  border-radius: 4px;
+}
+
+.holiday-rest {
+  color: #f56565;
+  background: rgba(245, 101, 101, 0.1);
+}
+
+.holiday-work {
+  color: #4299e1;
+  background: rgba(66, 153, 225, 0.1);
 }
 
 .todo-list {
