@@ -283,7 +283,12 @@ function getTodosForDate(date, dateStr) {
     }
   });
 
-  return result;
+  // Sort todos: incomplete first, then completed
+  return result.sort((a, b) => {
+    if (a.isCompleted && !b.isCompleted) return 1;
+    if (!a.isCompleted && b.isCompleted) return -1;
+    return 0;
+  });
 }
 
 // Check if instance is completed
