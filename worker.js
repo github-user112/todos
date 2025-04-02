@@ -60,12 +60,15 @@ async function handleGetTodos(request, env, userId) {
   }
 
   try {
-    // 查询待办事项
+    // 查询指定日期范围内的待办事项
     const todosResult = await env.DB.prepare(`
       SELECT * FROM todos 
-      WHERE user_id = ? AND date BETWEEN ? AND ?
+      WHERE user_id = ? AND (
+        (date BETWEEN ? AND ?) OR
+        (repeat_type != 'none' AND date <= ?)
+      )
     `)
-      .bind(userId, startDate, endDate)
+      .bind(userId, startDate, endDate, endDate)
       .all()
 
     // 查询已完成的实例
@@ -92,11 +95,11 @@ async function handleGetTodos(request, env, userId) {
       }),
       {
         headers: { "Content-Type": "application/json" },
-      },
+      }
     )
   } catch (error) {
-    console.error("获取待办事项时出错:", error)
-    return new Response(JSON.stringify({ error: "获取待办事项失败" }), {
+    console.error("查询待办事项时出错:", error)
+    return new Response(JSON.stringify({ error: "查询待办事项失败" }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
     })
@@ -283,6 +286,27 @@ async function handleToggleCompletedInstance(request, env, userId) {
       })
     }
 
+    // 处理所有实例的情况
+    if (data.allInstances && todo.repeat_type !== 'none') {
+      if (data.completed) {
+        // 标记所有实例为完成
+        await env.DB.prepare(`
+          UPDATE todos SET completed = 1 WHERE id = ?
+        `).bind(data.todoId).run()
+      } else {
+        // 取消所有实例的完成状态
+        await env.DB.prepare(`
+          UPDATE todos SET completed = 0 WHERE id = ?
+        `).bind(data.todoId).run()
+        await env.DB.prepare(`
+          DELETE FROM completed_instances WHERE todo_id = ?
+        `).bind(data.todoId).run()
+      }
+      return new Response(JSON.stringify({ success: true }), {
+        headers: { "Content-Type": "application/json" },
+      })
+    }
+
     // 检查是否已存在完成记录
     const existingInstance = await env.DB.prepare(`
       SELECT * FROM completed_instances 
@@ -352,6 +376,16 @@ async function handleCreateDeletedInstance(request, env, userId) {
     if (!todo) {
       return new Response(JSON.stringify({ error: "待办事项不存在或无权限" }), {
         status: 404,
+        headers: { "Content-Type": "application/json" },
+      })
+    }
+
+    // 处理删除所有实例的情况
+    if (data.allInstances && todo.repeat_type !== 'none') {
+      await env.DB.prepare(`
+        DELETE FROM todos WHERE id = ?
+      `).bind(data.todoId).run()
+      return new Response(JSON.stringify({ success: true }), {
         headers: { "Content-Type": "application/json" },
       })
     }
