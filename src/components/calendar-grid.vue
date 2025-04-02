@@ -2,9 +2,9 @@
   <div class="calendar-grid">
     <!-- Weekday headers -->
     <div 
-      v-for="day in weekdays" 
+      v-for="(day, index) in weekdays" 
       :key="day" 
-      class="calendar-weekday"
+      :class="['calendar-weekday', { 'weekend-header': index >= 5 }]"
     >
       {{ day }}
     </div>
@@ -42,7 +42,7 @@ defineEmits(['openAddTodoPopup', 'openTodoActions']);
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   grid-template-rows: 36px repeat(6, minmax(0, 1fr));
-  gap: 1px;
+  gap: 4px;
   flex: 1;
   height: calc(100vh - 60px);
   padding: 0 2px;
@@ -59,8 +59,7 @@ defineEmits(['openAddTodoPopup', 'openTodoActions']);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-.calendar-weekday:nth-child(6),
-.calendar-weekday:nth-child(7) {
+.weekend-header {
   color: #e53e3e;
   background: #fff5f5;
 }
@@ -68,7 +67,12 @@ defineEmits(['openAddTodoPopup', 'openTodoActions']);
 /* Mobile responsive styles */
 @media (max-width: 768px) {
   .calendar-grid {
-    gap: 1px;
+    gap: 2px;
+  }
+  
+  .calendar-weekday {
+    font-size: 13px;
+    padding: 8px 0;
   }
 }
 </style>

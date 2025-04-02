@@ -4,20 +4,23 @@
       'calendar-day',
       { 'other-month': day.isOtherMonth },
       { 'current-day': day.isToday },
-      getHolidayClass(day.holiday)
+      { 'weekend-day': isWeekend(day.date) && !day.holiday },
+      { 'holiday-rest-day': day.holiday === '休' || (typeof day.holiday === 'object' && day.holiday.type === 'public_holiday') },
+      { 'holiday-work-day': day.holiday === '班' || (typeof day.holiday === 'object' && day.holiday.type === 'working_day') }
     ]"
     :data-date="day.dateStr"
     @dblclick="$emit('dblclick')"
   >
     <div class="day-number">{{ day.dayNumber }}</div>
 
-    <!-- Lunar date and holiday display -->
-    <div v-if="day.lunarDate || day.holiday" class="special-date">
-      <span
-        :class="getHolidayClass(day.holiday)"
-      >
-        {{ getHolidayText(day.holiday) || day.lunarDate }}
-      </span>
+    <!-- Holiday indicator badge -->
+    <div v-if="day.holiday" class="holiday-badge" :class="getHolidayBadgeClass(day.holiday)">
+      {{ getHolidayBadgeText(day.holiday) }}
+    </div>
+
+    <!-- Holiday name or lunar date display -->
+    <div v-if="getHolidayName(day.holiday) || day.lunarDate" class="holiday-name">
+      {{ getHolidayName(day.holiday) || day.lunarDate }}
     </div>
 
     <div class="todo-list">
@@ -45,21 +48,38 @@ defineProps({
 
 defineEmits(['dblclick', 'openTodoActions']);
 
-// Helper functions
-function getHolidayClass(holiday) {
+// Helper function to check if date is weekend
+function isWeekend(date) {
+  const day = date.getDay();
+  return day === 0 || day === 6; // 0 is Sunday, 6 is Saturday
+}
+
+// Helper function to get holiday badge class
+function getHolidayBadgeClass(holiday) {
   if (holiday === '休' || (typeof holiday === 'object' && holiday.type === 'public_holiday')) {
-    return 'holiday-rest';
+    return 'rest-badge';
   } else if (holiday === '班' || (typeof holiday === 'object' && holiday.type === 'working_day')) {
-    return 'holiday-work';
+    return 'work-badge';
   }
   return '';
 }
 
-function getHolidayText(holiday) {
-  if (typeof holiday === 'object') {
+// Helper function to get holiday badge text
+function getHolidayBadgeText(holiday) {
+  if (holiday === '休' || (typeof holiday === 'object' && holiday.type === 'public_holiday')) {
+    return '休';
+  } else if (holiday === '班' || (typeof holiday === 'object' && holiday.type === 'working_day')) {
+    return '班';
+  }
+  return '';
+}
+
+// Helper function to get holiday name
+function getHolidayName(holiday) {
+  if (typeof holiday === 'object' && holiday.name) {
     return holiday.name;
   }
-  return holiday;
+  return '';
 }
 </script>
 
@@ -78,20 +98,20 @@ function getHolidayText(holiday) {
 }
 
 /* Weekend styling */
-.calendar-day:nth-child(7n),
-.calendar-day:nth-child(7n-1) {
+.weekend-day {
   background: #f0f7ff;
   border-color: #d0e1fd;
 }
 
-/* Holiday styling */
-.calendar-day.holiday-rest {
-  background: linear-gradient(135deg, #fff0f0, #fff5f5);
-  border-color: #fdd0d0;
+/* Holiday styling - Rest Day */
+.holiday-rest-day {
+  background: #fff0f0;
+  border-color: #ffd0d0;
 }
 
-.calendar-day.holiday-work {
-  background: linear-gradient(135deg, #f0f9ff, #e6f7ff);
+/* Holiday styling - Work Day */
+.holiday-work-day {
+  background: #e6f7ff;
   border-color: #bae7ff;
 }
 
@@ -101,10 +121,15 @@ function getHolidayText(holiday) {
 }
 
 .other-month {
-  background: #f8fafc !important;
   opacity: 0.6;
   color: #a0aec0;
   border-color: #edf2f7;
+}
+
+.other-month.weekend-day,
+.other-month.holiday-rest-day,
+.other-month.holiday-work-day {
+  opacity: 0.5;
 }
 
 .day-number {
@@ -118,13 +143,12 @@ function getHolidayText(holiday) {
 }
 
 .other-month .day-number {
-  color: #cbd5e0;
+  color: #a0aec0;
   font-size: 0.9em;
-  opacity: 0.7;
 }
 
 .current-day {
-  background: #ebf8ff !important;
+  background: #ebf8ff;
   border: 2px solid #3182ce;
   box-shadow: 0 0 0 1px rgba(49, 130, 206, 0.1);
 }
@@ -135,35 +159,63 @@ function getHolidayText(holiday) {
   font-size: 1.1em;
 }
 
-.special-date {
+/* Holiday badge */
+.holiday-badge {
   position: absolute;
   top: 6px;
   right: 8px;
   font-size: 0.75em;
-  font-weight: 600;
+  font-weight: 700;
   padding: 2px 6px;
   border-radius: 12px;
+  z-index: 2;
+  min-width: 20px;
+  text-align: center;
+}
+
+.rest-badge {
+  background: #e53e3e;
+  color: white;
+  box-shadow: 0 2px 4px rgba(229, 62, 62, 0.3);
+}
+
+.work-badge {
+  background: #3182ce;
+  color: white;
+  box-shadow: 0 2px 4px rgba(49, 130, 206, 0.3);
+}
+
+/* Holiday name */
+.holiday-name {
+  position: absolute;
+  top: 8px;
+  right: 40px;
+  font-size: 0.7em;
+  color: #718096;
   z-index: 1;
+  max-width: 80%;
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.holiday-rest {
+.holiday-rest-day .holiday-name {
   color: #e53e3e;
-  background: rgba(245, 101, 101, 0.15);
-  border: 1px solid rgba(245, 101, 101, 0.3);
+  font-weight: 600;
 }
 
-.holiday-work {
+.holiday-work-day .holiday-name {
   color: #3182ce;
-  background: rgba(66, 153, 225, 0.15);
-  border: 1px solid rgba(66, 153, 225, 0.3);
+  font-weight: 600;
 }
 
 .todo-list {
   flex: 1;
   overflow-y: auto;
-  margin-top: 24px;
+  margin-top: 25px; /* Increased to make room for holiday name */
   padding-right: 2px;
-  max-height: calc(100% - 30px);
+  max-height: calc(100% - 28px);
 }
 
 .todo-item {
@@ -206,9 +258,21 @@ function getHolidayText(holiday) {
     border-left-width: 2px;
   }
   
-  .special-date {
+  .holiday-badge {
     padding: 1px 4px;
     font-size: 0.7em;
+    right: 4px;
+    top: 4px;
+  }
+  
+  .holiday-name {
+    font-size: 0.65em;
+    top: 24px;
+    right: 4px;
+  }
+  
+  .todo-list {
+    margin-top: 36px;
   }
 }
 </style>

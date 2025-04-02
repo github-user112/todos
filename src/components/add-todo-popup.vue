@@ -18,8 +18,10 @@
         <option value="monthly">每月</option>
         <option value="yearly">每年</option>
       </select>
-      <button @click="$emit('save')">保存</button>
-      <button @click="$emit('close')">取消</button>
+      <div class="button-group">
+        <button @click="$emit('save')" class="save-button">保存</button>
+        <button @click="$emit('close')" class="cancel-button">取消</button>
+      </div>
     </div>
   </div>
 </template>
@@ -51,6 +53,7 @@ defineEmits(['update:todoText', 'update:todoRepeat', 'save', 'close']);
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  backdrop-filter: blur(3px);
 }
 
 .popup-content {
@@ -67,6 +70,7 @@ defineEmits(['update:todoText', 'update:todoRepeat', 'save', 'close']);
   margin-bottom: 20px;
   color: #2d3748;
   font-size: 1.4rem;
+  text-align: center;
 }
 
 .popup-content input,
@@ -77,29 +81,51 @@ defineEmits(['update:todoText', 'update:todoRepeat', 'save', 'close']);
   border: 1px solid #e2e8f0;
   border-radius: 6px;
   font-size: 15px;
+  transition: border-color 0.2s;
 }
 
-.popup-content button {
+.popup-content input:focus,
+.popup-content select:focus {
+  outline: none;
+  border-color: #4a6cf7;
+  box-shadow: 0 0 0 2px rgba(74, 108, 247, 0.2);
+}
+
+.button-group {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.save-button, .cancel-button {
+  flex: 1;
   padding: 10px 16px;
-  margin-right: 10px;
   border: none;
   border-radius: 6px;
   cursor: pointer;
   font-size: 14px;
   transition: all 0.2s;
+  font-weight: 500;
 }
 
-.popup-content button:first-of-type {
+.save-button {
   background: #4a6cf7;
   color: white;
 }
 
-.popup-content button:last-of-type {
+.cancel-button {
   background: #f8fafc;
   color: #4a5568;
+  border: 1px solid #e2e8f0;
 }
 
-.popup-content button:hover {
+.save-button:hover {
+  background: #3a5bd9;
+  transform: translateY(-1px);
+}
+
+.cancel-button:hover {
+  background: #edf2f7;
   transform: translateY(-1px);
 }
 

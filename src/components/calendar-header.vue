@@ -1,11 +1,11 @@
 <template>
   <div class="calendar-header">
-    <button @click="$emit('prevMonth')">&lt;</button>
+    <button @click="$emit('prevMonth')" class="nav-button">&lt;</button>
     <h2 class="calendar-title">
       {{ currentYear }}年{{ currentMonth + 1 }}月
     </h2>
-    <button @click="$emit('nextMonth')">&gt;</button>
-    <button @click="$emit('goToToday')">今天</button>
+    <button @click="$emit('nextMonth')" class="nav-button">&gt;</button>
+    <button @click="$emit('goToToday')" class="today-button">今天</button>
   </div>
 </template>
 
@@ -36,20 +36,35 @@ defineEmits(['prevMonth', 'nextMonth', 'goToToday']);
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
-.calendar-header button {
+.nav-button, .today-button {
   padding: 8px 16px;
-  background: #4a6cf7;
-  color: white;
   border: none;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s;
   font-size: 14px;
   font-weight: 500;
+}
+
+.nav-button {
+  background: #f0f7ff;
+  color: #3182ce;
+  box-shadow: 0 2px 5px rgba(49, 130, 206, 0.1);
+}
+
+.today-button {
+  background: #4a6cf7;
+  color: white;
   box-shadow: 0 2px 5px rgba(74, 108, 247, 0.2);
 }
 
-.calendar-header button:hover {
+.nav-button:hover {
+  background: #e1efff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(49, 130, 206, 0.2);
+}
+
+.today-button:hover {
   background: #3a5bd9;
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(74, 108, 247, 0.3);
@@ -68,7 +83,7 @@ defineEmits(['prevMonth', 'nextMonth', 'goToToday']);
     padding: 8px;
   }
 
-  .calendar-header button {
+  .nav-button, .today-button {
     padding: 4px 8px;
     font-size: 12px;
   }

@@ -1,7 +1,13 @@
 <template>
   <div class="todo-actions">
-    <button @click="$emit('complete')">完成</button>
-    <button @click="$emit('delete')">删除</button>
+    <button @click="$emit('complete')" class="complete-button">
+      <span class="action-icon">✓</span>
+      <span>完成</span>
+    </button>
+    <button @click="$emit('delete')" class="delete-button">
+      <span class="action-icon">✕</span>
+      <span>删除</span>
+    </button>
   </div>
 </template>
 
@@ -19,6 +25,7 @@ defineEmits(['complete', 'delete']);
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  border: 1px solid #e2e8f0;
 }
 
 .todo-actions button {
@@ -30,43 +37,34 @@ defineEmits(['complete', 'delete']);
   transition: all 0.2s;
   font-size: 14px;
   position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.todo-actions button:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-.todo-actions button:disabled::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 16px;
-  height: 16px;
-  border: 2px solid rgba(0, 0, 0, 0.1);
-  border-top-color: rgba(0, 0, 0, 0.3);
-  border-radius: 50%;
-  animation: spin 0.6s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: translate(-50%, -50%) rotate(360deg);
-  }
+.action-icon {
+  font-weight: bold;
+  font-size: 16px;
 }
 
 .todo-actions button:hover {
   background: #f8fafc;
 }
 
-.todo-actions button:first-child {
+.complete-button {
   color: #48bb78;
 }
 
-.todo-actions button:last-child {
+.complete-button:hover {
+  background: #f0fff4 !important;
+}
+
+.delete-button {
   color: #f56565;
+}
+
+.delete-button:hover {
+  background: #fff5f5 !important;
 }
 
 /* Mobile device styles */
@@ -79,11 +77,14 @@ defineEmits(['complete', 'delete']);
     display: flex;
     flex-direction: row;
     justify-content: space-around;
+    border-radius: 12px 12px 0 0;
+    border-bottom: none;
   }
   
   .todo-actions button {
     flex: 1;
-    text-align: center;
+    justify-content: center;
+    padding: 16px;
   }
 }
 </style>

@@ -124,7 +124,11 @@ const calendarDays = computed(() => {
   const mergedHolidayData = {
     ...props.holidayData,
     ...(holidayDataFromFile.value?.dates?.reduce((acc, item) => {
-      acc[item.date] = item.type === 'public_holiday' ? '休' : '班';
+      // Convert to object format with name and type
+      acc[item.date] = {
+        name: item.name || (item.type === 'public_holiday' ? '节假日' : '工作日'),
+        type: item.type
+      };
       return acc;
     }, {}) || {}),
   };
@@ -162,10 +166,7 @@ const calendarDays = computed(() => {
       date,
       dateStr,
       lunarDate: getLunarDate(date),
-      holiday: mergedHolidayData[dateStr]
-        ? mergedHolidayData[dateStr].name ||
-          (mergedHolidayData[dateStr] === '休' ? '休' : '班')
-        : '',
+      holiday: mergedHolidayData[dateStr] || '',
       todos: getTodosForDate(date, dateStr),
     });
   }
@@ -183,10 +184,7 @@ const calendarDays = computed(() => {
       date,
       dateStr,
       lunarDate: getLunarDate(date),
-      holiday: mergedHolidayData[dateStr]
-        ? mergedHolidayData[dateStr].name ||
-          (mergedHolidayData[dateStr] === '休' ? '休' : '班')
-        : '',
+      holiday: mergedHolidayData[dateStr] || '',
       todos: getTodosForDate(date, dateStr),
     });
   }
@@ -206,10 +204,7 @@ const calendarDays = computed(() => {
       date,
       dateStr,
       lunarDate: getLunarDate(date),
-      holiday: mergedHolidayData[dateStr]
-        ? mergedHolidayData[dateStr].name ||
-          (mergedHolidayData[dateStr] === '休' ? '休' : '班')
-        : '',
+      holiday: mergedHolidayData[dateStr] || '',
       todos: getTodosForDate(date, dateStr),
     });
   }
