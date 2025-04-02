@@ -4,6 +4,7 @@
       'calendar-day',
       { 'other-month': day.isOtherMonth },
       { 'current-day': day.isToday },
+      getHolidayClass(day.holiday)
     ]"
     :data-date="day.dateStr"
     @dblclick="$emit('dblclick')"
@@ -66,43 +67,32 @@ function getHolidayText(holiday) {
 .calendar-day {
   border: 1px solid #e2e8f0;
   padding: 8px 4px 4px 4px;
-  border-radius: 3px;
+  border-radius: 8px;
   display: flex;
   flex-direction: column;
   background: #ffffff;
   transition: all 0.2s;
   min-height: 0;
   position: relative;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
+/* Weekend styling */
 .calendar-day:nth-child(7n),
 .calendar-day:nth-child(7n-1) {
-  background: #f0f9ff;
+  background: #f0f7ff;
+  border-color: #d0e1fd;
 }
 
+/* Holiday styling */
 .calendar-day.holiday-rest {
-  background: #fff0f0;
+  background: linear-gradient(135deg, #fff0f0, #fff5f5);
+  border-color: #fdd0d0;
 }
 
-.calendar-day.holiday-rest:hover {
-  background: #ffe8e8;
-}
-
-.other-month:nth-child(7n),
-.other-month:nth-child(7n-1) {
-  background: #f0f9ff;
-  opacity: 0.6;
-}
-
-.other-month.holiday-rest {
-  background: #fff0f0;
-  opacity: 0.6;
-}
-
-.other-month {
-  background: #f8fafc;
-  opacity: 0.6;
-  color: #a0aec0;
+.calendar-day.holiday-work {
+  background: linear-gradient(135deg, #f0f9ff, #e6f7ff);
+  border-color: #bae7ff;
 }
 
 .calendar-day:hover {
@@ -110,10 +100,17 @@ function getHolidayText(holiday) {
   transform: translateY(-2px);
 }
 
+.other-month {
+  background: #f8fafc !important;
+  opacity: 0.6;
+  color: #a0aec0;
+  border-color: #edf2f7;
+}
+
 .day-number {
   position: absolute;
   top: 6px;
-  left: 6px;
+  left: 8px;
   font-weight: 600;
   color: #2d3748;
   font-size: 15px;
@@ -127,7 +124,7 @@ function getHolidayText(holiday) {
 }
 
 .current-day {
-  background: #ebf8ff;
+  background: #ebf8ff !important;
   border: 2px solid #3182ce;
   box-shadow: 0 0 0 1px rgba(49, 130, 206, 0.1);
 }
@@ -141,22 +138,24 @@ function getHolidayText(holiday) {
 .special-date {
   position: absolute;
   top: 6px;
-  right: 6px;
+  right: 8px;
   font-size: 0.75em;
   font-weight: 600;
-  padding: 0 4px;
-  border-radius: 4px;
+  padding: 2px 6px;
+  border-radius: 12px;
   z-index: 1;
 }
 
 .holiday-rest {
-  color: #f56565;
-  background: rgba(245, 101, 101, 0.1);
+  color: #e53e3e;
+  background: rgba(245, 101, 101, 0.15);
+  border: 1px solid rgba(245, 101, 101, 0.3);
 }
 
 .holiday-work {
-  color: #4299e1;
-  background: rgba(66, 153, 225, 0.1);
+  color: #3182ce;
+  background: rgba(66, 153, 225, 0.15);
+  border: 1px solid rgba(66, 153, 225, 0.3);
 }
 
 .todo-list {
@@ -169,19 +168,21 @@ function getHolidayText(holiday) {
 
 .todo-item {
   font-size: 0.82em;
-  padding: 4px 6px;
-  margin-bottom: 3px;
+  padding: 6px 8px;
+  margin-bottom: 4px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   background: #f8fafc;
-  border-radius: 3px;
-  border-left: 2px solid #4a6cf7;
+  border-radius: 4px;
+  border-left: 3px solid #4a6cf7;
   transition: all 0.2s;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .todo-item:hover {
   background: #edf2f7;
+  transform: translateX(2px);
 }
 
 .todo-item.completed {
@@ -189,18 +190,25 @@ function getHolidayText(holiday) {
   text-decoration-thickness: 2px;
   color: #a0aec0;
   border-left-color: #48bb78;
+  background: #f0fff4;
 }
 
 /* Mobile responsive styles */
 @media (max-width: 768px) {
   .calendar-day {
     padding: 3px;
+    border-radius: 6px;
   }
   
   .todo-item {
     padding: 3px 4px;
     font-size: 0.75em;
-    border-left-width: 1px;
+    border-left-width: 2px;
+  }
+  
+  .special-date {
+    padding: 1px 4px;
+    font-size: 0.7em;
   }
 }
 </style>

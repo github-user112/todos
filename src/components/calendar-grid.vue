@@ -56,11 +56,13 @@ defineEmits(['openAddTodoPopup', 'openTodoActions']);
   border-radius: 8px;
   color: #4a5568;
   font-size: 15px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .calendar-weekday:nth-child(6),
 .calendar-weekday:nth-child(7) {
-  color: #f56565;
+  color: #e53e3e;
+  background: #fff5f5;
 }
 
 /* Mobile responsive styles */

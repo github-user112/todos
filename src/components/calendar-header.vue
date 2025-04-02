@@ -29,11 +29,11 @@ defineEmits(['prevMonth', 'nextMonth', 'goToToday']);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 16px;
+  padding: 16px 20px;
   margin-bottom: 15px;
   background: #ffffff;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
 .calendar-header button {
@@ -41,20 +41,23 @@ defineEmits(['prevMonth', 'nextMonth', 'goToToday']);
   background: #4a6cf7;
   color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s;
   font-size: 14px;
+  font-weight: 500;
+  box-shadow: 0 2px 5px rgba(74, 108, 247, 0.2);
 }
 
 .calendar-header button:hover {
   background: #3a5bd9;
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(74, 108, 247, 0.3);
 }
 
 .calendar-title {
   margin: 0;
-  font-size: 1.3rem;
+  font-size: 1.5rem;
   color: #2d3748;
   font-weight: 600;
 }

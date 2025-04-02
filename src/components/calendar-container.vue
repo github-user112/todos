@@ -537,11 +537,12 @@ onMounted(async () => {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  padding: 0;
+  padding: 10px;
   margin: 0;
   box-sizing: border-box;
   background: #f5f7fa;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #2d3748;
 }
 
 /* Mobile responsive styles */
