@@ -99,7 +99,7 @@
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue';
 import { formatDate } from '../utils/dateUtils';
-import { useDialog } from 'naive-ui';
+import {useDialog, useMessage} from 'naive-ui';
 const dialog = useDialog();
 const message = useMessage();
 

@@ -24,7 +24,7 @@ import {ref, onMounted} from 'vue';
 import CalendarContainer from './components/CalendarContainer.vue';
 import {formatDate} from './utils/dateUtils';
 import {generateHash} from './utils/hashUtils';
-
+import {NDialogProvider,NMessageProvider} from 'naive-ui'
 // 状态
 const loading = ref(false);
 const isInitialized = ref(false);
