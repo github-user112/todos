@@ -2,7 +2,7 @@
   <div class="app-container">
     <div id="loading-indicator" v-if="loading">加载中...</div>
     <n-dialog-provider><n-message-provider>
-      <CalendarContainer
+      <calendar-container
           v-if="isInitialized"
           :todos="todos"
           :completedInstances="completedInstances"
@@ -21,7 +21,7 @@
 
 <script setup>
 import {ref, onMounted} from 'vue';
-import CalendarContainer from './components/CalendarContainer.vue';
+import CalendarContainer from './components/calendar-container.vue';
 import {formatDate} from './utils/dateUtils';
 import {generateHash} from './utils/hashUtils';
 import {NDialogProvider,NMessageProvider} from 'naive-ui'
@@ -35,43 +35,7 @@ const deletedInstances = ref([]);
 
 // 农历和节假日数据
 const lunarData = ref({
-  '2024-01-01': '元旦',
-  '2024-02-10': '春节',
-  '2024-02-11': '春节',
-  '2024-02-12': '春节',
-  '2024-04-04': '清明节',
-  '2024-05-01': '劳动节',
-  '2024-06-10': '端午节',
-  '2024-09-17': '中秋节',
-  '2024-10-01': '国庆节',
-  '2024-10-02': '国庆节',
-  '2024-10-03': '国庆节',
 
-  // 2025年节假日
-  '2025-01-01': '元旦',
-  '2025-01-29': '春节',
-  '2025-01-30': '春节',
-  '2025-01-31': '春节',
-  '2025-04-05': '清明节',
-  '2025-05-01': '劳动节',
-  '2025-06-01': '端午节',
-  '2025-10-06': '中秋节',
-  '2025-10-01': '国庆节',
-  '2025-10-02': '国庆节',
-  '2025-10-03': '国庆节',
-
-  // 2026年节假日
-  '2026-01-01': '元旦',
-  '2026-02-17': '春节',
-  '2026-02-18': '春节',
-  '2026-02-19': '春节',
-  '2026-04-05': '清明节',
-  '2026-05-01': '劳动节',
-  '2026-06-18': '端午节',
-  '2026-09-25': '中秋节',
-  '2026-10-01': '国庆节',
-  '2026-10-02': '国庆节',
-  '2026-10-03': '国庆节',
 });
 
 const holidayData = ref({});
