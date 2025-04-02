@@ -8,10 +8,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "naive-ui": "^2.41.0",
     "vue": "^3.3.4"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.2.3",
+    "unplugin-auto-import": "^19.1.2",
+    "unplugin-vue-components": "^28.4.1",
     "vite": "^4.4.6"
   }
 }

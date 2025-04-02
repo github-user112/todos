@@ -1,28 +1,29 @@
 <template>
   <div class="app-container">
     <div id="loading-indicator" v-if="loading">加载中...</div>
-
-    <CalendarContainer
-      v-if="isInitialized"
-      :todos="todos"
-      :completedInstances="completedInstances"
-      :deletedInstances="deletedInstances"
-      :lunarData="lunarData"
-      :holidayData="holidayData"
-      :userId="userId"
-      @fetch-calendar-data="fetchCalendarData"
-      @add-todo="handleAddTodo"
-      @complete-todo="handleCompleteTodo"
-      @delete-todo="handleDeleteTodo"
-    />
+    <n-dialog-provider><n-message-provider>
+      <CalendarContainer
+          v-if="isInitialized"
+          :todos="todos"
+          :completedInstances="completedInstances"
+          :deletedInstances="deletedInstances"
+          :lunarData="lunarData"
+          :holidayData="holidayData"
+          :userId="userId"
+          @fetch-calendar-data="fetchCalendarData"
+          @add-todo="handleAddTodo"
+          @complete-todo="handleCompleteTodo"
+          @delete-todo="handleDeleteTodo"
+      /></n-message-provider>
+    </n-dialog-provider>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import {ref, onMounted} from 'vue';
 import CalendarContainer from './components/CalendarContainer.vue';
-import { formatDate } from './utils/dateUtils';
-import { generateHash } from './utils/hashUtils';
+import {formatDate} from './utils/dateUtils';
+import {generateHash} from './utils/hashUtils';
 
 // 状态
 const loading = ref(false);
@@ -157,7 +158,7 @@ const fetchCalendarData = async (currentDate) => {
 
   try {
     const result = await apiRequest(
-      `/api/todos?startDate=${startDate}&endDate=${endDate}`
+        `/api/todos?startDate=${startDate}&endDate=${endDate}`
     );
     todos.value = result.todos || [];
     completedInstances.value = result.completedInstances || [];
@@ -196,8 +197,8 @@ const handleCompleteTodo = async (todoId, todoDate) => {
 
     if (todo) {
       if (
-        (!todo.repeat_type || todo.repeat_type === 'none') &&
-        todo.date === todoDate
+          (!todo.repeat_type || todo.repeat_type === 'none') &&
+          todo.date === todoDate
       ) {
         // 非重复事项，直接修改原始待办事项
         const result = await apiRequest('/api/todos', 'PUT', {
@@ -225,8 +226,8 @@ const handleCompleteTodo = async (todoId, todoDate) => {
           } else {
             // 移除完成记录
             const index = completedInstances.value.findIndex(
-              (instance) =>
-                instance.todo_id == todoId && instance.date === todoDate
+                (instance) =>
+                    instance.todo_id == todoId && instance.date === todoDate
             );
             if (index >= 0) {
               completedInstances.value.splice(index, 1);
@@ -244,14 +245,16 @@ const handleCompleteTodo = async (todoId, todoDate) => {
 };
 
 // 删除待办事项
-const handleDeleteTodo = async (todoId, todoDate) => {
+const handleDeleteTodo = async ({todoId, date:todoDate, allInstances}) => {
   try {
     const todo = todos.value.find((t) => t.id == todoId);
 
     if (todo) {
+      console.log(todo);
+      console.log(todoDate);
       if (
-        (!todo.repeat_type || todo.repeat_type === 'none') &&
-        todo.date === todoDate
+          (!todo.repeat_type || todo.repeat_type === 'none') &&
+          todo.date === todoDate
       ) {
         // 非重复事项，直接从数据库中删除
         const result = await apiRequest(`/api/todos?id=${todoId}`, 'DELETE');
@@ -261,20 +264,31 @@ const handleDeleteTodo = async (todoId, todoDate) => {
           todos.value = todos.value.filter((t) => t.id != todoId);
         }
       } else {
-        // 重复事项，记录特定实例的删除状态
-        const result = await apiRequest('/api/deleted-instances', 'POST', {
-          todoId,
-          date: todoDate,
-        });
+        if (allInstances) {
+          // 非重复事项，直接从数据库中删除
+          const result = await apiRequest(`/api/todos?id=${todoId}`, 'DELETE');
 
-        if (result.success) {
-          // 添加到本地删除实例数组
-          deletedInstances.value.push({
-            todo_id: parseInt(todoId),
+          if (result.success) {
+            // 从本地数组中移除
+            todos.value = todos.value.filter((t) => t.id != todoId);
+          }
+        } else {
+          // 重复事项，记录特定实例的删除状态
+          const result = await apiRequest('/api/deleted-instances', 'POST', {
+            todoId,
             date: todoDate,
-            user_id: userId.value,
           });
+
+          if (result.success) {
+            // 添加到本地删除实例数组
+            deletedInstances.value.push({
+              todo_id: parseInt(todoId),
+              date: todoDate,
+              user_id: userId.value,
+            });
+          }
         }
+
       }
       return true;
     }

@@ -82,7 +82,9 @@
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue';
 import { formatDate } from '../utils/dateUtils';
-
+import { useDialog } from 'naive-ui';
+const dialog = useDialog();
+const message = useMessage();
 // 接收的属性
 const props = defineProps({
   todos: {
@@ -428,26 +430,90 @@ const openTodoActions = (todoId, todoDate, event) => {
 const completeTodo = async () => {
   if (!selectedTodo.value || !selectedTodoDate.value) return;
 
-  const success = await emit(
-    'complete-todo',
-    selectedTodo.value,
-    selectedTodoDate.value
-  );
+  const todo = props.todos.find((t) => t.id === selectedTodo.value);
+  if (!todo) return;
 
-  // 无论成功与否都隐藏菜单
+  // 如果是重复事件，显示选择对话框
+  if (todo.repeat_type && todo.repeat_type !== 'none') {
+    const d = dialog.warning({
+      title: '完成重复事件',
+      content: '请选择操作范围',
+      positiveText: '完成所有重复事件',
+      negativeText: '仅完成当前事件',
+      onPositiveClick: async () => {
+        await emit('complete-todo', {
+          todoId: selectedTodo.value,
+          date: selectedTodoDate.value,
+          allInstances: true,
+        });
+        message.success('已完成所有重复事件');
+        showTodoActions.value = false;
+        d.destroy();
+      },
+      onNegativeClick: async () => {
+        await emit('complete-todo', {
+          todoId: selectedTodo.value,
+          date: selectedTodoDate.value,
+          allInstances: false,
+        });
+        message.success('已完成当前事件');
+        showTodoActions.value = false;
+        d.destroy();
+      },
+    });
+    return;
+  }
+
+  // 非重复事件直接完成
+  await emit('complete-todo', {
+    todoId: selectedTodo.value,
+    date: selectedTodoDate.value,
+    allInstances: false,
+  });
   showTodoActions.value = false;
 };
 
 const deleteTodo = async () => {
   if (!selectedTodo.value || !selectedTodoDate.value) return;
 
-  const success = await emit(
-    'delete-todo',
-    selectedTodo.value,
-    selectedTodoDate.value
-  );
+  const todo = props.todos.find((t) => t.id === selectedTodo.value);
+  if (!todo) return;
 
-  // 无论成功与否都隐藏菜单
+  // 如果是重复事件，显示选择对话框
+  if (todo.repeat_type && todo.repeat_type !== 'none') {
+    const d = dialog.warning({
+      title: '删除重复事件',
+      content: '请选择操作范围',
+      positiveText: '删除所有重复事件',
+      negativeText: '仅删除当前事件',
+      onPositiveClick: async () => {
+        await emit('delete-todo', {
+          todoId: selectedTodo.value,
+          date: selectedTodoDate.value,
+          allInstances: true,
+        });
+        message.success('已删除所有重复事件');
+        showTodoActions.value = false;
+      },
+      onNegativeClick: async () => {
+        await emit('delete-todo', {
+          todoId: selectedTodo.value,
+          date: selectedTodoDate.value,
+          allInstances: false,
+        });
+        message.success('已删除当前事件');
+        showTodoActions.value = false;
+      },
+    });
+    return;
+  }
+
+  // 非重复事件直接删除
+  await emit('delete-todo', {
+    todoId: selectedTodo.value,
+    date: selectedTodoDate.value,
+    allInstances: false,
+  });
   showTodoActions.value = false;
 };
 
