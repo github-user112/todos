@@ -134,9 +134,32 @@ const initializeUserId = () => {
 };
 
 // 初始化日历
+// 在App.vue的script setup部分添加
+const fetchHolidayData = async (year) => {
+  try {
+    const result = await apiRequest(`/api/holidays?year=${year}`);
+    if (result && result.dates) {
+      // 将数据转换为前端需要的格式
+      const holidayMap = {};
+      result.dates.forEach(item => {
+        holidayMap[item.date] = {
+          name: item.name_cn,
+          type: item.type
+        };
+      });
+      holidayData.value = holidayMap;
+    }
+  } catch (error) {
+    console.error('获取节假日数据失败:', error);
+  }
+};
+
+// 在initCalendar方法中调用
 const initCalendar = async () => {
   try {
-    await fetchCalendarData(new Date());
+    const currentDate = new Date();
+    await fetchHolidayData(currentDate.getFullYear());
+    await fetchCalendarData(currentDate);
     isInitialized.value = true;
   } catch (error) {
     console.error('初始化日历失败:', error);

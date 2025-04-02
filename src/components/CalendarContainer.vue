@@ -403,7 +403,7 @@ watch(
 
     // 当年份变化时尝试加载新的节假日数据
     try {
-      const response = await fetch(`/public/${newDate.getFullYear()}.json`);
+      const response = await apiRequest(`/api/holidays?year=${currentYear.value}`);
       if (response.ok) {
         holidayDataFromFile.value = await response.json();
       } else {
@@ -596,7 +596,7 @@ onMounted(async () => {
 
   // 尝试加载当前年份的节假日数据
   try {
-    const response = await fetch(`/public/${currentYear.value}.json`);
+    const response = await apiRequest(`/api/holidays?year=${currentYear.value}`);
     if (response.ok) {
       holidayDataFromFile.value = await response.json();
     }

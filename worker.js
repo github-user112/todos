@@ -18,7 +18,10 @@ export default {
       }
 
       // 路由处理
-      if (path === "/api/todos" && request.method === "GET") {
+      // 添加节假日路由
+    if (path === '/api/holidays') {
+      return handleGetHolidays(request, env, userId);
+    } if (path === "/api/todos" && request.method === "GET") {
         return await handleGetTodos(request, env, userId)
       } else if (path === "/api/todos" && request.method === "POST") {
         return await handleCreateTodo(request, env, userId)
@@ -422,6 +425,43 @@ async function handleCreateDeletedInstance(request, env, userId) {
       status: 500,
       headers: { "Content-Type": "application/json" },
     })
+  }
+}
+
+// 添加获取节假日数据的方法
+async function handleGetHolidays(request, env, userId) {
+  try {
+    const url = new URL(request.url);
+    const year = url.searchParams.get('year');
+    
+    if (!year) {
+      return new Response(JSON.stringify({ error: "缺少年份参数" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    // 从unpkg获取节假日数据
+    const response = await fetch(`https://unpkg.com/holiday-calendar@1.1.6/data/CN/${year}.min.json`);
+    
+    if (!response.ok) {
+      return new Response(JSON.stringify({ error: "获取节假日数据失败" }), {
+        status: response.status,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    const data = await response.json();
+    return new Response(JSON.stringify(data), {
+      headers: { "Content-Type": "application/json" },
+    });
+    
+  } catch (error) {
+    console.error('获取节假日数据错误:', error);
+    return new Response(JSON.stringify({ error: "服务器内部错误" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 }
 
