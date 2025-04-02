@@ -38,13 +38,21 @@
         <div v-if="day.lunarDate || day.holiday" class="special-date">
           <span
             :class="
-              day.holiday === '休'
+              day.holiday === '休' ||
+              (typeof day.holiday === 'object' &&
+                day.holiday.type === 'public_holiday')
                 ? 'holiday-rest'
-                : day.holiday === '班'
+                : day.holiday === '班' ||
+                  (typeof day.holiday === 'object' &&
+                    day.holiday.type === 'working_day')
                 ? 'holiday-work'
                 : ''
             "
-            >{{ day.holiday || day.lunarDate }}</span
+            >{{
+              typeof day.holiday === 'object'
+                ? day.holiday.name
+                : day.holiday || day.lunarDate
+            }}</span
           >
         </div>
 
@@ -228,9 +236,8 @@ const calendarDays = computed(() => {
       dateStr,
       lunarDate: getLunarDate(date),
       holiday: mergedHolidayData[dateStr]
-        ? mergedHolidayData[dateStr] === '休'
-          ? '休'
-          : '班'
+        ? mergedHolidayData[dateStr].name ||
+          (mergedHolidayData[dateStr] === '休' ? '休' : '班')
         : '',
       todos: getTodosForDate(date, dateStr),
     });
@@ -250,9 +257,8 @@ const calendarDays = computed(() => {
       dateStr,
       lunarDate: getLunarDate(date),
       holiday: mergedHolidayData[dateStr]
-        ? mergedHolidayData[dateStr] === '休'
-          ? '休'
-          : '班'
+        ? mergedHolidayData[dateStr].name ||
+          (mergedHolidayData[dateStr] === '休' ? '休' : '班')
         : '',
       todos: getTodosForDate(date, dateStr),
     });
@@ -274,9 +280,8 @@ const calendarDays = computed(() => {
       dateStr,
       lunarDate: getLunarDate(date),
       holiday: mergedHolidayData[dateStr]
-        ? mergedHolidayData[dateStr] === '休'
-          ? '休'
-          : '班'
+        ? mergedHolidayData[dateStr].name ||
+          (mergedHolidayData[dateStr] === '休' ? '休' : '班')
         : '',
       todos: getTodosForDate(date, dateStr),
     });
