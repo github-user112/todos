@@ -1,11 +1,12 @@
 <template>
   <div class="calendar-header">
     <button @click="$emit('prevMonth')" class="nav-button">&lt;</button>
-    <h2 class="calendar-title">
-      {{ currentYear }}年{{ currentMonth + 1 }}月
-    </h2>
+    <h2 class="calendar-title">{{ currentYear }}年{{ currentMonth + 1 }}月</h2>
     <button @click="$emit('nextMonth')" class="nav-button">&gt;</button>
     <button @click="$emit('goToToday')" class="today-button">今天</button>
+    <button @click="copyUrlToClipboard" class="share-button">
+      分享我的日程
+    </button>
   </div>
 </template>
 
@@ -13,15 +14,26 @@
 defineProps({
   currentYear: {
     type: Number,
-    required: true
+    required: true,
   },
   currentMonth: {
     type: Number,
-    required: true
-  }
+    required: true,
+  },
 });
 
 defineEmits(['prevMonth', 'nextMonth', 'goToToday']);
+
+const copyUrlToClipboard = () => {
+  navigator.clipboard
+    .writeText(window.location.href)
+    .then(() => {
+      alert('链接已复制到剪贴板');
+    })
+    .catch((err) => {
+      console.error('复制失败:', err);
+    });
+};
 </script>
 
 <style scoped>
@@ -36,7 +48,8 @@ defineEmits(['prevMonth', 'nextMonth', 'goToToday']);
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
-.nav-button, .today-button {
+.nav-button,
+.today-button {
   padding: 8px 16px;
   border: none;
   border-radius: 8px;
@@ -56,6 +69,18 @@ defineEmits(['prevMonth', 'nextMonth', 'goToToday']);
   background: #4a6cf7;
   color: white;
   box-shadow: 0 2px 5px rgba(74, 108, 247, 0.2);
+}
+
+.share-button {
+  background: #38a169;
+  color: white;
+  box-shadow: 0 2px 5px rgba(56, 161, 105, 0.2);
+}
+
+.share-button:hover {
+  background: #2f855a;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(56, 161, 105, 0.3);
 }
 
 .nav-button:hover {
@@ -83,7 +108,9 @@ defineEmits(['prevMonth', 'nextMonth', 'goToToday']);
     padding: 8px;
   }
 
-  .nav-button, .today-button {
+  .nav-button,
+  .today-button,
+  .share-button {
     padding: 4px 8px;
     font-size: 12px;
   }
@@ -93,4 +120,3 @@ defineEmits(['prevMonth', 'nextMonth', 'goToToday']);
   }
 }
 </style>
-
