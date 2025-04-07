@@ -22,8 +22,9 @@
 
 <script setup>
 import CalendarDay from './calendar-day.vue';
+import {computed} from "vue";
 
-defineProps({
+const {weekdays, calendarDays} =defineProps({
   weekdays: {
     type: Array,
     required: true
@@ -33,7 +34,7 @@ defineProps({
     required: true
   }
 });
-
+ const lines = computed(() => (calendarDays.length / 7))
 defineEmits(['openAddTodoPopup', 'openTodoActions']);
 </script>
 
@@ -41,7 +42,7 @@ defineEmits(['openAddTodoPopup', 'openTodoActions']);
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  grid-template-rows: 36px repeat(6, minmax(0, 1fr));
+  grid-template-rows: 36px repeat(v-bind(lines), minmax(0, 1fr));
   gap: 4px;
   flex: 1;
   height: calc(100vh - 60px);

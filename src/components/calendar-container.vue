@@ -190,8 +190,11 @@ const calendarDays = computed(() => {
   }
 
   // Add next month dates (to fill 6 weeks)
-  const cellsAdded = result.length;
-  const remainingCells = 42 - cellsAdded;
+const lastDayNumber = result[result.length - 1].date.getDay();
+  const remainingCells = 7 - lastDayNumber;
+  if(remainingCells >= 7){
+    return  result
+  }
 
   for (let i = 1; i <= remainingCells; i++) {
     const date = new Date(year, month + 1, i);

@@ -89,7 +89,7 @@ function getHolidayBadgeClass(holiday) {
 
 // Helper function to get holiday badge text
 function getHolidayBadgeText(holiday) {
-  console.log(holiday);
+  // console.log(holiday);
   if (
     holiday === '休' ||
     (typeof holiday === 'object' && holiday.type === 'public_holiday')
