@@ -1,33 +1,33 @@
 <template>
   <div class="calendar-container">
-    <CalendarHeader 
-      :currentYear="currentYear" 
-      :currentMonth="currentMonth" 
-      @prevMonth="prevMonth" 
-      @nextMonth="nextMonth" 
-      @goToToday="goToToday" 
+    <CalendarHeader
+      :currentYear="currentYear"
+      :currentMonth="currentMonth"
+      @prevMonth="prevMonth"
+      @nextMonth="nextMonth"
+      @goToToday="goToToday"
     />
 
-    <CalendarGrid 
-      :weekdays="weekdays" 
-      :calendarDays="calendarDays" 
-      @openAddTodoPopup="openAddTodoPopup" 
-      @openTodoActions="openTodoActions" 
+    <CalendarGrid
+      :weekdays="weekdays"
+      :calendarDays="calendarDays"
+      @openAddTodoPopup="openAddTodoPopup"
+      @openTodoActions="openTodoActions"
     />
 
-    <AddTodoPopup 
-      v-if="showAddTodoPopup" 
-      v-model:todoText="todoText" 
-      v-model:todoRepeat="todoRepeat" 
-      @close="closeAddTodoPopup" 
-      @save="saveTodo" 
+    <AddTodoPopup
+      v-if="showAddTodoPopup"
+      v-model:todoText="todoText"
+      v-model:todoRepeat="todoRepeat"
+      @close="closeAddTodoPopup"
+      @save="saveTodo"
     />
 
-    <TodoActionsMenu 
-      v-if="showTodoActions" 
-      :style="todoActionsStyle" 
-      @complete="completeTodo" 
-      @delete="deleteTodo" 
+    <TodoActionsMenu
+      v-if="showTodoActions"
+      :style="todoActionsStyle"
+      @complete="completeTodo"
+      @delete="deleteTodo"
     />
   </div>
 </template>
@@ -116,98 +116,66 @@ const truncatedUserId = computed(() => {
 
 // Calendar days computation
 const calendarDays = computed(() => {
-  const year = currentYear.value;
-  const month = currentMonth.value;
-  const result = [];
-
-  // Merge holiday data
   const mergedHolidayData = {
     ...props.holidayData,
     ...(holidayDataFromFile.value?.dates?.reduce((acc, item) => {
-      // Convert to object format with name and type
       acc[item.date] = {
-        name: item.name || (item.type === 'public_holiday' ? '节假日' : '工作日'),
-        type: item.type
+        name:
+          item.name || (item.type === 'public_holiday' ? '节假日' : '工作日'),
+        type: item.type,
       };
       return acc;
     }, {}) || {}),
   };
 
-  // Get first day of current month
-  const firstDay = new Date(year, month, 1);
-  // Get last day of current month
-  const lastDay = new Date(year, month + 1, 0);
+  // 获取当前日期
+  const today = currentDate.value;
+  today.setHours(0, 0, 0, 0);
 
-  // First day of week
-  let firstDayOfWeek = firstDay.getDay();
-  if (firstDayOfWeek === 0) firstDayOfWeek = 7; // Adjust Sunday to 7
+  // 找到当前周的周一
+  const currentDayOfWeek = today.getDay(); // 0=Sunday, 1=Monday...
+  const offsetToMonday = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
+  const currentMonday = new Date(today);
+  currentMonday.setDate(today.getDate() - offsetToMonday);
+  currentMonday.setHours(0, 0, 0, 0);
 
-  // Days in month
-  const daysInMonth = lastDay.getDate();
+  // 起始日期：当前周的周一往前推 2 周
+  const startDate = new Date(currentMonday);
+  startDate.setDate(startDate.getDate() - 14); // 往前推两周（14天）
 
-  // Last day of previous month
-  const prevMonthLastDay = new Date(year, month, 0).getDate();
+  const result = [];
 
-  // Current date
-  const today = new Date();
-  const isCurrentMonth =
-    today.getMonth() === month && today.getFullYear() === year;
-  const currentDay = today.getDate();
+  for (let i = 0; i < 35; i++) {
+    const date = new Date(startDate);
+    date.setDate(date.getDate() + i);
 
-  // Add previous month dates
-  for (let i = firstDayOfWeek - 1; i > 0; i--) {
-    const date = new Date(year, month - 1, prevMonthLastDay - i + 1);
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const dayNumber = date.getDate();
+
+    const isCurrentMonth =
+      month === currentMonth.value && year === currentYear.value;
+
     const dateStr = formatDate(date);
+    const isToday =
+      date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear();
 
     result.push({
-      dayNumber: prevMonthLastDay - i + 1,
-      isOtherMonth: true,
-      isToday: false,
-      date,
-      dateStr,
-      lunarDate: getLunarDate(date),
-      holiday: mergedHolidayData[dateStr] || '',
-      todos: getTodosForDate(date, dateStr),
-    });
-  }
-
-  // Add current month dates
-  for (let i = 1; i <= daysInMonth; i++) {
-    const date = new Date(year, month, i);
-    const dateStr = formatDate(date);
-    const isToday = isCurrentMonth && i === currentDay;
-
-    result.push({
-      dayNumber: i,
-      isOtherMonth: false,
+      dayNumber,
+      isOtherMonth: !isCurrentMonth,
       isToday,
       date,
       dateStr,
       lunarDate: getLunarDate(date),
-      holiday: mergedHolidayData[dateStr] || '',
-      todos: getTodosForDate(date, dateStr),
-    });
-  }
-
-  // Add next month dates (to fill 6 weeks)
-const lastDayNumber = result[result.length - 1].date.getDay();
-  const remainingCells = 7 - lastDayNumber;
-  if(remainingCells >= 7){
-    return  result
-  }
-
-  for (let i = 1; i <= remainingCells; i++) {
-    const date = new Date(year, month + 1, i);
-    const dateStr = formatDate(date);
-
-    result.push({
-      dayNumber: i,
-      isOtherMonth: true,
-      isToday: false,
-      date,
-      dateStr,
-      lunarDate: getLunarDate(date),
-      holiday: mergedHolidayData[dateStr] || '',
+      holiday:
+        mergedHolidayData[dateStr]?.name ||
+        (mergedHolidayData[dateStr]?.type === 'public_holiday'
+          ? '休'
+          : mergedHolidayData[dateStr]?.type === 'workday'
+          ? '班'
+          : ''),
       todos: getTodosForDate(date, dateStr),
     });
   }
@@ -333,7 +301,9 @@ watch(
 
     // Load holiday data when year changes
     try {
-      const response = await apiRequest(`/api/holidays?year=${currentYear.value}`);
+      const response = await apiRequest(
+        `/api/holidays?year=${currentYear.value}`
+      );
       if (response.ok) {
         holidayDataFromFile.value = await response.json();
       } else {
@@ -524,7 +494,9 @@ onMounted(async () => {
 
   // Load holiday data for current year
   try {
-    const response = await apiRequest(`/api/holidays?year=${currentYear.value}`);
+    const response = await apiRequest(
+      `/api/holidays?year=${currentYear.value}`
+    );
     if (response.ok) {
       holidayDataFromFile.value = await response.json();
     }
@@ -555,4 +527,3 @@ onMounted(async () => {
   }
 }
 </style>
-
