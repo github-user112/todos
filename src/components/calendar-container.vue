@@ -141,7 +141,7 @@ const calendarDays = computed(() => {
 
   // 起始日期：当前周的周一往前推 2 周
   const startDate = new Date(currentMonday);
-  startDate.setDate(startDate.getDate() - 14); // 往前推两周（14天）
+  startDate.setDate(startDate.getDate() - 7); // 往前推两周（14天）
 
   const result = [];
 
