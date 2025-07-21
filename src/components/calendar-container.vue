@@ -41,7 +41,6 @@ import CalendarGrid from './calendar-grid.vue';
 import AddTodoPopup from './add-todo-popup.vue';
 import TodoActionsMenu from './todo-actions-menu.vue';
 import { apiRequest } from '../utils/api';
-      
 
 const dialog = useDialog();
 const message = useMessage();
@@ -171,7 +170,7 @@ const calendarDays = computed(() => {
       date,
       dateStr,
       lunarDate: getLunarDate(date),
-       holiday: mergedHolidayData[dateStr] || '',
+      holiday: mergedHolidayData[dateStr] || '',
       todos: getTodosForDate(date, dateStr),
     });
   }
@@ -293,6 +292,7 @@ const goToToday = () => {
 watch(
   currentDate,
   async (newDate) => {
+    console.log(newDate);
     await emit('fetch-calendar-data', newDate);
 
     // Load holiday data when year changes
@@ -311,7 +311,7 @@ watch(
     }
   },
   {
-    immediate: true,
+    immediate: false,
     flush: 'post', // Ensure DOM is updated first
   }
 );
@@ -489,16 +489,16 @@ onMounted(async () => {
   }
 
   // Load holiday data for current year
-  try {
-    const response = await apiRequest(
-      `/api/holidays?year=${currentYear.value}`
-    );
-    if (response.ok) {
-      holidayDataFromFile.value = await response.json();
-    }
-  } catch (error) {
-    console.error('加载节假日数据失败:', error);
-  }
+  // try {
+  //   const response = await apiRequest(
+  //     `/api/holidays?year=${currentYear.value}`
+  //   );
+  //   if (response.ok) {
+  //     holidayDataFromFile.value = await response.json();
+  //   }
+  // } catch (error) {
+  //   console.error('加载节假日数据失败:', error);
+  // }
 });
 </script>
 

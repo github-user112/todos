@@ -1,8 +1,9 @@
 <template>
   <div class="app-container">
     <div id="loading-indicator" v-if="loading">加载中...</div>
-    <n-dialog-provider><n-message-provider>
-      <calendar-container
+    <n-dialog-provider
+      ><n-message-provider>
+        <calendar-container
           v-if="isInitialized"
           :todos="todos"
           :completedInstances="completedInstances"
@@ -20,11 +21,11 @@
 </template>
 
 <script setup>
-import {ref, onMounted} from 'vue';
+import { ref, onMounted } from 'vue';
 import CalendarContainer from './components/calendar-container.vue';
-import {formatDate} from './utils/dateUtils';
-import {generateHash} from './utils/hashUtils';
-import {NDialogProvider,NMessageProvider} from 'naive-ui'
+import { formatDate } from './utils/dateUtils';
+import { generateHash } from './utils/hashUtils';
+import { NDialogProvider, NMessageProvider } from 'naive-ui';
 // 状态
 const loading = ref(false);
 const isInitialized = ref(false);
@@ -34,9 +35,7 @@ const completedInstances = ref([]);
 const deletedInstances = ref([]);
 
 // 农历和节假日数据
-const lunarData = ref({
-
-});
+const lunarData = ref({});
 
 const holidayData = ref({});
 
@@ -101,14 +100,16 @@ const initializeUserId = () => {
 // 在App.vue的script setup部分添加
 const fetchHolidayData = async (year) => {
   try {
-    const result = await apiRequest(`/api/holidays?year=${year}`, 'GET', null, { 'X-User-ID': userId.value });
+    const result = await apiRequest(`/api/holidays?year=${year}`, 'GET', null, {
+      'X-User-ID': userId.value,
+    });
     if (result && result.dates) {
       // 将数据转换为前端需要的格式
       const holidayMap = {};
-      result.dates.forEach(item => {
+      result.dates.forEach((item) => {
         holidayMap[item.date] = {
           name: item.name_cn,
-          type: item.type
+          type: item.type,
         };
       });
       holidayData.value = holidayMap;
@@ -122,8 +123,11 @@ const fetchHolidayData = async (year) => {
 const initCalendar = async () => {
   try {
     const currentDate = new Date();
-    await fetchHolidayData(currentDate.getFullYear());
-    await fetchCalendarData(currentDate);
+    // 使用Promise.all并行调用两个API
+    await Promise.all([
+      fetchHolidayData(currentDate.getFullYear()),
+      fetchCalendarData(currentDate)
+    ]);
     isInitialized.value = true;
   } catch (error) {
     console.error('初始化日历失败:', error);
@@ -133,6 +137,7 @@ const initCalendar = async () => {
 
 // 获取日历数据
 const fetchCalendarData = async (currentDate) => {
+  console.log(currentDate);
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
 
@@ -145,7 +150,7 @@ const fetchCalendarData = async (currentDate) => {
 
   try {
     const result = await apiRequest(
-        `/api/todos?startDate=${startDate}&endDate=${endDate}`
+      `/api/todos?startDate=${startDate}&endDate=${endDate}`
     );
     todos.value = result.todos || [];
     completedInstances.value = result.completedInstances || [];
@@ -178,13 +183,16 @@ const handleAddTodo = async (todoData) => {
 };
 
 // 完成待办事项
-const handleCompleteTodo = async ({todoId, date: todoDate, allInstances}) => {
+const handleCompleteTodo = async ({ todoId, date: todoDate, allInstances }) => {
   try {
     const todo = todos.value.find((t) => t.id == todoId);
 
     if (!todo) return false;
 
-    if ((!todo.repeat_type || todo.repeat_type === 'none') && todo.date === todoDate) {
+    if (
+      (!todo.repeat_type || todo.repeat_type === 'none') &&
+      todo.date === todoDate
+    ) {
       // 非重复事项，直接修改原始待办事项
       const result = await apiRequest('/api/todos', 'PUT', {
         id: todoId,
@@ -224,7 +232,8 @@ const handleCompleteTodo = async ({todoId, date: todoDate, allInstances}) => {
           } else {
             // 移除完成记录
             const index = completedInstances.value.findIndex(
-              (instance) => instance.todo_id == todoId && instance.date === todoDate
+              (instance) =>
+                instance.todo_id == todoId && instance.date === todoDate
             );
             if (index >= 0) {
               completedInstances.value.splice(index, 1);
@@ -242,7 +251,7 @@ const handleCompleteTodo = async ({todoId, date: todoDate, allInstances}) => {
 };
 
 // 删除待办事项
-const handleDeleteTodo = async ({todoId, date:todoDate, allInstances}) => {
+const handleDeleteTodo = async ({ todoId, date: todoDate, allInstances }) => {
   try {
     const todo = todos.value.find((t) => t.id == todoId);
 
@@ -250,8 +259,8 @@ const handleDeleteTodo = async ({todoId, date:todoDate, allInstances}) => {
       console.log(todo);
       console.log(todoDate);
       if (
-          (!todo.repeat_type || todo.repeat_type === 'none') &&
-          todo.date === todoDate
+        (!todo.repeat_type || todo.repeat_type === 'none') &&
+        todo.date === todoDate
       ) {
         // 非重复事项，直接从数据库中删除
         const result = await apiRequest(`/api/todos?id=${todoId}`, 'DELETE');
@@ -285,7 +294,6 @@ const handleDeleteTodo = async ({todoId, date:todoDate, allInstances}) => {
             });
           }
         }
-
       }
       return true;
     }
