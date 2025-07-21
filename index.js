@@ -379,7 +379,7 @@
       showLoading();
       
       try {
-        const result = await apiRequest('/api/login', 'POST', { password });
+        const result = await apiRequest('/api/login', 'POST', { password }, { 'Authorization': `Bearer ${authToken}` });
         
         if (result.success) {
           authToken = result.token;
@@ -428,7 +428,7 @@
       const startDate = formatDate(firstDay);
       const endDate = formatDate(lastDay);
       
-      const result = await apiRequest(`/api/todos?startDate=${startDate}&endDate=${endDate}&userId=${userId}`);
+      const result = await apiRequest(`/api/todos?startDate=${startDate}&endDate=${endDate}&userId=${userId}`, 'GET', null, { 'Authorization': `Bearer ${authToken}` });
       
       todos = result.todos || [];
       completedInstances = result.completedInstances || [];

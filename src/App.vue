@@ -101,7 +101,7 @@ const initializeUserId = () => {
 // 在App.vue的script setup部分添加
 const fetchHolidayData = async (year) => {
   try {
-    const result = await apiRequest(`/api/holidays?year=${year}`);
+    const result = await apiRequest(`/api/holidays?year=${year}`, 'GET', null, { 'X-User-ID': userId.value });
     if (result && result.dates) {
       // 将数据转换为前端需要的格式
       const holidayMap = {};
@@ -342,3 +342,4 @@ body {
   z-index: 1000;
 }
 </style>
+import { apiRequest } from '../utils/api';
