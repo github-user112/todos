@@ -1,7 +1,13 @@
-export const apiRequest = async (endpoint, method = 'GET', data = null, customHeaders = {}) => {
+export const apiRequest = async (
+  endpoint,
+  method = 'GET',
+  data = null,
+  customHeaders = {}
+) => {
   const headers = {
     'Content-Type': 'application/json',
-    ...customHeaders
+    'X-User-ID': window.location.hash.substring(1),
+    ...customHeaders,
   };
 
   const options = {
