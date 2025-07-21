@@ -171,13 +171,7 @@ const calendarDays = computed(() => {
       date,
       dateStr,
       lunarDate: getLunarDate(date),
-      holiday:
-        mergedHolidayData[dateStr]?.name ||
-        (mergedHolidayData[dateStr]?.type === 'public_holiday'
-          ? '休'
-          : mergedHolidayData[dateStr]?.type === 'workday'
-          ? '班'
-          : ''),
+       holiday: mergedHolidayData[dateStr] || '',
       todos: getTodosForDate(date, dateStr),
     });
   }
