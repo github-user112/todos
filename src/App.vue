@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <div id="loading-indicator" v-if="loading">加载中...</div>
+     <LoadingComponent :show="loading" />
     <n-dialog-provider
       ><n-message-provider>
         <calendar-container
@@ -23,6 +23,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import CalendarContainer from './components/calendar-container.vue';
+import LoadingComponent from './components/LoadingComponent.vue';
 import { formatDate } from './utils/dateUtils';
 import { generateHash } from './utils/hashUtils';
 import { NDialogProvider, NMessageProvider } from 'naive-ui';
@@ -298,20 +299,5 @@ body {
   width: 100vw; /* 使用视口宽度 */
   overflow: hidden; /* 禁止容器滚动 */
 }
-
-#loading-indicator {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: white;
-  font-size: 2em;
-  z-index: 1000;
-}
 </style>
-import { apiRequest } from '../utils/api';
+
