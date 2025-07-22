@@ -1,10 +1,10 @@
 <template>
   <div class="app-container">
-     <LoadingComponent :show="loading" />
+     <!-- <LoadingComponent :show="loading" /> -->
     <n-dialog-provider
       ><n-message-provider>
         <calendar-container
-          v-if="isInitialized"
+          
           :todos="todos"
           :completedInstances="completedInstances"
           :deletedInstances="deletedInstances"
