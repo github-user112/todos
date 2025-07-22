@@ -1,3 +1,5 @@
+import { setLoading } from './loading';
+
 export const apiRequest = async (
   endpoint,
   method = 'GET',
@@ -19,6 +21,9 @@ export const apiRequest = async (
     options.body = JSON.stringify(data);
   }
 
+  // 请求开始，显示加载
+  setLoading(true);
+
   try {
     const response = await fetch(endpoint, options);
     const result = await response.json();
@@ -31,5 +36,8 @@ export const apiRequest = async (
   } catch (error) {
     console.error('API 请求错误:', error);
     throw error;
+  } finally {
+    // 请求结束，隐藏加载
+    setLoading(false);
   }
 };

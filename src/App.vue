@@ -26,8 +26,11 @@ import CalendarContainer from './components/calendar-container.vue';
 import { formatDate } from './utils/dateUtils';
 import { generateHash } from './utils/hashUtils';
 import { NDialogProvider, NMessageProvider } from 'naive-ui';
-// 状态
-const loading = ref(false);
+import { apiRequest } from './utils/api';
+import { loading } from './utils/loading'; // 导入全局loading状态
+
+// 移除本地loading定义
+// const loading = ref(false);
 const isInitialized = ref(false);
 const userId = ref(null);
 const todos = ref([]);
@@ -38,45 +41,6 @@ const deletedInstances = ref([]);
 const lunarData = ref({});
 
 const holidayData = ref({});
-
-// API 请求函数
-const apiRequest = async (endpoint, method = 'GET', data = null) => {
-  loading.value = true;
-
-  try {
-    const headers = {
-      'Content-Type': 'application/json',
-    };
-
-    // 添加用户ID到请求头
-    if (userId.value) {
-      headers['X-User-ID'] = userId.value;
-    }
-
-    const options = {
-      method,
-      headers,
-    };
-
-    if (data && (method === 'POST' || method === 'PUT')) {
-      options.body = JSON.stringify(data);
-    }
-
-    const response = await fetch(endpoint, options);
-    const result = await response.json();
-
-    if (!response.ok) {
-      throw new Error(result.error || '请求失败');
-    }
-
-    return result;
-  } catch (error) {
-    console.error('API 请求错误:', error);
-    throw error;
-  } finally {
-    loading.value = false;
-  }
-};
 
 // 初始化用户ID
 const initializeUserId = () => {
@@ -126,7 +90,7 @@ const initCalendar = async () => {
     // 使用Promise.all并行调用两个API
     await Promise.all([
       fetchHolidayData(currentDate.getFullYear()),
-      fetchCalendarData(currentDate)
+      fetchCalendarData(currentDate),
     ]);
     isInitialized.value = true;
   } catch (error) {
