@@ -1,10 +1,9 @@
 <template>
   <div class="app-container">
-     <!-- <LoadingComponent :show="loading" /> -->
+    <LoadingComponent :show="loading" />
     <n-dialog-provider
       ><n-message-provider>
         <calendar-container
-          
           :todos="todos"
           :completedInstances="completedInstances"
           :deletedInstances="deletedInstances"
@@ -130,11 +129,17 @@ const fetchCalendarData = async (currentDate) => {
 // 添加待办事项
 const handleAddTodo = async (todoData) => {
   try {
-    const result = await apiRequest('/api/todos', 'POST', {
-      text: todoData.text,
-      date: todoData.date,
-      repeatType: todoData.repeatType,
-    });
+    const result = await apiRequest(
+      '/api/todos',
+      'POST',
+      {
+        text: todoData.text,
+        date: todoData.date,
+        repeatType: todoData.repeatType,
+      },
+      null,
+      true
+    );
 
     if (result.success) {
       todos.value.push(result.todo);
@@ -159,10 +164,16 @@ const handleCompleteTodo = async ({ todoId, date: todoDate, allInstances }) => {
       todo.date === todoDate
     ) {
       // 非重复事项，直接修改原始待办事项
-      const result = await apiRequest('/api/todos', 'PUT', {
-        id: todoId,
-        completed: !todo.completed,
-      });
+      const result = await apiRequest(
+        '/api/todos',
+        'PUT',
+        {
+          id: todoId,
+          completed: !todo.completed,
+        },
+        null,
+        true
+      );
 
       if (result.success) {
         todo.completed = !todo.completed;
@@ -171,10 +182,16 @@ const handleCompleteTodo = async ({ todoId, date: todoDate, allInstances }) => {
     } else {
       if (allInstances) {
         // 完成所有重复实例
-        const result = await apiRequest('/api/todos', 'PUT', {
-          id: todoId,
-          completed: !todo.completed,
-        });
+        const result = await apiRequest(
+          '/api/todos',
+          'PUT',
+          {
+            id: todoId,
+            completed: !todo.completed,
+          },
+          null,
+          true
+        );
 
         if (result.success) {
           todo.completed = !todo.completed;
@@ -182,10 +199,16 @@ const handleCompleteTodo = async ({ todoId, date: todoDate, allInstances }) => {
         }
       } else {
         // 完成单个重复实例
-        const result = await apiRequest('/api/completed-instances', 'POST', {
-          todoId,
-          date: todoDate,
-        });
+        const result = await apiRequest(
+          '/api/completed-instances',
+          'POST',
+          {
+            todoId,
+            date: todoDate,
+          },
+          null,
+          true
+        );
 
         if (result.success) {
           if (result.completed) {
@@ -228,7 +251,13 @@ const handleDeleteTodo = async ({ todoId, date: todoDate, allInstances }) => {
         todo.date === todoDate
       ) {
         // 非重复事项，直接从数据库中删除
-        const result = await apiRequest(`/api/todos?id=${todoId}`, 'DELETE');
+        const result = await apiRequest(
+          `/api/todos?id=${todoId}`,
+          'DELETE',
+          null,
+          null,
+          true
+        );
 
         if (result.success) {
           // 从本地数组中移除
@@ -237,7 +266,13 @@ const handleDeleteTodo = async ({ todoId, date: todoDate, allInstances }) => {
       } else {
         if (allInstances) {
           // 非重复事项，直接从数据库中删除
-          const result = await apiRequest(`/api/todos?id=${todoId}`, 'DELETE');
+          const result = await apiRequest(
+            `/api/todos?id=${todoId}`,
+            'DELETE',
+            null,
+            null,
+            true
+          );
 
           if (result.success) {
             // 从本地数组中移除
@@ -245,10 +280,17 @@ const handleDeleteTodo = async ({ todoId, date: todoDate, allInstances }) => {
           }
         } else {
           // 重复事项，记录特定实例的删除状态
-          const result = await apiRequest('/api/deleted-instances', 'POST', {
-            todoId,
-            date: todoDate,
-          });
+          const result = await apiRequest(
+            '/api/deleted-instances',
+            'POST',
+            {
+              todoId,
+              date: todoDate,
+            },
+            null,
+            null,
+            true
+          );
 
           if (result.success) {
             // 添加到本地删除实例数组
@@ -300,4 +342,3 @@ body {
   overflow: hidden; /* 禁止容器滚动 */
 }
 </style>
-

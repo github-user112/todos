@@ -4,7 +4,8 @@ export const apiRequest = async (
   endpoint,
   method = 'GET',
   data = null,
-  customHeaders = {}
+  customHeaders = {},
+  showLoading = false
 ) => {
   const headers = {
     'Content-Type': 'application/json',
@@ -21,8 +22,10 @@ export const apiRequest = async (
     options.body = JSON.stringify(data);
   }
 
-  // 请求开始，显示加载
-  setLoading(true);
+  if (showLoading) {
+    // 请求开始，显示加载
+    setLoading(true);
+  }
 
   try {
     const response = await fetch(endpoint, options);
@@ -37,7 +40,9 @@ export const apiRequest = async (
     console.error('API 请求错误:', error);
     throw error;
   } finally {
-    // 请求结束，隐藏加载
-    setLoading(false);
+    if (showLoading) {
+      // 请求结束，隐藏加载
+      setLoading(false);
+    }
   }
 };
