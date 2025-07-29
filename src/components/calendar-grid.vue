@@ -1,9 +1,9 @@
 <template>
   <div class="calendar-grid">
     <!-- Weekday headers -->
-    <div 
-      v-for="(day, index) in weekdays" 
-      :key="day" 
+    <div
+      v-for="(day, index) in weekdays"
+      :key="day"
       :class="['calendar-weekday', { 'weekend-header': index >= 5 }]"
     >
       {{ day }}
@@ -15,26 +15,28 @@
       :key="day.date"
       :day="day"
       @dblclick="$emit('openAddTodoPopup', day.dateStr)"
-      @openTodoActions="(todoId, event) => $emit('openTodoActions', todoId, day.dateStr, event)"
+      @openTodoActions="
+        (todoId, event) => $emit('openTodoActions', todoId, day.dateStr, event)
+      "
     />
   </div>
 </template>
 
 <script setup>
 import CalendarDay from './calendar-day.vue';
-import {computed} from "vue";
+import { computed } from 'vue';
 
-const {weekdays, calendarDays} =defineProps({
+const { weekdays, calendarDays } = defineProps({
   weekdays: {
     type: Array,
-    required: true
+    required: true,
   },
   calendarDays: {
     type: Array,
-    required: true
-  }
+    required: true,
+  },
 });
- const lines = computed(() => (calendarDays.length / 7))
+const lines = computed(() => calendarDays.length / 7);
 defineEmits(['openAddTodoPopup', 'openTodoActions']);
 </script>
 
@@ -53,7 +55,7 @@ defineEmits(['openAddTodoPopup', 'openTodoActions']);
   text-align: center;
   font-weight: 600;
   padding: 12px 0;
-  background: #ffffff;
+  background: #dddddd75;
   border-radius: 8px;
   color: #4a5568;
   font-size: 15px;
@@ -70,11 +72,10 @@ defineEmits(['openAddTodoPopup', 'openTodoActions']);
   .calendar-grid {
     gap: 2px;
   }
-  
+
   .calendar-weekday {
     font-size: 13px;
     padding: 8px 0;
   }
 }
 </style>
-
