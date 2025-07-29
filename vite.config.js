@@ -1,4 +1,3 @@
-
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import { fileURLToPath } from 'url';
@@ -13,14 +12,16 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://6.pjgg2023.eu.org',
+        target: 'http://127.0.0.1:8787',
         changeOrigin: true,
         logLevel: 'debug',
         configure: (proxy, options) => {
           proxy.on('proxyReq', (proxyReq, req, res) => {
-            console.log(`[Proxy] ${req.method} ${req.url} -> ${options.target}${req.url}`);
+            console.log(
+              `[Proxy] ${req.method} ${req.url} -> ${options.target}${req.url}`
+            );
           });
-        }
+        },
       },
     },
   },
