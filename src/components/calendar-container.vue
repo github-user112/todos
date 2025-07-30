@@ -117,6 +117,7 @@ const truncatedUserId = computed(() => {
 
 // Calendar days computation
 const calendarDays = computed(() => {
+  console.log('computed calendarDays');
   const mergedHolidayData = {
     ...props.holidayData,
     ...(holidayDataFromFile.value?.dates?.reduce((acc, item) => {
@@ -296,19 +297,19 @@ watch(
     await emit('fetch-calendar-data', newDate);
 
     // Load holiday data when year changes
-    try {
-      const response = await apiRequest(
-        `/api/holidays?year=${currentYear.value}`
-      );
-      if (response.ok) {
-        holidayDataFromFile.value = await response.json();
-      } else {
-        holidayDataFromFile.value = {};
-      }
-    } catch (error) {
-      console.error('加载节假日数据失败:', error);
-      holidayDataFromFile.value = {};
-    }
+    // try {
+    //   const response = await apiRequest(
+    //     `/api/holidays?year=${currentYear.value}`
+    //   );
+    //   if (response.ok) {
+    //     holidayDataFromFile.value = await response.json();
+    //   } else {
+    //     holidayDataFromFile.value = {};
+    //   }
+    // } catch (error) {
+    //   console.error('加载节假日数据失败:', error);
+    //   holidayDataFromFile.value = {};
+    // }
   },
   {
     immediate: false,
@@ -487,18 +488,6 @@ onMounted(async () => {
     calendarEl.addEventListener('touchstart', handleTouchStart);
     calendarEl.addEventListener('touchend', handleTouchEnd);
   }
-
-  // Load holiday data for current year
-  // try {
-  //   const response = await apiRequest(
-  //     `/api/holidays?year=${currentYear.value}`
-  //   );
-  //   if (response.ok) {
-  //     holidayDataFromFile.value = await response.json();
-  //   }
-  // } catch (error) {
-  //   console.error('加载节假日数据失败:', error);
-  // }
 });
 </script>
 

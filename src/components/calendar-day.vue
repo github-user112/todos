@@ -1,70 +1,93 @@
 <template>
-  <div
-    :class="[
-      'calendar-day',
-      { 'other-month': day.isOtherMonth },
-      { 'current-day': day.isToday },
-      { 'weekend-day': isWeekend(day.date) && !day.holiday },
-      {
-        'holiday-rest-day':
-          day.holiday === '休' ||
-          (typeof day.holiday === 'object' &&
-            day.holiday.type === 'public_holiday'),
-      },
-      {
-        'holiday-work-day':
-          day.holiday === '班' ||
-          (typeof day.holiday === 'object' &&
-            day.holiday.type === 'transfer_workday'),
-      },
-    ]"
-    :data-date="day.dateStr"
-    @dblclick="$emit('dblclick')"
-  >
-    <div class="day-number">{{ day.dayNumber }}</div>
-
-    <!-- Holiday indicator badge -->
+  <Transition @before-enter="onBeforeEnter">
     <div
-      v-if="day.holiday"
-      class="holiday-badge"
-      :class="getHolidayBadgeClass(day.holiday)"
+      :class="[
+        'calendar-day',
+        { 'other-month': day.isOtherMonth },
+        { 'current-day': day.isToday },
+        { 'weekend-day': isWeekend(day.date) && !day.holiday },
+        {
+          'holiday-rest-day':
+            day.holiday === '休' ||
+            (typeof day.holiday === 'object' &&
+              day.holiday.type === 'public_holiday'),
+        },
+        {
+          'holiday-work-day':
+            day.holiday === '班' ||
+            (typeof day.holiday === 'object' &&
+              day.holiday.type === 'transfer_workday'),
+        },
+      ]"
+      :data-date="day.dateStr"
+      @dblclick="$emit('dblclick')"
     >
-      {{ getHolidayBadgeText(day.holiday) }}
-    </div>
+      <div class="day-number">{{ day.dayNumber }}</div>
 
-    <!-- Holiday name or lunar date display -->
-    <div
-      v-if="getHolidayName(day.holiday) || day.lunarDate"
-      class="holiday-name"
-    >
-      {{ getHolidayName(day.holiday) || day.lunarDate }}
-    </div>
-
-    <div class="todo-list">
+      <!-- Holiday indicator badge -->
       <div
-        v-for="todo in day.todos"
-        :key="`${todo.id}-${day.dateStr}`"
-        :class="['todo-item', { completed: todo.isCompleted }]"
-        :data-id="todo.id"
-        :data-date="day.dateStr"
-        @click="$emit('openTodoActions', todo.id, $event)"
+        v-if="day.holiday"
+        class="holiday-badge"
+        :class="getHolidayBadgeClass(day.holiday)"
       >
-        {{ todo.text }}
+        {{ getHolidayBadgeText(day.holiday) }}
       </div>
-    </div>
-  </div>
+
+      <!-- Holiday name or lunar date display -->
+      <div
+        v-if="getHolidayName(day.holiday) || day.lunarDate"
+        class="holiday-name"
+      >
+        {{ getHolidayName(day.holiday) || day.lunarDate }}
+      </div>
+
+      <div class="todo-list">
+        <div
+          v-for="todo in day.todos"
+          :key="`${todo.id}-${day.dateStr}`"
+          :class="['todo-item', { completed: todo.isCompleted }]"
+          :data-id="todo.id"
+          :data-date="day.dateStr"
+          @click="$emit('openTodoActions', todo.id, $event)"
+        >
+          {{ todo.text }}
+        </div>
+      </div>
+    </div></Transition
+  >
 </template>
 
 <script setup>
-defineProps({
+import { computed, inject, watch } from 'vue';
+const { day, holidayData } = defineProps({
   day: {
     type: Object,
     required: true,
   },
+  holidayData: {
+    type: Object,
+    required: false,
+  },
 });
-
+// console.log(props.day);
+// console.log(holidayData);
+const holiday = computed(() => {
+  // console.log(holiday.value);
+  return holidayData.value[props.day.dateStr];
+});
+// watch(holidayData, (holidayData) => {
+//   console.log(holidayData.value);
+//   if (holiday.value) {
+//     props.day.holiday = props.day.dateStr
+//       ? holidayData.value[props.day.dateStr]
+//       : '';
+//   }
+// });
+// props.day.holiday = holidayData[props.day.dateStr];
 defineEmits(['dblclick', 'openTodoActions']);
-
+function onBeforeEnter() {
+  console.log('onBeforeEnter');
+}
 // Helper function to check if date is weekend
 function isWeekend(date) {
   const day = date.getDay();
@@ -114,6 +137,16 @@ function getHolidayName(holiday) {
 </script>
 
 <style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 5s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
 .calendar-day {
   border: 1px solid #e2e8f0;
   padding: 8px 4px 4px 4px;
@@ -121,7 +154,7 @@ function getHolidayName(holiday) {
   display: flex;
   flex-direction: column;
   background: #ffffff;
-  transition: all 0.2s;
+  /*transition: all 0.2s;*/
   min-height: 0;
   position: relative;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
@@ -151,7 +184,7 @@ function getHolidayName(holiday) {
 }
 
 .other-month {
-  opacity: 0.6;
+  /*opacity: 0.6;*/
   color: #a0aec0;
   border-color: #edf2f7;
 }
@@ -159,7 +192,7 @@ function getHolidayName(holiday) {
 .other-month.weekend-day,
 .other-month.holiday-rest-day,
 .other-month.holiday-work-day {
-  opacity: 0.5;
+  /*opacity: 0.5;*/
 }
 
 .day-number {

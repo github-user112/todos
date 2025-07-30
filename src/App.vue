@@ -4,6 +4,7 @@
     <n-dialog-provider
       ><n-message-provider>
         <calendar-container
+          v-if="isInitialized"
           :todos="todos"
           :completedInstances="completedInstances"
           :deletedInstances="deletedInstances"
@@ -20,14 +21,14 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, provide } from 'vue';
 import CalendarContainer from './components/calendar-container.vue';
 import LoadingComponent from './components/LoadingComponent.vue';
 import { formatDate } from './utils/dateUtils';
 import { generateHash } from './utils/hashUtils';
 import { NDialogProvider, NMessageProvider } from 'naive-ui';
 import { apiRequest } from './utils/api';
-import { loading } from './utils/loading'; // 导入全局loading状态
+import { loading, setLoading } from './utils/loading'; // 导入全局loading状态
 
 // 移除本地loading定义
 // const loading = ref(false);
@@ -82,16 +83,20 @@ const fetchHolidayData = async (year) => {
     console.error('获取节假日数据失败:', error);
   }
 };
-
+console.log(holidayData);
+console.log(holidayData.value);
+provide('holidayData', holidayData);
 // 在initCalendar方法中调用
 const initCalendar = async () => {
   try {
     const currentDate = new Date();
     // 使用Promise.all并行调用两个API
+    setLoading(true);
     await Promise.all([
       fetchHolidayData(currentDate.getFullYear()),
       fetchCalendarData(currentDate),
     ]);
+    setLoading(false);
     isInitialized.value = true;
   } catch (error) {
     console.error('初始化日历失败:', error);

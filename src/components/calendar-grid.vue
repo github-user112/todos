@@ -8,24 +8,29 @@
     >
       {{ day }}
     </div>
-
-    <!-- Calendar days -->
-    <CalendarDay
-      v-for="day in calendarDays"
-      :key="day.date"
-      :day="day"
-      @dblclick="$emit('openAddTodoPopup', day.dateStr)"
-      @openTodoActions="
-        (todoId, event) => $emit('openTodoActions', todoId, day.dateStr, event)
-      "
-    />
+    <TransitionGroup name="list">
+      <!-- Calendar days -->
+      <CalendarDay
+        v-for="(day, index) in calendarDays"
+        :key="day.date"
+        :day="day"
+        class="list-item"
+        :style="{ '--delay': (index % 7) * 0.1 + 's' }"
+        @dblclick="$emit('openAddTodoPopup', day.dateStr)"
+        @openTodoActions="
+          (todoId, event) =>
+            $emit('openTodoActions', todoId, day.dateStr, event)
+        "
+    /></TransitionGroup>
   </div>
 </template>
 
 <script setup>
 import CalendarDay from './calendar-day.vue';
 import { computed } from 'vue';
-
+function onBeforeEnter(el) {
+  console.log('onBeforeEnter', el);
+}
 const { weekdays, calendarDays } = defineProps({
   weekdays: {
     type: Array,
@@ -41,6 +46,25 @@ defineEmits(['openAddTodoPopup', 'openTodoActions']);
 </script>
 
 <style scoped>
+.list-leave-active {
+  /*position: absolute;*/
+  /*float: left;*/
+  display: none;
+}
+.list-enter-active,
+.list-leave-active {
+  transition: all 0.1s ease;
+  transition-delay: var(--delay); /* 使用 CSS 变量 */
+}
+.list-enter-from {
+  /* opacity: 0;*/
+  transform: translateX(100vw);
+}
+.list-leave-to {
+  opacity: 0;
+  transform: translateX(-100vw);
+}
+
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
