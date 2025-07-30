@@ -8,7 +8,7 @@
     >
       {{ day }}
     </div>
-    <TransitionGroup name="list">
+    <TransitionGroup name="list" @beforeEnter="onBeforeEnter">
       <!-- Calendar days -->
       <CalendarDay
         v-for="(day, index) in calendarDays"
@@ -29,7 +29,7 @@
 import CalendarDay from './calendar-day.vue';
 import { computed } from 'vue';
 function onBeforeEnter(el) {
-  console.log('onBeforeEnter', el);
+  // console.log('onBeforeEnter', el);
 }
 const { weekdays, calendarDays } = defineProps({
   weekdays: {

@@ -273,15 +273,17 @@ function isInstanceDeleted(todoId, dateStr) {
 }
 
 // Month navigation
-const prevMonth = () => {
+const prevMonth = async () => {
   const newDate = new Date(currentDate.value);
   newDate.setMonth(newDate.getMonth() - 1);
+  await emit('fetch-calendar-data', newDate);
   currentDate.value = newDate;
 };
 
-const nextMonth = () => {
+const nextMonth = async () => {
   const newDate = new Date(currentDate.value);
   newDate.setMonth(newDate.getMonth() + 1);
+  await emit('fetch-calendar-data', newDate);
   currentDate.value = newDate;
 };
 
@@ -294,7 +296,6 @@ watch(
   currentDate,
   async (newDate) => {
     console.log(newDate);
-    await emit('fetch-calendar-data', newDate);
 
     // Load holiday data when year changes
     // try {
