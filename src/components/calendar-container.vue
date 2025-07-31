@@ -115,6 +115,70 @@ const truncatedUserId = computed(() => {
   return props.userId;
 });
 
+// Calendar days computation
+const calendarDays = computed(() => {
+  console.log('computed calendarDays');
+  const mergedHolidayData = {
+    ...props.holidayData,
+    ...(holidayDataFromFile.value?.dates?.reduce((acc, item) => {
+      acc[item.date] = {
+        name:
+          item.name || (item.type === 'public_holiday' ? '节假日' : '工作日'),
+        type: item.type,
+      };
+      return acc;
+    }, {}) || {}),
+  };
+
+  // 获取当前日期
+  const today = currentDate.value;
+  today.setHours(0, 0, 0, 0);
+
+  // 找到当前周的周一
+  const currentDayOfWeek = today.getDay(); // 0=Sunday, 1=Monday...
+  const offsetToMonday = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
+  const currentMonday = new Date(today);
+  currentMonday.setDate(today.getDate() - offsetToMonday);
+  currentMonday.setHours(0, 0, 0, 0);
+
+  // 起始日期：当前周的周一往前推 2 周
+  const startDate = new Date(currentMonday);
+  startDate.setDate(startDate.getDate() - 7); // 往前推两周（14天）
+
+  const result = [];
+
+  for (let i = 0; i < 35; i++) {
+    const date = new Date(startDate);
+    date.setDate(date.getDate() + i);
+
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const dayNumber = date.getDate();
+
+    const isCurrentMonth =
+      month === currentMonth.value && year === currentYear.value;
+
+    const dateStr = formatDate(date);
+    const isToday =
+      date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear();
+
+    result.push({
+      dayNumber,
+      isOtherMonth: !isCurrentMonth,
+      isToday,
+      date,
+      dateStr,
+      lunarDate: getLunarDate(date),
+      holiday: mergedHolidayData[dateStr] || '',
+      todos: getTodosForDate(date, dateStr),
+    });
+  }
+
+  return result;
+});
+
 // Get lunar date
 function getLunarDate(date) {
   const dateStr = formatDate(date);
@@ -212,92 +276,26 @@ function isInstanceDeleted(todoId, dateStr) {
 const prevMonth = async () => {
   const newDate = new Date(currentDate.value);
   newDate.setMonth(newDate.getMonth() - 1);
-
+  await emit('fetch-calendar-data', newDate);
   currentDate.value = newDate;
 };
 
 const nextMonth = async () => {
   const newDate = new Date(currentDate.value);
   newDate.setMonth(newDate.getMonth() + 1);
-
+  await emit('fetch-calendar-data', newDate);
   currentDate.value = newDate;
 };
 
 const goToToday = () => {
   currentDate.value = new Date();
 };
-let calendarDays = ref([]);
+
 // Watch for date changes
 watch(
   currentDate,
   async (newDate) => {
     console.log(newDate);
-    await emit('fetch-calendar-data', newDate);
-    // Calendar days computation
-
-    const fun = () => {
-      console.log('watch calendarDays');
-      const mergedHolidayData = {
-        ...props.holidayData,
-        ...(holidayDataFromFile.value?.dates?.reduce((acc, item) => {
-          acc[item.date] = {
-            name:
-              item.name ||
-              (item.type === 'public_holiday' ? '节假日' : '工作日'),
-            type: item.type,
-          };
-          return acc;
-        }, {}) || {}),
-      };
-
-      // 获取当前日期
-      const today = currentDate.value;
-      today.setHours(0, 0, 0, 0);
-
-      // 找到当前周的周一
-      const currentDayOfWeek = today.getDay(); // 0=Sunday, 1=Monday...
-      const offsetToMonday = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
-      const currentMonday = new Date(today);
-      currentMonday.setDate(today.getDate() - offsetToMonday);
-      currentMonday.setHours(0, 0, 0, 0);
-
-      // 起始日期：当前周的周一往前推 2 周
-      const startDate = new Date(currentMonday);
-      startDate.setDate(startDate.getDate() - 7); // 往前推两周（14天）
-
-      const result = [];
-
-      for (let i = 0; i < 35; i++) {
-        const date = new Date(startDate);
-        date.setDate(date.getDate() + i);
-
-        const year = date.getFullYear();
-        const month = date.getMonth();
-        const dayNumber = date.getDate();
-
-        const isCurrentMonth =
-          month === currentMonth.value && year === currentYear.value;
-
-        const dateStr = formatDate(date);
-        const isToday =
-          date.getDate() === today.getDate() &&
-          date.getMonth() === today.getMonth() &&
-          date.getFullYear() === today.getFullYear();
-
-        result.push({
-          dayNumber,
-          isOtherMonth: !isCurrentMonth,
-          isToday,
-          date,
-          dateStr,
-          lunarDate: getLunarDate(date),
-          holiday: mergedHolidayData[dateStr] || '',
-          todos: getTodosForDate(date, dateStr),
-        });
-      }
-      calendarDays.value = result;
-      return result;
-    };
 
     // Load holiday data when year changes
     // try {
@@ -313,10 +311,9 @@ watch(
     //   console.error('加载节假日数据失败:', error);
     //   holidayDataFromFile.value = {};
     // }
-    fun();
   },
   {
-    immediate: true,
+    immediate: false,
     flush: 'post', // Ensure DOM is updated first
   }
 );

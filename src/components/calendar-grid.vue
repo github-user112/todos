@@ -12,7 +12,7 @@
       <!-- Calendar days -->
       <CalendarDay
         v-for="(day, index) in calendarDays"
-        :key="day.date"
+        :key="day.dateStr"
         :day="day"
         class="list-item"
         :style="{ '--delay': (index % 7) * 0.1 + 's' }"
