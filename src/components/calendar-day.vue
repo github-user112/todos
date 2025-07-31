@@ -184,7 +184,7 @@ function getHolidayName(holiday) {
 }
 
 .other-month {
-  /*opacity: 0.6;*/
+  opacity: 0.6;
   color: #a0aec0;
   border-color: #edf2f7;
 }
@@ -192,7 +192,7 @@ function getHolidayName(holiday) {
 .other-month.weekend-day,
 .other-month.holiday-rest-day,
 .other-month.holiday-work-day {
-  /*opacity: 0.5;*/
+  opacity: 0.5;
 }
 
 .day-number {
