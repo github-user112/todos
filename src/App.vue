@@ -4,7 +4,6 @@
     <n-dialog-provider
       ><n-message-provider>
         <calendar-container
-          v-if="isInitialized"
           :todos="todos"
           :completedInstances="completedInstances"
           :deletedInstances="deletedInstances"
@@ -12,6 +11,7 @@
           :holidayData="holidayData"
           :userId="userId"
           @fetch-calendar-data="fetchCalendarData"
+          @fetch-holiday-data="fetchHolidayData"
           @add-todo="handleAddTodo"
           @complete-todo="handleCompleteTodo"
           @delete-todo="handleDeleteTodo"
@@ -65,7 +65,8 @@ const initializeUserId = () => {
 // 在App.vue的script setup部分添加
 const fetchHolidayData = async (year) => {
   try {
-    const result = await apiRequest(`/api/holidays?year=${year}`, 'GET', null, {
+    const result = await apiRequest(`
+https://unpkg.com/holiday-calendar@1.1.6/data/CN/${year}.min.json?callback=holiday_1753945082090_8842`, 'GET', null, {
       'X-User-ID': userId.value,
     });
     if (result && result.dates) {

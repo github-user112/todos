@@ -1,0 +1,43 @@
+:root {
+  /* 主色调 */
+  --primary-color: #ff7d00; /* 活力橙 */
+  --primary-light: #ffedd5; /* 浅橙色 */
+  --primary-dark: #c2410c; /* 深橙色 */
+  
+  /* 辅助色 */
+  --success-color: #10b981; /* 成功绿 */
+  --danger-color: #ef4444; /* 危险红 */
+  --info-color: #3b82f6; /* 信息蓝 */
+  
+  /* 中性色 */
+  --background-color: #ffffff; /* 背景色 */
+  --card-background: #f9fafb; /* 卡片背景 */
+  --text-primary: #111827; /* 主要文本 */
+  --text-secondary: #6b7280; /* 次要文本 */
+  --border-color: #e5e7eb; /* 边框色 */
+  --hover-color: #f3f4f6; /* 悬停色 */
+  
+  /* 月份区分颜色 */
+  --current-month-bg: #ffffff; /* 本月背景色 */
+  --current-month-border: #e5e7eb; /* 本月边框色 */
+  --other-month-bg: #f9fafb; /* 其他月背景色 */
+  --other-month-border: #f3f4f6; /* 其他月边框色 */
+  --other-month-text: #9ca3af; /* 其他月文本色 */
+}
+
+/* 深色模式变量（可选）*/
+.dark-mode:root {
+  --background-color: #111827;
+  --card-background: #1f2937;
+  --text-primary: #f3f4f6;
+  --text-secondary: #9ca3af;
+  --border-color: #374151;
+  --hover-color: #374151;
+  
+  /* 月份区分颜色 */
+  --current-month-bg: #1f2937; /* 本月背景色 */
+  --current-month-border: #374151; /* 本月边框色 */
+  --other-month-bg: #111827; /* 其他月背景色 */
+  --other-month-border: #1f2937; /* 其他月边框色 */
+  --other-month-text: #4b5563; /* 其他月文本色 */
+}

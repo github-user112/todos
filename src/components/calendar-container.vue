@@ -276,14 +276,13 @@ function isInstanceDeleted(todoId, dateStr) {
 const prevMonth = async () => {
   const newDate = new Date(currentDate.value);
   newDate.setMonth(newDate.getMonth() - 1);
-  await emit('fetch-calendar-data', newDate);
   currentDate.value = newDate;
 };
 
 const nextMonth = async () => {
   const newDate = new Date(currentDate.value);
   newDate.setMonth(newDate.getMonth() + 1);
-  await emit('fetch-calendar-data', newDate);
+
   currentDate.value = newDate;
 };
 
@@ -294,27 +293,12 @@ const goToToday = () => {
 // Watch for date changes
 watch(
   currentDate,
-  async (newDate) => {
-    console.log(newDate);
-
+  async (newDate, oldValue) => {
+    emit('fetch-calendar-data', newDate);
     // Load holiday data when year changes
-    // try {
-    //   const response = await apiRequest(
-    //     `/api/holidays?year=${currentYear.value}`
-    //   );
-    //   if (response.ok) {
-    //     holidayDataFromFile.value = await response.json();
-    //   } else {
-    //     holidayDataFromFile.value = {};
-    //   }
-    // } catch (error) {
-    //   console.error('加载节假日数据失败:', error);
-    //   holidayDataFromFile.value = {};
-    // }
-  },
-  {
-    immediate: false,
-    flush: 'post', // Ensure DOM is updated first
+    if (oldValue && newDate.getFullYear() !== oldValue.getFullYear()) {
+      emit('fetch-holiday-data', newDate.getFullYear());
+    }
   }
 );
 
