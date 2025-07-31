@@ -12,10 +12,10 @@
       <!-- Calendar days -->
       <CalendarDay
         v-for="(day, index) in calendarDays"
-        :key="day.dateStr"
+        :key="day.dateStr + day.isOtherMonth"
         :day="day"
         class="list-item"
-        :style="{ '--delay': (index % 7) * 0.1 + 's' }"
+        :style="{ '--delay': (index / 7) * 0.1 + 's' }"
         @dblclick="$emit('openAddTodoPopup', day.dateStr)"
         @openTodoActions="
           (todoId, event) =>
@@ -53,7 +53,7 @@ defineEmits(['openAddTodoPopup', 'openTodoActions']);
 }
 .list-enter-active,
 .list-leave-active {
-  transition: all 0.1s ease;
+  transition: all 0.3s cubic-bezier(0.075, 0.82, 0.165, 1);
   transition-delay: var(--delay); /* 使用 CSS 变量 */
 }
 .list-enter-from {
