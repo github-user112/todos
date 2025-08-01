@@ -14,6 +14,9 @@
         :value="animationType"
         @change="$emit('changeAnimation', $event.target.value)"
       >
+        <option value="animate__bounce">animate__bounce</option>
+        <option value="animate__tada">animate__tada</option>
+
         <option value="random">随机</option>
         <option value="slide-left">向左滑动</option>
         <option value="default">默认</option>

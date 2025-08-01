@@ -10,6 +10,7 @@
     </div>
     <TransitionGroup
       :name="animationType ? animationType : 'default'"
+      :enter-active-class="activeClass"
       @beforeEnter="onBeforeEnter"
     >
       <!-- Calendar days -->
@@ -18,7 +19,11 @@
         :key="day.dateStr + day.isOtherMonth"
         :day="day"
         class="list-item"
-        :style="{ '--delay': (index / 7) * 0.1 + 's', '--i': getI(index),'--j':getJ(index) }"
+        :style="{
+          '--delay': (index / 7) * 0.1 + 's',
+          '--i': getI(index),
+          '--j': getJ(index),
+        }"
         @dblclick="$emit('openAddTodoPopup', day.dateStr)"
         @openTodoActions="
           (todoId, event) =>
@@ -33,11 +38,11 @@ import CalendarDay from './calendar-day.vue';
 import { computed } from 'vue';
 // 引入动画样式文件
 import '../assets/animation.css';
-function getI(index){
-return parseInt(index/7)
+function getI(index) {
+  return parseInt(index / 7);
 }
-function getJ(index){
-return parseInt(index%7)
+function getJ(index) {
+  return parseInt(index % 7);
 }
 function onBeforeEnter(el) {
   // console.log('onBeforeEnter', el);
@@ -57,6 +62,11 @@ const props = defineProps({
   },
 });
 const lines = computed(() => props.calendarDays.length / 7);
+const activeClass = computed(() =>
+  props.animationType.includes('animate')
+    ? 'animate__animated ' + props.animationType
+    : props.animationType + '-enter-active'
+);
 defineEmits(['openAddTodoPopup', 'openTodoActions']);
 </script>
 

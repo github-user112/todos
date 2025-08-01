@@ -180,7 +180,8 @@ function getHolidayName(holiday) {
 
 .calendar-day:hover {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  transform: translateY(-2px);
+  animation: jello; /* referring directly to the animation's @keyframe declaration */
+  animation-duration: 0.5s; /* don't forget to set a duration! */
 }
 
 .other-month {
