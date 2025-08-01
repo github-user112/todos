@@ -96,9 +96,7 @@ const weekdays = ['一', '二', '三', '四', '五', '六', '日'];
 // 从localStorage读取保存的动画类型，默认为'slide-left'
 const allowedAnimations = ['slide-left', 'default']; // 允许的动画类型列表
 const savedAnimation = localStorage.getItem('calendar_animation_type');
-const animationType = ref(
-  allowedAnimations.includes(savedAnimation) ? savedAnimation : 'slide-left'
-);
+const animationType = ref(savedAnimation ? savedAnimation : 'slide-left');
 
 // Popup state
 const showAddTodoPopup = ref(false);

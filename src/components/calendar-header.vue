@@ -14,6 +14,7 @@
         :value="animationType"
         @change="$emit('changeAnimation', $event.target.value)"
       >
+        <option value="random">随机</option>
         <option value="slide-left">向左滑动</option>
         <option value="default">默认</option>
         <!-- 未来可以添加更多动画选项 -->

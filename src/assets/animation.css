@@ -1,4 +1,33 @@
 /* 动画样式文件 */
+.random-enter-from.list-item{
+  opacity: 0;
+}
+.random-enter-active {
+   transition: all 0.3s linear;
+  transition-delay:calc(var(--j) * 100ms);
+
+}
+.random-leave-active.list-item {
+  /* animation-name: randomEnter; */
+  display: none;
+}
+  
+    @keyframes randomEnter {
+      0% {
+        opacity: 0;
+      }
+      40% {
+        opacity: 0;
+      }
+      70% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 1;
+      }
+    
+  }
+
 
 /* 向左滑动动画 */
 .slide-left-leave-active.list-item {
