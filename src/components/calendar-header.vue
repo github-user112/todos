@@ -7,6 +7,18 @@
     <button @click="copyUrlToClipboard" class="share-button">
       分享我的日程
     </button>
+    <div class="animation-selector">
+      <label for="animation-type">动画类型:</label>
+      <select
+        id="animation-type"
+        :value="animationType"
+        @change="$emit('changeAnimation', $event.target.value)"
+      >
+        <option value="slide-left">向左滑动</option>
+        <option value="default">默认</option>
+        <!-- 未来可以添加更多动画选项 -->
+      </select>
+    </div>
   </div>
 </template>
 
@@ -20,9 +32,13 @@ defineProps({
     type: Number,
     required: true,
   },
+  animationType: {
+    type: String,
+    required: true,
+  },
 });
 
-defineEmits(['prevMonth', 'nextMonth', 'goToToday']);
+defineEmits(['prevMonth', 'nextMonth', 'goToToday', 'changeAnimation']);
 
 const copyUrlToClipboard = () => {
   navigator.clipboard
@@ -117,6 +133,41 @@ const copyUrlToClipboard = () => {
 
   .calendar-title {
     font-size: 1rem;
+  }
+}
+
+.animation-selector {
+  display: flex;
+  align-items: center;
+  margin-left: 10px;
+}
+
+.animation-selector label {
+  margin-right: 8px;
+  font-size: 14px;
+  color: #4a5568;
+}
+
+.animation-selector select {
+  padding: 6px 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background: #ffffff;
+  font-size: 14px;
+  color: #2d3748;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .animation-selector {
+    margin-left: 5px;
+  }
+  .animation-selector label {
+    font-size: 12px;
+  }
+  .animation-selector select {
+    padding: 4px 8px;
+    font-size: 12px;
   }
 }
 </style>

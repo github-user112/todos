@@ -3,14 +3,17 @@
     <CalendarHeader
       :currentYear="currentYear"
       :currentMonth="currentMonth"
+      :animationType="animationType"
       @prevMonth="prevMonth"
       @nextMonth="nextMonth"
       @goToToday="goToToday"
+      @changeAnimation="changeAnimation"
     />
 
     <CalendarGrid
       :weekdays="weekdays"
       :calendarDays="calendarDays"
+      :animationType="animationType"
       @openAddTodoPopup="openAddTodoPopup"
       @openTodoActions="openTodoActions"
     />
@@ -89,6 +92,13 @@ const currentDate = ref(new Date());
 const currentYear = computed(() => currentDate.value.getFullYear());
 const currentMonth = computed(() => currentDate.value.getMonth());
 const weekdays = ['一', '二', '三', '四', '五', '六', '日'];
+// 添加动画类型状态
+// 从localStorage读取保存的动画类型，默认为'slide-left'
+const allowedAnimations = ['slide-left', 'default']; // 允许的动画类型列表
+const savedAnimation = localStorage.getItem('calendar_animation_type');
+const animationType = ref(
+  allowedAnimations.includes(savedAnimation) ? savedAnimation : 'slide-left'
+);
 
 // Popup state
 const showAddTodoPopup = ref(false);
@@ -291,16 +301,13 @@ const goToToday = () => {
 };
 
 // Watch for date changes
-watch(
-  currentDate,
-  async (newDate, oldValue) => {
-    emit('fetch-calendar-data', newDate);
-    // Load holiday data when year changes
-    if (oldValue && newDate.getFullYear() !== oldValue.getFullYear()) {
-      emit('fetch-holiday-data', newDate.getFullYear());
-    }
+watch(currentDate, async (newDate, oldValue) => {
+  emit('fetch-calendar-data', newDate);
+  // Load holiday data when year changes
+  if (oldValue && newDate.getFullYear() !== oldValue.getFullYear()) {
+    emit('fetch-holiday-data', newDate.getFullYear());
   }
-);
+});
 
 // Todo popup management
 const openAddTodoPopup = (date) => {
@@ -462,7 +469,12 @@ const handleTouchEnd = async (event) => {
     }
   }
 };
-
+// 添加动画类型更改方法
+const changeAnimation = (newType) => {
+  animationType.value = newType;
+  // 保存到localStorage
+  localStorage.setItem('calendar_animation_type', newType);
+};
 // Initialize event listeners
 onMounted(async () => {
   document.addEventListener('click', closeActionsOnOutsideClick);

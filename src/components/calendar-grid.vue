@@ -8,7 +8,10 @@
     >
       {{ day }}
     </div>
-    <TransitionGroup name="list" @beforeEnter="onBeforeEnter">
+    <TransitionGroup
+      :name="animationType ? animationType : 'default'"
+      @beforeEnter="onBeforeEnter"
+    >
       <!-- Calendar days -->
       <CalendarDay
         v-for="(day, index) in calendarDays"
@@ -28,10 +31,13 @@
 <script setup>
 import CalendarDay from './calendar-day.vue';
 import { computed } from 'vue';
+// 引入动画样式文件
+import '../assets/animation.css';
+
 function onBeforeEnter(el) {
   // console.log('onBeforeEnter', el);
 }
-const { weekdays, calendarDays } = defineProps({
+const props = defineProps({
   weekdays: {
     type: Array,
     required: true,
@@ -40,31 +46,16 @@ const { weekdays, calendarDays } = defineProps({
     type: Array,
     required: true,
   },
+  animationType: {
+    type: String,
+    required: true,
+  },
 });
-const lines = computed(() => calendarDays.length / 7);
+const lines = computed(() => props.calendarDays.length / 7);
 defineEmits(['openAddTodoPopup', 'openTodoActions']);
 </script>
 
 <style scoped>
-.list-leave-active {
-  /*position: absolute;*/
-  /*float: left;*/
-  display: none;
-}
-.list-enter-active,
-.list-leave-active {
-  transition: all 0.3s cubic-bezier(0.075, 0.82, 0.165, 1);
-  transition-delay: var(--delay); /* 使用 CSS 变量 */
-}
-.list-enter-from {
-  /* opacity: 0;*/
-  transform: translateX(100vw);
-}
-.list-leave-to {
-  opacity: 0;
-  transform: translateX(-100vw);
-}
-
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
