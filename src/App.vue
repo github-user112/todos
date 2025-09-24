@@ -65,10 +65,15 @@ const initializeUserId = () => {
 // 在App.vue的script setup部分添加
 const fetchHolidayData = async (year) => {
   try {
-    const result = await apiRequest(`
-https://unpkg.com/holiday-calendar@1.1.6/data/CN/${year}.min.json?callback=holiday_1753945082090_8842`, 'GET', null, {
-      'X-User-ID': userId.value,
-    });
+    const result = await apiRequest(
+      `
+https://unpkg.com/holiday-calendar@1.1.6/data/CN/${year}.min.json?callback=holiday_1753945082090_8842`,
+      'GET',
+      null,
+      {
+        'X-User-ID': userId.value,
+      }
+    );
     if (result && result.dates) {
       // 将数据转换为前端需要的格式
       const holidayMap = {};
@@ -134,6 +139,7 @@ const fetchCalendarData = async (currentDate) => {
 
 // 添加待办事项
 const handleAddTodo = async (todoData) => {
+  console.log(todoData);
   try {
     const result = await apiRequest(
       '/api/todos',
@@ -142,6 +148,7 @@ const handleAddTodo = async (todoData) => {
         text: todoData.text,
         date: todoData.date,
         repeatType: todoData.repeatType,
+        repeatInterval: todoData.repeatInterval || 1,
       },
       null,
       true

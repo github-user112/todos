@@ -5,90 +5,107 @@ export default {
   async fetch(request, env, ctx) {
     try {
       // 解析请求 URL
-      const url = new URL(request.url)
-      const path = url.pathname
+      const url = new URL(request.url);
+      const path = url.pathname;
 
       // 获取用户 ID
-      const userId = request.headers.get("X-User-ID")
+      const userId = request.headers.get('X-User-ID');
       if (!userId) {
-        return new Response(JSON.stringify({ error: "缺少用户 ID" }), {
+        return new Response(JSON.stringify({ error: '缺少用户 ID' }), {
           status: 401,
-          headers: { "Content-Type": "application/json" },
-        })
+          headers: { 'Content-Type': 'application/json' },
+        });
       }
 
       // 路由处理
       // 添加节假日路由
-    if (path === '/api/holidays') {
-      return handleGetHolidays(request, env, userId);
-    } if (path === "/api/todos" && request.method === "GET") {
-        return await handleGetTodos(request, env, userId)
-      } else if (path === "/api/todos" && request.method === "POST") {
-        return await handleCreateTodo(request, env, userId)
-      } else if (path === "/api/todos" && request.method === "PUT") {
-        return await handleUpdateTodo(request, env, userId)
-      } else if (path === "/api/todos" && request.method === "DELETE") {
-        return await handleDeleteTodo(request, env, userId)
-      } else if (path === "/api/completed-instances" && request.method === "POST") {
-        return await handleToggleCompletedInstance(request, env, userId)
-      } else if (path === "/api/deleted-instances" && request.method === "POST") {
-        return await handleCreateDeletedInstance(request, env, userId)
+      if (path === '/api/holidays') {
+        return handleGetHolidays(request, env, userId);
+      }
+      if (path === '/api/todos' && request.method === 'GET') {
+        return await handleGetTodos(request, env, userId);
+      } else if (path === '/api/todos' && request.method === 'POST') {
+        return await handleCreateTodo(request, env, userId);
+      } else if (path === '/api/todos' && request.method === 'PUT') {
+        return await handleUpdateTodo(request, env, userId);
+      } else if (path === '/api/todos' && request.method === 'DELETE') {
+        return await handleDeleteTodo(request, env, userId);
+      } else if (
+        path === '/api/completed-instances' &&
+        request.method === 'POST'
+      ) {
+        return await handleToggleCompletedInstance(request, env, userId);
+      } else if (
+        path === '/api/deleted-instances' &&
+        request.method === 'POST'
+      ) {
+        return await handleCreateDeletedInstance(request, env, userId);
       } else {
-        return new Response(JSON.stringify({ error: "无效的 API 路径" }), {
+        return new Response(JSON.stringify({ error: '无效的 API 路径' }), {
           status: 404,
-          headers: { "Content-Type": "application/json" },
-        })
+          headers: { 'Content-Type': 'application/json' },
+        });
       }
     } catch (error) {
-      console.error("处理请求时出错:", error)
-      return new Response(JSON.stringify({ error: "服务器内部错误" }), {
+      console.error('处理请求时出错:', error);
+      return new Response(JSON.stringify({ error: '服务器内部错误' }), {
         status: 500,
-        headers: { "Content-Type": "application/json" },
-      })
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
   },
-}
+};
 
 // 获取待办事项列表
 async function handleGetTodos(request, env, userId) {
-  const url = new URL(request.url)
-  const startDate = url.searchParams.get("startDate")
-  const endDate = url.searchParams.get("endDate")
-
+  const url = new URL(request.url);
+  const startDate = url.searchParams.get('startDate');
+  const endDate = url.searchParams.get('endDate');
+  console.log(startDate);
   if (!startDate || !endDate) {
-    return new Response(JSON.stringify({ error: "缺少开始日期或结束日期参数" }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" },
-    })
+    return new Response(
+      JSON.stringify({ error: '缺少开始日期或结束日期参数' }),
+      {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
   }
 
   try {
     // 查询指定日期范围内的待办事项
-    const todosResult = await env.DB.prepare(`
+    const todosResult = await env.DB.prepare(
+      `
       SELECT * FROM todos 
       WHERE user_id = ? AND (
         (date BETWEEN ? AND ?) OR
         (repeat_type != 'none' AND date <= ?)
       )
-    `)
+      ORDER BY date, repeat_type, repeat_interval
+    `
+    )
       .bind(userId, startDate, endDate, endDate)
-      .all()
+      .all();
 
     // 查询已完成的实例
-    const completedInstancesResult = await env.DB.prepare(`
+    const completedInstancesResult = await env.DB.prepare(
+      `
       SELECT * FROM completed_instances 
       WHERE user_id = ? AND date BETWEEN ? AND ?
-    `)
+    `
+    )
       .bind(userId, startDate, endDate)
-      .all()
+      .all();
 
     // 查询已删除的实例
-    const deletedInstancesResult = await env.DB.prepare(`
+    const deletedInstancesResult = await env.DB.prepare(
+      `
       SELECT * FROM deleted_instances 
       WHERE user_id = ? AND date BETWEEN ? AND ?
-    `)
+    `
+    )
       .bind(userId, startDate, endDate)
-      .all()
+      .all();
 
     return new Response(
       JSON.stringify({
@@ -97,47 +114,66 @@ async function handleGetTodos(request, env, userId) {
         deletedInstances: deletedInstancesResult.results || [],
       }),
       {
-        headers: { "Content-Type": "application/json" },
+        headers: { 'Content-Type': 'application/json' },
       }
-    )
+    );
   } catch (error) {
-    console.error("查询待办事项时出错:", error)
-    return new Response(JSON.stringify({ error: "查询待办事项失败" }), {
+    console.error('查询待办事项时出错:', error);
+    return new Response(JSON.stringify({ error: '查询待办事项失败' }), {
       status: 500,
-      headers: { "Content-Type": "application/json" },
-    })
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 }
 
 // 创建新的待办事项
 async function handleCreateTodo(request, env, userId) {
   try {
-    const data = await request.json()
+    const data = await request.json();
 
     if (!data.text || !data.date) {
-      return new Response(JSON.stringify({ error: "缺少必要的字段" }), {
+      return new Response(JSON.stringify({ error: '缺少必要的字段' }), {
         status: 400,
-        headers: { "Content-Type": "application/json" },
-      })
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
-    const repeatType = data.repeatType || "none"
+    const repeatType = data.repeatType || 'none';
+    const repeatInterval = data.repeatInterval || 1;
+
+    // 验证间隔值
+    const validationResult = validateRepeatInterval(repeatType, repeatInterval);
+    if (!validationResult.valid) {
+      return new Response(
+        JSON.stringify({
+          error: validationResult.message,
+        }),
+        {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+    }
 
     // 插入新的待办事项
-    const result = await env.DB.prepare(`
-      INSERT INTO todos (text, date, repeat_type, completed, user_id)
-      VALUES (?, ?, ?, 0, ?)
-    `)
-      .bind(data.text, data.date, repeatType, userId)
-      .run()
+    const result = await env.DB.prepare(
+      `
+      INSERT INTO todos (text, date, repeat_type, repeat_interval, completed, user_id)
+      VALUES (?, ?, ?, ?, 0, ?)
+    `
+    )
+      .bind(data.text, data.date, repeatType, repeatInterval, userId)
+      .run();
 
     if (result.success) {
       // 获取新插入的待办事项
-      const todo = await env.DB.prepare(`
+      const todo = await env.DB.prepare(
+        `
         SELECT * FROM todos WHERE id = ?
-      `)
+      `
+      )
         .bind(result.meta.last_row_id)
-        .first()
+        .first();
 
       return new Response(
         JSON.stringify({
@@ -145,198 +181,272 @@ async function handleCreateTodo(request, env, userId) {
           todo,
         }),
         {
-          headers: { "Content-Type": "application/json" },
-        },
-      )
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
     } else {
-      throw new Error("插入待办事项失败")
+      throw new Error('插入待办事项失败');
     }
   } catch (error) {
-    console.error("创建待办事项时出错:", error)
-    return new Response(JSON.stringify({ error: "创建待办事项失败" }), {
+    console.error('创建待办事项时出错:', error);
+    return new Response(JSON.stringify({ error: '创建待办事项失败' }), {
       status: 500,
-      headers: { "Content-Type": "application/json" },
-    })
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
+}
+
+/**
+ * 验证重复间隔值
+ * @param {string} repeatType - 重复类型
+ * @param {number} interval - 间隔值
+ * @returns {object} - 验证结果
+ */
+function validateRepeatInterval(repeatType, interval) {
+  const limits = {
+    daily: { min: 1, max: 365, unit: '天' },
+    weekly: { min: 1, max: 52, unit: '周' },
+    monthly: { min: 1, max: 12, unit: '个月' },
+    yearly: { min: 1, max: 10, unit: '年' },
+  };
+
+  if (repeatType === 'none') {
+    return { valid: true };
+  }
+
+  const limit = limits[repeatType];
+  if (!limit) {
+    return { valid: false, message: '不支持的重复类型' };
+  }
+
+  if (
+    !Number.isInteger(interval) ||
+    interval < limit.min ||
+    interval > limit.max
+  ) {
+    return {
+      valid: false,
+      message: `${
+        repeatType === 'daily'
+          ? '每日'
+          : repeatType === 'weekly'
+          ? '每周'
+          : repeatType === 'monthly'
+          ? '每月'
+          : '每年'
+      }间隔必须在${limit.min}-${limit.max}${limit.unit}之间`,
+    };
+  }
+
+  return { valid: true };
 }
 
 // 更新待办事项
 async function handleUpdateTodo(request, env, userId) {
   try {
-    const data = await request.json()
+    const data = await request.json();
 
     if (!data.id) {
-      return new Response(JSON.stringify({ error: "缺少待办事项 ID" }), {
+      return new Response(JSON.stringify({ error: '缺少待办事项 ID' }), {
         status: 400,
-        headers: { "Content-Type": "application/json" },
-      })
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
     // 验证待办事项所有权
-    const todo = await env.DB.prepare(`
+    const todo = await env.DB.prepare(
+      `
       SELECT * FROM todos WHERE id = ? AND user_id = ?
-    `)
+    `
+    )
       .bind(data.id, userId)
-      .first()
+      .first();
 
     if (!todo) {
-      return new Response(JSON.stringify({ error: "待办事项不存在或无权限" }), {
+      return new Response(JSON.stringify({ error: '待办事项不存在或无权限' }), {
         status: 404,
-        headers: { "Content-Type": "application/json" },
-      })
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
     // 更新待办事项
-    const completed = data.completed !== undefined ? (data.completed ? 1 : 0) : todo.completed
+    const completed =
+      data.completed !== undefined ? (data.completed ? 1 : 0) : todo.completed;
 
-    const result = await env.DB.prepare(`
+    const result = await env.DB.prepare(
+      `
       UPDATE todos SET completed = ? WHERE id = ?
-    `)
+    `
+    )
       .bind(completed, data.id)
-      .run()
+      .run();
 
     return new Response(
       JSON.stringify({
         success: result.success,
       }),
       {
-        headers: { "Content-Type": "application/json" },
-      },
-    )
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
   } catch (error) {
-    console.error("更新待办事项时出错:", error)
-    return new Response(JSON.stringify({ error: "更新待办事项失败" }), {
+    console.error('更新待办事项时出错:', error);
+    return new Response(JSON.stringify({ error: '更新待办事项失败' }), {
       status: 500,
-      headers: { "Content-Type": "application/json" },
-    })
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 }
 
 // 删除待办事项
 async function handleDeleteTodo(request, env, userId) {
   try {
-    const url = new URL(request.url)
-    const id = url.searchParams.get("id")
+    const url = new URL(request.url);
+    const id = url.searchParams.get('id');
 
     if (!id) {
-      return new Response(JSON.stringify({ error: "缺少待办事项 ID" }), {
+      return new Response(JSON.stringify({ error: '缺少待办事项 ID' }), {
         status: 400,
-        headers: { "Content-Type": "application/json" },
-      })
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
     // 验证待办事项所有权
-    const todo = await env.DB.prepare(`
+    const todo = await env.DB.prepare(
+      `
       SELECT * FROM todos WHERE id = ? AND user_id = ?
-    `)
+    `
+    )
       .bind(id, userId)
-      .first()
+      .first();
 
     if (!todo) {
-      return new Response(JSON.stringify({ error: "待办事项不存在或无权限" }), {
+      return new Response(JSON.stringify({ error: '待办事项不存在或无权限' }), {
         status: 404,
-        headers: { "Content-Type": "application/json" },
-      })
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
     // 删除待办事项
-    const result = await env.DB.prepare(`
+    const result = await env.DB.prepare(
+      `
       DELETE FROM todos WHERE id = ?
-    `)
+    `
+    )
       .bind(id)
-      .run()
+      .run();
 
     return new Response(
       JSON.stringify({
         success: result.success,
       }),
       {
-        headers: { "Content-Type": "application/json" },
-      },
-    )
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
   } catch (error) {
-    console.error("删除待办事项时出错:", error)
-    return new Response(JSON.stringify({ error: "删除待办事项失败" }), {
+    console.error('删除待办事项时出错:', error);
+    return new Response(JSON.stringify({ error: '删除待办事项失败' }), {
       status: 500,
-      headers: { "Content-Type": "application/json" },
-    })
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 }
 
 // 切换待办事项实例的完成状态
 async function handleToggleCompletedInstance(request, env, userId) {
   try {
-    const data = await request.json()
+    const data = await request.json();
 
     if (!data.todoId || !data.date) {
-      return new Response(JSON.stringify({ error: "缺少必要的字段" }), {
+      return new Response(JSON.stringify({ error: '缺少必要的字段' }), {
         status: 400,
-        headers: { "Content-Type": "application/json" },
-      })
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
     // 验证待办事项所有权
-    const todo = await env.DB.prepare(`
+    const todo = await env.DB.prepare(
+      `
       SELECT * FROM todos WHERE id = ? AND user_id = ?
-    `)
+    `
+    )
       .bind(data.todoId, userId)
-      .first()
+      .first();
 
     if (!todo) {
-      return new Response(JSON.stringify({ error: "待办事项不存在或无权限" }), {
+      return new Response(JSON.stringify({ error: '待办事项不存在或无权限' }), {
         status: 404,
-        headers: { "Content-Type": "application/json" },
-      })
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
     // 处理所有实例的情况
     if (data.allInstances && todo.repeat_type !== 'none') {
       if (data.completed) {
         // 标记所有实例为完成
-        await env.DB.prepare(`
+        await env.DB.prepare(
+          `
           UPDATE todos SET completed = 1 WHERE id = ?
-        `).bind(data.todoId).run()
+        `
+        )
+          .bind(data.todoId)
+          .run();
       } else {
         // 取消所有实例的完成状态
-        await env.DB.prepare(`
+        await env.DB.prepare(
+          `
           UPDATE todos SET completed = 0 WHERE id = ?
-        `).bind(data.todoId).run()
-        await env.DB.prepare(`
+        `
+        )
+          .bind(data.todoId)
+          .run();
+        await env.DB.prepare(
+          `
           DELETE FROM completed_instances WHERE todo_id = ?
-        `).bind(data.todoId).run()
+        `
+        )
+          .bind(data.todoId)
+          .run();
       }
       return new Response(JSON.stringify({ success: true }), {
-        headers: { "Content-Type": "application/json" },
-      })
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
     // 检查是否已存在完成记录
-    const existingInstance = await env.DB.prepare(`
+    const existingInstance = await env.DB.prepare(
+      `
       SELECT * FROM completed_instances 
       WHERE todo_id = ? AND date = ? AND user_id = ?
-    `)
+    `
+    )
       .bind(data.todoId, data.date, userId)
-      .first()
+      .first();
 
-    let completed = false
+    let completed = false;
 
     if (existingInstance) {
       // 如果存在，则删除记录（取消完成）
-      await env.DB.prepare(`
+      await env.DB.prepare(
+        `
         DELETE FROM completed_instances 
         WHERE todo_id = ? AND date = ? AND user_id = ?
-      `)
+      `
+      )
         .bind(data.todoId, data.date, userId)
-        .run()
+        .run();
     } else {
       // 如果不存在，则添加记录（标记为完成）
-      await env.DB.prepare(`
+      await env.DB.prepare(
+        `
         INSERT INTO completed_instances (todo_id, date, user_id)
         VALUES (?, ?, ?)
-      `)
+      `
+      )
         .bind(data.todoId, data.date, userId)
-        .run()
-      completed = true
+        .run();
+      completed = true;
     }
 
     return new Response(
@@ -345,70 +455,80 @@ async function handleToggleCompletedInstance(request, env, userId) {
         completed,
       }),
       {
-        headers: { "Content-Type": "application/json" },
-      },
-    )
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
   } catch (error) {
-    console.error("切换完成状态时出错:", error)
-    return new Response(JSON.stringify({ error: "切换完成状态失败" }), {
+    console.error('切换完成状态时出错:', error);
+    return new Response(JSON.stringify({ error: '切换完成状态失败' }), {
       status: 500,
-      headers: { "Content-Type": "application/json" },
-    })
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 }
 
 // 创建已删除的实例记录
 async function handleCreateDeletedInstance(request, env, userId) {
   try {
-    const data = await request.json()
+    const data = await request.json();
 
     if (!data.todoId || !data.date) {
-      return new Response(JSON.stringify({ error: "缺少必要的字段" }), {
+      return new Response(JSON.stringify({ error: '缺少必要的字段' }), {
         status: 400,
-        headers: { "Content-Type": "application/json" },
-      })
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
     // 验证待办事项所有权
-    const todo = await env.DB.prepare(`
+    const todo = await env.DB.prepare(
+      `
       SELECT * FROM todos WHERE id = ? AND user_id = ?
-    `)
+    `
+    )
       .bind(data.todoId, userId)
-      .first()
+      .first();
 
     if (!todo) {
-      return new Response(JSON.stringify({ error: "待办事项不存在或无权限" }), {
+      return new Response(JSON.stringify({ error: '待办事项不存在或无权限' }), {
         status: 404,
-        headers: { "Content-Type": "application/json" },
-      })
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
     // 处理删除所有实例的情况
     if (data.allInstances && todo.repeat_type !== 'none') {
-      await env.DB.prepare(`
+      await env.DB.prepare(
+        `
         DELETE FROM todos WHERE id = ?
-      `).bind(data.todoId).run()
+      `
+      )
+        .bind(data.todoId)
+        .run();
       return new Response(JSON.stringify({ success: true }), {
-        headers: { "Content-Type": "application/json" },
-      })
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
     // 检查是否已存在删除记录
-    const existingInstance = await env.DB.prepare(`
+    const existingInstance = await env.DB.prepare(
+      `
       SELECT * FROM deleted_instances 
       WHERE todo_id = ? AND date = ? AND user_id = ?
-    `)
+    `
+    )
       .bind(data.todoId, data.date, userId)
-      .first()
+      .first();
 
     if (!existingInstance) {
       // 添加删除记录
-      await env.DB.prepare(`
+      await env.DB.prepare(
+        `
         INSERT INTO deleted_instances (todo_id, date, user_id)
         VALUES (?, ?, ?)
-      `)
+      `
+      )
         .bind(data.todoId, data.date, userId)
-        .run()
+        .run();
     }
 
     return new Response(
@@ -416,15 +536,15 @@ async function handleCreateDeletedInstance(request, env, userId) {
         success: true,
       }),
       {
-        headers: { "Content-Type": "application/json" },
-      },
-    )
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
   } catch (error) {
-    console.error("创建删除记录时出错:", error)
-    return new Response(JSON.stringify({ error: "创建删除记录失败" }), {
+    console.error('创建删除记录时出错:', error);
+    return new Response(JSON.stringify({ error: '创建删除记录失败' }), {
       status: 500,
-      headers: { "Content-Type": "application/json" },
-    })
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 }
 
@@ -433,35 +553,35 @@ async function handleGetHolidays(request, env, userId) {
   try {
     const url = new URL(request.url);
     const year = url.searchParams.get('year');
-    
+
     if (!year) {
-      return new Response(JSON.stringify({ error: "缺少年份参数" }), {
+      return new Response(JSON.stringify({ error: '缺少年份参数' }), {
         status: 400,
-        headers: { "Content-Type": "application/json" },
+        headers: { 'Content-Type': 'application/json' },
       });
     }
 
     // 从unpkg获取节假日数据
-    const response = await fetch(`https://unpkg.com/holiday-calendar@1.1.6/data/CN/${year}.min.json`);
-    
+    const response = await fetch(
+      `https://unpkg.com/holiday-calendar@1.1.6/data/CN/${year}.min.json`
+    );
+
     if (!response.ok) {
-      return new Response(JSON.stringify({ error: "获取节假日数据失败" }), {
+      return new Response(JSON.stringify({ error: '获取节假日数据失败' }), {
         status: response.status,
-        headers: { "Content-Type": "application/json" },
+        headers: { 'Content-Type': 'application/json' },
       });
     }
 
     const data = await response.json();
     return new Response(JSON.stringify(data), {
-      headers: { "Content-Type": "application/json" },
+      headers: { 'Content-Type': 'application/json' },
     });
-    
   } catch (error) {
     console.error('获取节假日数据错误:', error);
-    return new Response(JSON.stringify({ error: "服务器内部错误" }), {
+    return new Response(JSON.stringify({ error: '服务器内部错误' }), {
       status: 500,
-      headers: { "Content-Type": "application/json" },
+      headers: { 'Content-Type': 'application/json' },
     });
   }
 }
-

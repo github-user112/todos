@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS todos (
   text TEXT NOT NULL,
   date TEXT NOT NULL,
   repeat_type TEXT DEFAULT 'none',
+  repeat_interval INTEGER DEFAULT 1,
   completed INTEGER DEFAULT 0,
   user_id TEXT NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -31,6 +32,7 @@ CREATE TABLE IF NOT EXISTS deleted_instances (
 
 -- 创建索引
 CREATE INDEX IF NOT EXISTS idx_todos_user_date ON todos (user_id, date);
+CREATE INDEX IF NOT EXISTS idx_todos_repeat_type_interval ON todos (repeat_type, repeat_interval);
 CREATE INDEX IF NOT EXISTS idx_completed_instances_user_todo_date ON completed_instances (user_id, todo_id, date);
 CREATE INDEX IF NOT EXISTS idx_deleted_instances_user_todo_date ON deleted_instances (user_id, todo_id, date);
 

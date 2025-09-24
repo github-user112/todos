@@ -44,7 +44,7 @@ import CalendarGrid from './calendar-grid.vue';
 import AddTodoPopup from './add-todo-popup.vue';
 import TodoActionsMenu from './todo-actions-menu.vue';
 import { apiRequest } from '../utils/api';
-
+import { shouldShowRepeatingTodo } from '../utils/repeatUtils';
 const dialog = useDialog();
 const message = useMessage();
 
@@ -198,18 +198,17 @@ function getHoliday(date) {
   const dateStr = formatDate(date);
   return props.holidayData[dateStr] || '';
 }
-
-// Get todos for date
+// 获取特定日期的待办事项
 function getTodosForDate(date, dateStr) {
   const result = [];
 
   props.todos.forEach((todo) => {
-    // Check if instance is deleted
+    // 检查是否是已删除的实例
     if (isInstanceDeleted(todo.id, dateStr)) {
       return;
     }
 
-    // Check direct date match
+    // 检查直接匹配的日期
     if (todo.date === dateStr) {
       const isCompleted =
         todo.completed || isInstanceCompleted(todo.id, dateStr);
@@ -220,36 +219,17 @@ function getTodosForDate(date, dateStr) {
       return;
     }
 
-    // Check repeating todos
+    // 检查重复的待办事项
     if (!todo.repeat_type || todo.repeat_type === 'none') return;
 
     const todoDate = new Date(todo.date);
     const currentDate = new Date(dateStr);
+    const interval = todo.repeat_interval || 1;
 
-    // Check if repeating todo should show on current date
-    let shouldShow = false;
-
-    if (todo.repeat_type === 'daily') {
-      shouldShow = true;
-    } else if (
-      todo.repeat_type === 'weekly' &&
-      todoDate.getDay() === currentDate.getDay()
+    // 使用统一的间隔计算函数
+    if (
+      shouldShowRepeatingTodo(todoDate, currentDate, todo.repeat_type, interval)
     ) {
-      shouldShow = true;
-    } else if (
-      todo.repeat_type === 'monthly' &&
-      todoDate.getDate() === currentDate.getDate()
-    ) {
-      shouldShow = true;
-    } else if (
-      todo.repeat_type === 'yearly' &&
-      todoDate.getDate() === currentDate.getDate() &&
-      todoDate.getMonth() === currentDate.getMonth()
-    ) {
-      shouldShow = true;
-    }
-
-    if (shouldShow) {
       const isCompleted = isInstanceCompleted(todo.id, dateStr);
       result.push({
         ...todo,
@@ -258,22 +238,17 @@ function getTodosForDate(date, dateStr) {
     }
   });
 
-  // Sort todos: incomplete first, then completed
-  return result.sort((a, b) => {
-    if (a.isCompleted && !b.isCompleted) return 1;
-    if (!a.isCompleted && b.isCompleted) return -1;
-    return 0;
-  });
+  return result;
 }
 
-// Check if instance is completed
+// 检查特定实例是否已完成
 function isInstanceCompleted(todoId, dateStr) {
   return props.completedInstances.some(
     (instance) => instance.todo_id === todoId && instance.date === dateStr
   );
 }
 
-// Check if instance is deleted
+// 检查特定实例是否已删除
 function isInstanceDeleted(todoId, dateStr) {
   return props.deletedInstances.some(
     (instance) => instance.todo_id === todoId && instance.date === dateStr
@@ -319,14 +294,15 @@ const closeAddTodoPopup = () => {
   showAddTodoPopup.value = false;
 };
 
-const saveTodo = async () => {
+const saveTodo = async (eventData) => {
   if (!todoText.value.trim()) return;
-
+  console.log(todoRepeat.value);
   try {
     await emit('add-todo', {
       text: todoText.value.trim(),
       date: selectedDate.value,
-      repeatType: todoRepeat.value,
+      repeatType: eventData?.repeatType || todoRepeat.value,
+      repeatInterval: eventData?.repeatInterval || 1,
     });
     closeAddTodoPopup();
   } catch (error) {

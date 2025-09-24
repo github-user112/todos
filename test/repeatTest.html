@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>重复事件功能测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f7fa;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2d3748;
+            text-align: center;
+        }
+        .test-button {
+            background: #4a6cf7;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        .test-button:hover {
+            background: #3a5bd9;
+        }
+        #output {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 15px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 600px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        .success {
+            color: #48bb78;
+        }
+        .error {
+            color: #f56565;
+        }
+        .info {
+            color: #4299e1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>重复事件功能测试</h1>
+        
+        <div>
+            <button class="test-button" onclick="runRepeatTests()">运行重复逻辑测试</button>
+            <button class="test-button" onclick="runValidationTests()">运行验证测试</button>
+            <button class="test-button" onclick="runPreviewTests()">运行预览功能测试</button>
+            <button class="test-button" onclick="clearOutput()">清空输出</button>
+        </div>
+        
+        <div id="output"></div>
+    </div>
+
+    <script type="module">
+        // 重复事件计算逻辑（从repeatUtils.js复制）
+        function shouldShowRepeatingTodo(todoDate, currentDate, repeatType, interval = 1) {
+            if (currentDate < todoDate) {
+                return false;
+            }
+            
+            if (!repeatType || repeatType === 'none') {
+                return false;
+            }
+            
+            if (!Number.isInteger(interval) || interval < 1) {
+                return false;
+            }
+            
+            switch (repeatType) {
+                case 'daily':
+                    return shouldShowDailyInterval(todoDate, currentDate, interval);
+                case 'weekly':
+                    return shouldShowWeeklyInterval(todoDate, currentDate, interval);
+                case 'monthly':
+                    return shouldShowMonthlyInterval(todoDate, currentDate, interval);
+                case 'yearly':
+                    return shouldShowYearlyInterval(todoDate, currentDate, interval);
+                default:
+                    return false;
+            }
+        }
+
+        function shouldShowDailyInterval(todoDate, currentDate, interval) {
+            const dayDiff = Math.floor(
+                (currentDate.getTime() - todoDate.getTime()) / (1000 * 60 * 60 * 24)
+            );
+            return dayDiff >= 0 && dayDiff % interval === 0;
+        }
+
+        function shouldShowWeeklyInterval(todoDate, currentDate, interval) {
+            if (todoDate.getDay() !== currentDate.getDay()) {
+                return false;
+            }
+            
+            const weekDiff = Math.floor(
+                (currentDate.getTime() - todoDate.getTime()) / (1000 * 60 * 60 * 24 * 7)
+            );
+            return weekDiff >= 0 && weekDiff % interval === 0;
+        }
+
+        function shouldShowMonthlyInterval(todoDate, currentDate, interval) {
+            const adjustedCurrentDate = adjustMonthEndDate(
+                todoDate, 
+                currentDate.getFullYear(), 
+                currentDate.getMonth()
+            );
+            
+            if (adjustedCurrentDate.getDate() !== currentDate.getDate()) {
+                return false;
+            }
+            
+            const monthDiff = 
+                (currentDate.getFullYear() - todoDate.getFullYear()) * 12 + 
+                (currentDate.getMonth() - todoDate.getMonth());
+            
+            return monthDiff >= 0 && monthDiff % interval === 0;
+        }
+
+        function shouldShowYearlyInterval(todoDate, currentDate, interval) {
+            if (todoDate.getMonth() !== currentDate.getMonth()) {
+                return false;
+            }
+            
+            const todoDay = todoDate.getDate();
+            const currentDay = currentDate.getDate();
+            
+            if (todoDay === 29 && todoDate.getMonth() === 1) {
+                const isCurrentLeapYear = isLeapYear(currentDate.getFullYear());
+                if (!isCurrentLeapYear && currentDay === 28) {
+                    // 允许在非闰年的2月28日显示原本2月29日的事件
+                } else if (currentDay !== todoDay) {
+                    return false;
+                }
+            } else if (todoDay !== currentDay) {
+                return false;
+            }
+            
+            const yearDiff = currentDate.getFullYear() - todoDate.getFullYear();
+            return yearDiff >= 0 && yearDiff % interval === 0;
+        }
+
+        function adjustMonthEndDate(originalDate, targetYear, targetMonth) {
+            const originalDay = originalDate.getDate();
+            const daysInTargetMonth = new Date(targetYear, targetMonth + 1, 0).getDate();
+            const adjustedDay = Math.min(originalDay, daysInTargetMonth);
+            return new Date(targetYear, targetMonth, adjustedDay);
+        }
+
+        function isLeapYear(year) {
+            return (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
+        }
+
+        function validateRepeatInterval(repeatType, interval) {
+            const limits = {
+                daily: { min: 1, max: 365, unit: '天' },
+                weekly: { min: 1, max: 52, unit: '周' },
+                monthly: { min: 1, max: 12, unit: '个月' },
+                yearly: { min: 1, max: 10, unit: '年' }
+            };
+            
+            if (repeatType === 'none') {
+                return { valid: true };
+            }
+            
+            const limit = limits[repeatType];
+            if (!limit) {
+                return { valid: false, message: '不支持的重复类型' };
+            }
+            
+            if (!Number.isInteger(interval) || interval < limit.min || interval > limit.max) {
+                return { 
+                    valid: false, 
+                    message: `间隔必须在${limit.min}-${limit.max}${limit.unit}之间` 
+                };
+            }
+            
+            return { valid: true };
+        }
+
+        // 测试用例
+        const testCases = [
+            {
+                name: '每2天重复',
+                todoDate: new Date('2024-01-01'),
+                repeatType: 'daily',
+                interval: 2,
+                testDates: [
+                    { date: new Date('2024-01-01'), expected: true },
+                    { date: new Date('2024-01-02'), expected: false },
+                    { date: new Date('2024-01-03'), expected: true },
+                    { date: new Date('2024-01-04'), expected: false },
+                    { date: new Date('2024-01-05'), expected: true },
+                ]
+            },
+            {
+                name: '每3周重复（周一）',
+                todoDate: new Date('2024-01-01'),
+                repeatType: 'weekly',
+                interval: 3,
+                testDates: [
+                    { date: new Date('2024-01-01'), expected: true },
+                    { date: new Date('2024-01-08'), expected: false },
+                    { date: new Date('2024-01-15'), expected: false },
+                    { date: new Date('2024-01-22'), expected: true },
+                ]
+            },
+            {
+                name: '每2个月重复',
+                todoDate: new Date('2024-01-15'),
+                repeatType: 'monthly',
+                interval: 2,
+                testDates: [
+                    { date: new Date('2024-01-15'), expected: true },
+                    { date: new Date('2024-02-15'), expected: false },
+                    { date: new Date('2024-03-15'), expected: true },
+                    { date: new Date('2024-04-15'), expected: false },
+                    { date: new Date('2024-05-15'), expected: true },
+                ]
+            }
+        ];
+
+        // 全局函数
+        window.runRepeatTests = function() {
+            let output = '开始测试重复事件间隔功能...\n\n';
+            let totalTests = 0;
+            let passedTests = 0;
+            
+            testCases.forEach(testCase => {
+                output += `测试: ${testCase.name}\n`;
+                output += `原始日期: ${testCase.todoDate.toDateString()}\n`;
+                output += `重复类型: ${testCase.repeatType}, 间隔: ${testCase.interval}\n`;
+                
+                testCase.testDates.forEach(test => {
+                    totalTests++;
+                    const result = shouldShowRepeatingTodo(
+                        testCase.todoDate, 
+                        test.date, 
+                        testCase.repeatType, 
+                        testCase.interval
+                    );
+                    
+                    const passed = result === test.expected;
+                    if (passed) {
+                        passedTests++;
+                        output += `  ✓ ${test.date.toDateString()}: ${result} (预期: ${test.expected})\n`;
+                    } else {
+                        output += `  ✗ ${test.date.toDateString()}: ${result} (预期: ${test.expected})\n`;
+                    }
+                });
+                
+                output += '\n';
+            });
+            
+            output += `测试完成: ${passedTests}/${totalTests} 通过\n`;
+            output += `成功率: ${((passedTests / totalTests) * 100).toFixed(1)}%\n`;
+            
+            if (passedTests === totalTests) {
+                output += '🎉 所有测试通过！\n';
+            } else {
+                output += '❌ 部分测试失败，需要检查实现\n';
+            }
+            
+            appendOutput(output);
+        };
+
+        window.runValidationTests = function() {
+            let output = '测试间隔验证功能...\n';
+            
+            const validationTests = [
+                { type: 'daily', interval: 1, expected: true },
+                { type: 'daily', interval: 365, expected: true },
+                { type: 'daily', interval: 366, expected: false },
+                { type: 'weekly', interval: 52, expected: true },
+                { type: 'weekly', interval: 53, expected: false },
+                { type: 'monthly', interval: 12, expected: true },
+                { type: 'monthly', interval: 13, expected: false },
+            ];
+            
+            let totalTests = 0;
+            let passedTests = 0;
+            
+            validationTests.forEach(test => {
+                totalTests++;
+                const result = validateRepeatInterval(test.type, test.interval);
+                const passed = result.valid === test.expected;
+                
+                if (passed) {
+                    passedTests++;
+                    output += `  ✓ ${test.type}间隔${test.interval}: ${result.valid ? '有效' : '无效'}\n`;
+                } else {
+                    output += `  ✗ ${test.type}间隔${test.interval}: ${result.valid ? '有效' : '无效'} (预期: ${test.expected ? '有效' : '无效'})\n`;
+                    if (!result.valid) {
+                        output += `    错误信息: ${result.message}\n`;
+                    }
+                }
+            });
+            
+            output += `\n验证测试完成: ${passedTests}/${totalTests} 通过\n`;
+            appendOutput(output);
+        };
+
+        window.runPreviewTests = function() {
+            let output = '测试预览功能...\n';
+            
+            // 模拟预览功能测试
+            const baseDate = new Date('2024-01-15');
+            output += `原始日期: ${baseDate.toDateString()}\n`;
+            output += '测试不同重复类型的预览:\n\n';
+            
+            const previewTests = [
+                { type: 'daily', interval: 3, desc: '每3天' },
+                { type: 'weekly', interval: 2, desc: '每2周' },
+                { type: 'monthly', interval: 1, desc: '每月' },
+                { type: 'yearly', interval: 2, desc: '每2年' }
+            ];
+            
+            previewTests.forEach(test => {
+                output += `${test.desc}重复:\n`;
+                for (let i = 1; i <= 3; i++) {
+                    let nextDate;
+                    switch (test.type) {
+                        case 'daily':
+                            nextDate = new Date(baseDate);
+                            nextDate.setDate(baseDate.getDate() + (test.interval * i));
+                            break;
+                        case 'weekly':
+                            nextDate = new Date(baseDate);
+                            nextDate.setDate(baseDate.getDate() + (test.interval * 7 * i));
+                            break;
+                        case 'monthly':
+                            nextDate = new Date(baseDate);
+                            nextDate.setMonth(baseDate.getMonth() + (test.interval * i));
+                            break;
+                        case 'yearly':
+                            nextDate = new Date(baseDate);
+                            nextDate.setFullYear(baseDate.getFullYear() + (test.interval * i));
+                            break;
+                    }
+                    if (nextDate) {
+                        output += `  ${i}. ${nextDate.toDateString()}\n`;
+                    }
+                }
+                output += '\n';
+            });
+            
+            appendOutput(output);
+        };
+
+        window.clearOutput = function() {
+            document.getElementById('output').innerHTML = '';
+        };
+
+        function appendOutput(text) {
+            const output = document.getElementById('output');
+            output.textContent += text + '\n';
+            output.scrollTop = output.scrollHeight;
+        }
+    </script>
+</body>
+</html>

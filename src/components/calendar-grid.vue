@@ -12,6 +12,7 @@
       :name="animationType ? animationType : 'default'"
       :enter-active-class="activeClass"
       @beforeEnter="onBeforeEnter"
+      mode="out-in"
     >
       <!-- Calendar days -->
       <CalendarDay

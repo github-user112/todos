@@ -31,21 +31,14 @@
     </div>
 
     <!-- 添加待办事项弹窗 -->
-    <div class="add-todo-popup" v-if="showAddTodoPopup">
-      <div class="popup-content">
-        <h2>添加待办事项</h2>
-        <input type="text" v-model="todoText" placeholder="待办事项" />
-        <select v-model="todoRepeat">
-          <option value="none">不重复</option>
-          <option value="daily">每天</option>
-          <option value="weekly">每周</option>
-          <option value="monthly">每月</option>
-          <option value="yearly">每年</option>
-        </select>
-        <button @click="saveTodo">保存</button>
-        <button @click="closeAddTodoPopup">取消</button>
-      </div>
-    </div>
+    <AddTodoPopup
+      v-if="showAddTodoPopup"
+      v-model:todoText="todoText"
+      v-model:todoRepeat="todoRepeat"
+      :selectedDate="selectedDate"
+      @save="saveTodo"
+      @close="closeAddTodoPopup"
+    />
 
     <!-- 待办事项操作菜单 -->
     <div class="todo-actions" v-if="showTodoActions" :style="todoActionsStyle">
@@ -58,7 +51,9 @@
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue';
 import { formatDate } from '../utils/dateUtils';
+import { shouldShowRepeatingTodo } from '../utils/repeatUtils';
 import { useDialog, useMessage } from 'naive-ui';
+import AddTodoPopup from './add-todo-popup.vue';
 const dialog = useDialog();
 const message = useMessage();
 
@@ -287,31 +282,12 @@ function getTodosForDate(date, dateStr) {
 
     const todoDate = new Date(todo.date);
     const currentDate = new Date(dateStr);
+    const interval = todo.repeat_interval || 1;
 
-    // 检查重复事项是否应该显示在当前日期
-    let shouldShow = false;
-
-    if (todo.repeat_type === 'daily') {
-      shouldShow = true;
-    } else if (
-      todo.repeat_type === 'weekly' &&
-      todoDate.getDay() === currentDate.getDay()
+    // 使用统一的间隔计算函数
+    if (
+      shouldShowRepeatingTodo(todoDate, currentDate, todo.repeat_type, interval)
     ) {
-      shouldShow = true;
-    } else if (
-      todo.repeat_type === 'monthly' &&
-      todoDate.getDate() === currentDate.getDate()
-    ) {
-      shouldShow = true;
-    } else if (
-      todo.repeat_type === 'yearly' &&
-      todoDate.getDate() === currentDate.getDate() &&
-      todoDate.getMonth() === currentDate.getMonth()
-    ) {
-      shouldShow = true;
-    }
-
-    if (shouldShow) {
       const isCompleted = isInstanceCompleted(todo.id, dateStr);
       result.push({
         ...todo,
@@ -383,7 +359,7 @@ watch(
 
 // 待办事项弹窗
 const openAddTodoPopup = (date) => {
-  selectedDate.value = date;
+  selectedDate.value = new Date(date); // 确保是Date对象
   showAddTodoPopup.value = true;
   todoText.value = '';
   todoRepeat.value = 'none';
@@ -393,14 +369,15 @@ const closeAddTodoPopup = () => {
   showAddTodoPopup.value = false;
 };
 
-const saveTodo = async () => {
+const saveTodo = async (eventData) => {
   if (!todoText.value.trim()) return;
-
+  console.log(eventData);
   try {
     await emit('add-todo', {
       text: todoText.value.trim(),
       date: selectedDate.value,
-      repeatType: todoRepeat.value,
+      repeatType: eventData?.repeatType || todoRepeat.value,
+      repeatInterval: eventData?.repeatInterval || 1,
     });
     closeAddTodoPopup();
   } catch (error) {
@@ -767,70 +744,6 @@ onMounted(async () => {
   text-decoration-thickness: 2px;
   color: #a0aec0;
   border-left-color: #48bb78;
-}
-
-/* 添加待办事项弹窗 */
-.add-todo-popup {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.popup-content {
-  background: white;
-  padding: 25px;
-  border-radius: 12px;
-  width: 90%;
-  max-width: 400px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-}
-
-.popup-content h2 {
-  margin-top: 0;
-  margin-bottom: 20px;
-  color: #2d3748;
-  font-size: 1.4rem;
-}
-
-.popup-content input,
-.popup-content select {
-  width: 100%;
-  padding: 12px;
-  margin-bottom: 15px;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  font-size: 15px;
-}
-
-.popup-content button {
-  padding: 10px 16px;
-  margin-right: 10px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: all 0.2s;
-}
-
-.popup-content button:first-of-type {
-  background: #4a6cf7;
-  color: white;
-}
-
-.popup-content button:last-of-type {
-  background: #f8fafc;
-  color: #4a5568;
-}
-
-.popup-content button:hover {
-  transform: translateY(-1px);
 }
 
 /* 待办事项操作菜单 */
