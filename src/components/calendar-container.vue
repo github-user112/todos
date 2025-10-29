@@ -277,15 +277,22 @@ function isInstanceDeleted(todoId, dateStr) {
 
 // Month navigation
 const prevMonth = async () => {
+  // 上一月：左进右出 - 设置方向为-1
+  // 获取根元素并设置CSS变量
+  document.documentElement.style.setProperty('--direction', '-1');
+  
   const newDate = new Date(currentDate.value);
   newDate.setMonth(newDate.getMonth() - 1);
   currentDate.value = newDate;
 };
 
 const nextMonth = async () => {
+  // 下一月：左出右进 - 设置方向为1（默认值）
+  // 获取根元素并设置CSS变量
+  document.documentElement.style.setProperty('--direction', '1');
+  
   const newDate = new Date(currentDate.value);
   newDate.setMonth(newDate.getMonth() + 1);
-
   currentDate.value = newDate;
 };
 

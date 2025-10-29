@@ -29,10 +29,9 @@
   }
 
 
-/* 向左滑动动画 */
+/* 滑动动画 - 通过CSS变量控制方向 */
 .slide-left-leave-active.list-item {
   position: absolute;
-
   top: 0;
   left: 0;
   width: calc((100vw - 40px) / 7 - 4px);
@@ -43,13 +42,14 @@
   transition: all 0.6s cubic-bezier(0.075, 0.82, 0.165, 1);
   transition-delay: var(--delay);
 }
+/* 使用CSS变量控制进入和离开的方向 */
 .slide-left-enter-from {
-  transform: translateX(100vw);
+  transform: translateX(calc(var(--direction, 1) * 100vw));
   opacity: 0;
 }
 .slide-left-leave-to {
   opacity: 0;
-  transform: translateX(-100vw);
+  transform: translateX(calc(var(--direction, 1) * -100vw));
 }
 
 /* 默认动画 */
