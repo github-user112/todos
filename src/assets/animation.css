@@ -31,7 +31,10 @@
 
 /* 向左滑动动画 */
 .slide-left-leave-active.list-item {
-  /* display: none; */
+  position: absolute;
+  width: calc((100% - 40px) / 7 - 4px);
+  top: 0;
+  left: 0;
 }
 .slide-left-enter-active,
 .slide-left-leave-active {
@@ -40,6 +43,7 @@
 }
 .slide-left-enter-from {
   transform: translateX(100vw);
+  opacity: 0;
 }
 .slide-left-leave-to {
   opacity: 0;

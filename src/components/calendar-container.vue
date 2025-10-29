@@ -13,6 +13,7 @@
     <CalendarGrid
       :weekdays="weekdays"
       :calendarDays="calendarDays"
+      :weekNumbers="weekNumbers"
       :animationType="animationType"
       @openAddTodoPopup="openAddTodoPopup"
       @openTodoActions="openTodoActions"
@@ -37,7 +38,7 @@
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue';
-import { formatDate } from '../utils/dateUtils';
+import { formatDate, getWeekNumber } from '../utils/dateUtils';
 import { useDialog, useMessage } from 'naive-ui';
 import CalendarHeader from './calendar-header.vue';
 import CalendarGrid from './calendar-grid.vue';
@@ -185,6 +186,25 @@ const calendarDays = computed(() => {
   }
 
   return result;
+});
+
+// 计算每周的周数
+const weekNumbers = computed(() => {
+  const weeks = [];
+  for (let i = 0; i < 5; i++) {
+    // 5周的周数
+    // 取每周的周一来计算周数
+    // 每周的第一天是索引为 i * 7 的日期
+    const firstDayOfWeek = new Date(calendarDays.value[i * 7].date);
+    // 计算这一周的周一
+    const dayOfWeek = firstDayOfWeek.getDay(); // 0=Sunday, 1=Monday...
+    const offsetToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // 计算到周一需要减去的天数
+    const monday = new Date(firstDayOfWeek);
+    monday.setDate(firstDayOfWeek.getDate() - offsetToMonday);
+
+    weeks.push(getWeekNumber(monday));
+  }
+  return weeks;
 });
 
 // Get lunar date
