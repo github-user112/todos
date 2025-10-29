@@ -40,7 +40,7 @@
             '--i': weekIndex,
             '--j': dayIndex,
             'grid-row': weekIndex + 2,
-            'grid-column': dayIndex + 2
+            'grid-column': dayIndex + 2,
           }"
           @dblclick="$emit('openAddTodoPopup', day.dateStr)"
           @openTodoActions="

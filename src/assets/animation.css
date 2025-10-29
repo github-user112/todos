@@ -32,9 +32,11 @@
 /* 向左滑动动画 */
 .slide-left-leave-active.list-item {
   position: absolute;
-  width: calc((100% - 40px) / 7 - 4px);
+
   top: 0;
   left: 0;
+  width: calc((100vw - 40px) / 7 - 4px);
+  height: calc((100vh - 60px - 36px - 16px) / 5);
 }
 .slide-left-enter-active,
 .slide-left-leave-active {
