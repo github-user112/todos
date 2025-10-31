@@ -4,10 +4,12 @@
       :currentYear="currentYear"
       :currentMonth="currentMonth"
       :animationType="animationType"
+      :themeType="themeType"
       @prevMonth="prevMonth"
       @nextMonth="nextMonth"
       @goToToday="goToToday"
       @changeAnimation="changeAnimation"
+      @changeTheme="changeTheme"
     />
 
     <CalendarGrid
@@ -98,6 +100,11 @@ const weekdays = ['一', '二', '三', '四', '五', '六', '日'];
 const allowedAnimations = ['slide-left', 'default']; // 允许的动画类型列表
 const savedAnimation = localStorage.getItem('calendar_animation_type');
 const animationType = ref(savedAnimation ? savedAnimation : 'slide-left');
+
+// 添加主题类型状态
+// 从localStorage读取保存的主题类型，默认为'default'
+const savedTheme = localStorage.getItem('calendar_theme_type');
+const themeType = ref(savedTheme ? savedTheme : 'default');
 
 // Popup state
 const showAddTodoPopup = ref(false);
@@ -196,7 +203,7 @@ const weekNumbers = computed(() => {
     // 取每周的周一来计算周数
     // 每周的第一天是索引为 i * 7 的日期
     const firstDayOfWeek = new Date(calendarDays.value[i * 7].date);
-    // 计算这一周的周一
+    // 计算到周一需要减去的天数
     const dayOfWeek = firstDayOfWeek.getDay(); // 0=Sunday, 1=Monday...
     const offsetToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // 计算到周一需要减去的天数
     const monday = new Date(firstDayOfWeek);
@@ -280,7 +287,7 @@ const prevMonth = async () => {
   // 上一月：左进右出 - 设置方向为-1
   // 获取根元素并设置CSS变量
   document.documentElement.style.setProperty('--direction', '-1');
-  
+
   const newDate = new Date(currentDate.value);
   newDate.setMonth(newDate.getMonth() - 1);
   currentDate.value = newDate;
@@ -290,7 +297,7 @@ const nextMonth = async () => {
   // 下一月：左出右进 - 设置方向为1（默认值）
   // 获取根元素并设置CSS变量
   document.documentElement.style.setProperty('--direction', '1');
-  
+
   const newDate = new Date(currentDate.value);
   newDate.setMonth(newDate.getMonth() + 1);
   currentDate.value = newDate;
@@ -476,6 +483,29 @@ const changeAnimation = (newType) => {
   // 保存到localStorage
   localStorage.setItem('calendar_animation_type', newType);
 };
+
+// 添加主题类型更改方法
+const changeTheme = (newType) => {
+  themeType.value = newType;
+  // 保存到localStorage
+  localStorage.setItem('calendar_theme_type', newType);
+
+  // 应用主题
+  applyTheme(newType);
+};
+
+// 应用主题的方法
+const applyTheme = (theme) => {
+  const root = document.documentElement;
+  root.classList.remove('classic-theme', 'orange-theme');
+
+  if (theme === 'classic') {
+    root.classList.add('classic-theme');
+  } else if (theme === 'orange') {
+    root.classList.add('orange-theme');
+  }
+};
+
 // Initialize event listeners
 onMounted(async () => {
   document.addEventListener('click', closeActionsOnOutsideClick);
@@ -486,6 +516,9 @@ onMounted(async () => {
     calendarEl.addEventListener('touchstart', handleTouchStart);
     calendarEl.addEventListener('touchend', handleTouchEnd);
   }
+
+  // 初始化主题
+  applyTheme(themeType.value);
 });
 </script>
 
@@ -498,9 +531,9 @@ onMounted(async () => {
   padding: 10px;
   margin: 0;
   box-sizing: border-box;
-  background: #f5f7fa;
+  background: var(--background-color);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: #2d3748;
+  color: var(--text-primary);
 }
 
 /* Mobile responsive styles */

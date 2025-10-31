@@ -7,6 +7,19 @@
     <button @click="copyUrlToClipboard" class="share-button">
       分享我的日程
     </button>
+    <div class="theme-selector">
+      <label for="theme-type">主题:</label>
+      <select
+        id="theme-type"
+        :value="themeType"
+        @change="$emit('changeTheme', $event.target.value)"
+      >
+        <option value="default">默认</option>
+        <option value="classic">经典</option>
+        <option value="orange">橙色</option>
+        <!-- 未来可以添加更多主题选项 -->
+      </select>
+    </div>
     <div class="animation-selector">
       <label for="animation-type">动画类型:</label>
       <select
@@ -40,9 +53,19 @@ defineProps({
     type: String,
     required: true,
   },
+  themeType: {
+    type: String,
+    required: true,
+  },
 });
 
-defineEmits(['prevMonth', 'nextMonth', 'goToToday', 'changeAnimation']);
+defineEmits([
+  'prevMonth',
+  'nextMonth',
+  'goToToday',
+  'changeAnimation',
+  'changeTheme',
+]);
 
 const copyUrlToClipboard = () => {
   navigator.clipboard
@@ -63,7 +86,7 @@ const copyUrlToClipboard = () => {
   align-items: center;
   padding: 16px 20px;
   margin-bottom: 15px;
-  background: #ffffff;
+  background: var(--card-background);
   border-radius: 12px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
@@ -80,37 +103,37 @@ const copyUrlToClipboard = () => {
 }
 
 .nav-button {
-  background: #f0f7ff;
-  color: #3182ce;
+  background: var(--preview-bg);
+  color: var(--info-color);
   box-shadow: 0 2px 5px rgba(49, 130, 206, 0.1);
 }
 
 .today-button {
-  background: #4a6cf7;
+  background: var(--button-primary-bg);
   color: white;
   box-shadow: 0 2px 5px rgba(74, 108, 247, 0.2);
 }
 
 .share-button {
-  background: #38a169;
+  background: var(--button-success-bg);
   color: white;
   box-shadow: 0 2px 5px rgba(56, 161, 105, 0.2);
 }
 
 .share-button:hover {
-  background: #2f855a;
+  background: var(--button-success-hover-bg);
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(56, 161, 105, 0.3);
 }
 
 .nav-button:hover {
-  background: #e1efff;
+  background: var(--preview-hover-bg);
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(49, 130, 206, 0.2);
 }
 
 .today-button:hover {
-  background: #3a5bd9;
+  background: var(--button-primary-hover-bg);
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(74, 108, 247, 0.3);
 }
@@ -118,7 +141,7 @@ const copyUrlToClipboard = () => {
 .calendar-title {
   margin: 0;
   font-size: 1.5rem;
-  color: #2d3748;
+  color: var(--text-primary);
   font-weight: 600;
 }
 
@@ -126,6 +149,7 @@ const copyUrlToClipboard = () => {
 @media (max-width: 768px) {
   .calendar-header {
     padding: 8px;
+    flex-wrap: wrap;
   }
 
   .nav-button,
@@ -137,41 +161,58 @@ const copyUrlToClipboard = () => {
 
   .calendar-title {
     font-size: 1rem;
+    flex-basis: 100%;
+    text-align: center;
+    margin: 8px 0;
   }
 }
 
+.theme-selector,
 .animation-selector {
   display: flex;
   align-items: center;
   margin-left: 10px;
 }
 
+.theme-selector label,
 .animation-selector label {
   margin-right: 8px;
   font-size: 14px;
-  color: #4a5568;
+  color: var(--text-secondary);
 }
 
+.theme-selector select,
 .animation-selector select {
   padding: 6px 10px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-color);
   border-radius: 6px;
-  background: #ffffff;
+  background: var(--card-background);
   font-size: 14px;
-  color: #2d3748;
+  color: var(--text-primary);
   cursor: pointer;
 }
 
 @media (max-width: 768px) {
+  .theme-selector,
   .animation-selector {
     margin-left: 5px;
   }
+  .theme-selector label,
   .animation-selector label {
     font-size: 12px;
   }
+  .theme-selector select,
   .animation-selector select {
     padding: 4px 8px;
     font-size: 12px;
+  }
+}
+
+/* 在小屏幕上将选择器放在下一行 */
+@media (max-width: 768px) {
+  .theme-selector,
+  .animation-selector {
+    margin-top: 8px;
   }
 }
 </style>

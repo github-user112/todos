@@ -8,6 +8,7 @@
   --success-color: #10b981; /* 成功绿 */
   --danger-color: #ef4444; /* 危险红 */
   --info-color: #3b82f6; /* 信息蓝 */
+  --warning-color: #f59e0b; /* 警告色 */
   
   /* 中性色 */
   --background-color: #ffffff; /* 背景色 */
@@ -23,6 +24,208 @@
   --other-month-bg: #f9fafb; /* 其他月背景色 */
   --other-month-border: #f3f4f6; /* 其他月边框色 */
   --other-month-text: #9ca3af; /* 其他月文本色 */
+  
+  /* 按钮颜色 */
+  --button-primary-bg: #4a6cf7;
+  --button-primary-hover-bg: #3a5bd9;
+  --button-secondary-bg: #f8fafc;
+  --button-secondary-hover-bg: #edf2f7;
+  --button-success-bg: #38a169;
+  --button-success-hover-bg: #2f855a;
+  --button-danger-bg: #e53e3e;
+  --button-danger-hover-bg: #c53030;
+  
+  /* 日历特定颜色 */
+  --calendar-day-bg: #ffffff;
+  --calendar-day-border: #e2e8f0;
+  --calendar-day-hover-bg: #ebf8ff;
+  --calendar-day-current-bg: #ebf8ff;
+  --calendar-day-current-border: #3182ce;
+  --calendar-day-other-month-opacity: 0.6;
+  --calendar-day-weekend-bg: #f0f7ff;
+  --calendar-day-weekend-border: #d0e1fd;
+  --calendar-day-holiday-rest-bg: #fff0f0;
+  --calendar-day-holiday-rest-border: #ffd0d0;
+  --calendar-day-holiday-work-bg: #e6f7ff;
+  --calendar-day-holiday-work-border: #bae7ff;
+  
+  /* 待办事项颜色 */
+  --todo-item-bg: #f8fafc;
+  --todo-item-border-left: #4a6cf7;
+  --todo-item-completed-bg: #f0fff4;
+  --todo-item-completed-border-left: #48bb78;
+  --todo-item-completed-text: #a0aec0;
+  
+  /* 预览颜色 */
+  --preview-bg: #f0f9ff;
+  --preview-border: #bae6fd;
+  --preview-text: #0369a1;
+  --preview-hover-bg: #e0f2fe;
+  --preview-hover-border: #7dd3fc;
+  
+  /* 节日徽章颜色 */
+  --badge-rest-bg: #e53e3e;
+  --badge-work-bg: #3182ce;
+  --badge-text: #ffffff;
+  
+  /* 加载组件颜色 */
+  --loading-overlay-bg: rgba(255, 255, 255, 0.85);
+  --loading-spinner-border: #f3f3f3;
+  --loading-spinner-border-top: #3498db;
+  --loading-text: #333333;
+  
+  /* 表单颜色 */
+  --form-input-border: #ddd;
+  --form-input-focus-border: #4a6cf7;
+  --form-input-focus-shadow: rgba(74, 108, 247, 0.2);
+}
+
+/* 经典主题 */
+.classic-theme {
+  /* 主色调 */
+  --primary-color: #007bff; /* 经典蓝 */
+  --primary-light: #cce5ff; /* 浅蓝色 */
+  --primary-dark: #0056b3; /* 深蓝色 */
+  
+  /* 辅助色 */
+  --success-color: #28a745; /* 成功绿 */
+  --danger-color: #dc3545; /* 危险红 */
+  --info-color: #17a2b8; /* 信息蓝 */
+  --warning-color: #ffc107; /* 警告黄 */
+  
+  /* 中性色 */
+  --background-color: #f8f9fa; /* 背景色 */
+  --card-background: #ffffff; /* 卡片背景 */
+  --text-primary: #212529; /* 主要文本 */
+  --text-secondary: #6c757d; /* 次要文本 */
+  --border-color: #dee2e6; /* 边框色 */
+  --hover-color: #e9ecef; /* 悬停色 */
+  
+  /* 按钮颜色 */
+  --button-primary-bg: #007bff;
+  --button-primary-hover-bg: #0069d9;
+  --button-secondary-bg: #6c757d;
+  --button-secondary-hover-bg: #5a6268;
+  --button-success-bg: #28a745;
+  --button-success-hover-bg: #218838;
+  --button-danger-bg: #dc3545;
+  --button-danger-hover-bg: #c82333;
+  
+  /* 日历特定颜色 */
+  --calendar-day-bg: #ffffff;
+  --calendar-day-border: #dee2e6;
+  --calendar-day-hover-bg: #e3f2fd;
+  --calendar-day-current-bg: #d1ecf1;
+  --calendar-day-current-border: #007bff;
+  --calendar-day-other-month-opacity: 0.5;
+  --calendar-day-weekend-bg: #fff8e1;
+  --calendar-day-weekend-border: #ffecb3;
+  --calendar-day-holiday-rest-bg: #ffebee;
+  --calendar-day-holiday-rest-border: #ffcdd2;
+  --calendar-day-holiday-work-bg: #e3f2fd;
+  --calendar-day-holiday-work-border: #bbdefb;
+  
+  /* 待办事项颜色 */
+  --todo-item-bg: #f8f9fa;
+  --todo-item-border-left: #007bff;
+  --todo-item-completed-bg: #e8f5e9;
+  --todo-item-completed-border-left: #4caf50;
+  --todo-item-completed-text: #6c757d;
+  
+  /* 预览颜色 */
+  --preview-bg: #e3f2fd;
+  --preview-border: #bbdefb;
+  --preview-text: #1976d2;
+  --preview-hover-bg: #bbdefb;
+  --preview-hover-border: #90caf9;
+  
+  /* 节日徽章颜色 */
+  --badge-rest-bg: #dc3545;
+  --badge-work-bg: #007bff;
+  --badge-text: #ffffff;
+}
+
+/* 橙色主题 */
+.orange-theme {
+  /* 主色调 */
+  --primary-color: #ff6b00; /* 橙色 */
+  --primary-light: #ffeacc; /* 浅橙色 */
+  --primary-dark: #cc5500; /* 深橙色 */
+  
+  /* 辅助色 */
+  --success-color: #22c55e; /* 成功绿 */
+  --danger-color: #ef4444; /* 危险红 */
+  --info-color: #3b82f6; /* 信息蓝 */
+  --warning-color: #f97316; /* 警告橙 */
+  
+  /* 中性色 */
+  --background-color: #fff9f2; /* 背景色 */
+  --card-background: #ffffff; /* 卡片背景 */
+  --text-primary: #2d2d2d; /* 主要文本 */
+  --text-secondary: #737373; /* 次要文本 */
+  --border-color: #fed7aa; /* 边框色 */
+  --hover-color: #fff2e8; /* 悬停色 */
+  
+  /* 按钮颜色 */
+  --button-primary-bg: #ff6b00;
+  --button-primary-hover-bg: #cc5500;
+  --button-secondary-bg: #fef3c7;
+  --button-secondary-hover-bg: #fde68a;
+  --button-success-bg: #22c55e;
+  --button-success-hover-bg: #16a34a;
+  --button-danger-bg: #ef4444;
+  --button-danger-hover-bg: #dc2626;
+  
+  /* 日历特定颜色 */
+  --calendar-day-bg: #ffffff;
+  --calendar-day-border: #fed7aa;
+  --calendar-day-hover-bg: #fff2e8;
+  --calendar-day-current-bg: #fff7ed;
+  --calendar-day-current-border: #ff6b00;
+  --calendar-day-other-month-opacity: 0.6;
+  --calendar-day-weekend-bg: #fff8f0;
+  --calendar-day-weekend-border: #fdba74;
+  --calendar-day-holiday-rest-bg: #fff0f0;
+  --calendar-day-holiday-rest-border: #fecaca;
+  --calendar-day-holiday-work-bg: #fff7ed;
+  --calendar-day-holiday-work-border: #fed7aa;
+  
+  /* 待办事项颜色 */
+  --todo-item-bg: #fffaf2;
+  --todo-item-border-left: #ff6b00;
+  --todo-item-completed-bg: #f0fdf4;
+  --todo-item-completed-border-left: #4ade80;
+  --todo-item-completed-text: #a3a3a3;
+  
+  /* 预览颜色 */
+  --preview-bg: #fff7ed;
+  --preview-border: #fed7aa;
+  --preview-text: #ea580c;
+  --preview-hover-bg: #fff2e8;
+  --preview-hover-border: #fdba74;
+  
+  /* 节日徽章颜色 */
+  --badge-rest-bg: #ef4444;
+  --badge-work-bg: #3b82f6;
+  --badge-text: #ffffff;
+  
+  /* 加载组件颜色 */
+  --loading-overlay-bg: rgba(255, 249, 242, 0.85);
+  --loading-spinner-border: #fed7aa;
+  --loading-spinner-border-top: #ff6b00;
+  --loading-text: #2d2d2d;
+  
+  /* 表单颜色 */
+  --form-input-border: #fed7aa;
+  --form-input-focus-border: #ff6b00;
+  --form-input-focus-shadow: rgba(255, 107, 0, 0.2);
+  
+  /* 月份区分颜色 */
+  --current-month-bg: #ffffff; /* 本月背景色 */
+  --current-month-border: #fed7aa; /* 本月边框色 */
+  --other-month-bg: #fffaf2; /* 其他月背景色 */
+  --other-month-border: #fff2e8; /* 其他月边框色 */
+  --other-month-text: #a3a3a3; /* 其他月文本色 */
 }
 
 /* 深色模式变量（可选）*/

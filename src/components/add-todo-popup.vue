@@ -273,7 +273,7 @@ const handleSave = () => {
 }
 
 .popup-content {
-  background: white;
+  background: var(--card-background);
   padding: 25px;
   border-radius: 12px;
   width: 90%;
@@ -286,7 +286,7 @@ const handleSave = () => {
 .popup-content h2 {
   margin-top: 0;
   margin-bottom: 20px;
-  color: #2d3748;
+  color: var(--text-primary);
   font-size: 1.4rem;
   text-align: center;
 }
@@ -295,32 +295,34 @@ const handleSave = () => {
   width: 100%;
   padding: 12px;
   margin-bottom: 20px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   font-size: 15px;
   transition: border-color 0.2s;
   box-sizing: border-box;
+  background: var(--card-background);
+  color: var(--text-primary);
 }
 
 .popup-content input[type="text"]:focus {
   outline: none;
-  border-color: #4a6cf7;
-  box-shadow: 0 0 0 2px rgba(74, 108, 247, 0.2);
+  border-color: var(--button-primary-bg);
+  box-shadow: 0 0 0 2px var(--form-input-focus-shadow);
 }
 
 /* 重复设置区域 */
 .repeat-section {
   margin-bottom: 20px;
   padding: 15px;
-  background: #f8fafc;
+  background: var(--background-color);
   border-radius: 8px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-color);
 }
 
 .section-label {
   display: block;
   font-weight: 600;
-  color: #2d3748;
+  color: var(--text-primary);
   margin-bottom: 12px;
   font-size: 14px;
 }
@@ -347,7 +349,7 @@ const handleSave = () => {
   margin-right: 8px;
   cursor: pointer;
   font-size: 14px;
-  color: #4a5568;
+  color: var(--text-secondary);
   min-width: fit-content;
 }
 
@@ -355,33 +357,35 @@ const handleSave = () => {
   width: 60px;
   padding: 4px 8px;
   margin: 0 6px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border-color);
   border-radius: 4px;
   text-align: center;
   font-size: 14px;
   transition: all 0.2s;
+  background: var(--card-background);
+  color: var(--text-primary);
 }
 
 .interval-input:enabled {
-  border-color: #4a6cf7;
-  background: white;
+  border-color: var(--button-primary-bg);
+  background: var(--card-background);
 }
 
 .interval-input:disabled {
-  background: #f3f4f6;
-  color: #9ca3af;
+  background: var(--hover-color);
+  color: var(--text-secondary);
   cursor: not-allowed;
 }
 
 .interval-input:focus {
   outline: none;
-  border-color: #4a6cf7;
-  box-shadow: 0 0 0 2px rgba(74, 108, 247, 0.2);
+  border-color: var(--button-primary-bg);
+  box-shadow: 0 0 0 2px var(--form-input-focus-shadow);
 }
 
 .hint {
   font-size: 12px;
-  color: #6b7280;
+  color: var(--text-secondary);
   margin-left: 8px;
   font-style: italic;
 }
@@ -395,18 +399,18 @@ const handleSave = () => {
 .preview-toggle {
   width: 100%;
   padding: 8px 12px;
-  background: #f0f9ff;
-  border: 1px solid #bae6fd;
+  background: var(--preview-bg);
+  border: 1px solid var(--preview-border);
   border-radius: 6px;
-  color: #0369a1;
+  color: var(--preview-text);
   font-size: 13px;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .preview-toggle:hover {
-  background: #e0f2fe;
-  border-color: #7dd3fc;
+  background: var(--preview-hover-bg);
+  border-color: var(--preview-hover-border);
 }
 
 .button-group {
@@ -428,23 +432,23 @@ const handleSave = () => {
 }
 
 .save-button {
-  background: #4a6cf7;
+  background: var(--button-primary-bg);
   color: white;
 }
 
 .cancel-button {
-  background: #f8fafc;
-  color: #4a5568;
-  border: 1px solid #e2e8f0;
+  background: var(--button-secondary-bg);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
 }
 
 .save-button:hover {
-  background: #3a5bd9;
+  background: var(--button-primary-hover-bg);
   transform: translateY(-1px);
 }
 
 .cancel-button:hover {
-  background: #edf2f7;
+  background: var(--button-secondary-hover-bg);
   transform: translateY(-1px);
 }
 
@@ -486,6 +490,5 @@ const handleSave = () => {
   .button-group {
     flex-direction: column;
   }
-}
-</style>
+}</style>
 

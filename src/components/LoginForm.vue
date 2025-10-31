@@ -60,28 +60,38 @@ const handleLogin = async () => {
   margin-bottom: 20px;
   width: 300px;
   padding: 20px;
-  border: 1px solid #eee;
+  border: 1px solid var(--border-color);
   border-radius: 5px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  background: var(--card-background);
 }
 
 h2 {
   margin-top: 0;
   margin-bottom: 20px;
+  color: var(--text-primary);
 }
 
 input {
   width: 100%;
   padding: 10px;
   margin-bottom: 15px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--form-input-border);
   border-radius: 4px;
+  background: var(--card-background);
+  color: var(--text-primary);
+}
+
+input:focus {
+  outline: none;
+  border-color: var(--form-input-focus-border);
+  box-shadow: 0 0 0 2px var(--form-input-focus-shadow);
 }
 
 button {
   width: 100%;
   padding: 10px;
-  background-color: #007bff;
+  background-color: var(--button-primary-bg);
   color: white;
   border: none;
   border-radius: 4px;
@@ -89,13 +99,11 @@ button {
 }
 
 button:hover {
-  background-color: #0069d9;
+  background-color: var(--button-primary-hover-bg);
 }
 
 .login-error {
-  color: red;
+  color: var(--danger-color);
   margin-top: 15px;
   text-align: center;
 }
-</style>
-

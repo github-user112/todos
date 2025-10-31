@@ -148,12 +148,12 @@ function getHolidayName(holiday) {
 }
 
 .calendar-day {
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--calendar-day-border);
   padding: 8px 4px 4px 4px;
   border-radius: 8px;
   display: flex;
   flex-direction: column;
-  background: #ffffff;
+  background: var(--calendar-day-bg);
   /*transition: all 0.2s;*/
   min-height: 0;
   position: relative;
@@ -162,20 +162,20 @@ function getHolidayName(holiday) {
 
 /* Weekend styling */
 .weekend-day {
-  background: #f0f7ff;
-  border-color: #d0e1fd;
+  background: var(--calendar-day-weekend-bg);
+  border-color: var(--calendar-day-weekend-border);
 }
 
 /* Holiday styling - Rest Day */
 .holiday-rest-day {
-  background: #fff0f0;
-  border-color: #ffd0d0;
+  background: var(--calendar-day-holiday-rest-bg);
+  border-color: var(--calendar-day-holiday-rest-border);
 }
 
 /* Holiday styling - Work Day */
 .holiday-work-day {
-  background: #e6f7ff;
-  border-color: #bae7ff;
+  background: var(--calendar-day-holiday-work-bg);
+  border-color: var(--calendar-day-holiday-work-border);
 }
 
 .calendar-day:hover {
@@ -185,15 +185,15 @@ function getHolidayName(holiday) {
 }
 
 .other-month {
-  opacity: 0.6;
-  color: #a0aec0;
-  border-color: #edf2f7;
+  opacity: var(--calendar-day-other-month-opacity);
+  color: var(--other-month-text);
+  border-color: var(--other-month-border);
 }
 
 .other-month.weekend-day,
 .other-month.holiday-rest-day,
 .other-month.holiday-work-day {
-  opacity: 0.5;
+  opacity: var(--calendar-day-other-month-opacity);
 }
 
 .day-number {
@@ -201,24 +201,24 @@ function getHolidayName(holiday) {
   top: 6px;
   left: 8px;
   font-weight: 600;
-  color: #2d3748;
+  color: var(--text-primary);
   font-size: 15px;
   z-index: 1;
 }
 
 .other-month .day-number {
-  color: #a0aec0;
+  color: var(--other-month-text);
   font-size: 0.9em;
 }
 
 .current-day {
-  background: #ebf8ff;
-  border: 2px solid #3182ce;
+  background: var(--calendar-day-current-bg);
+  border: 2px solid var(--calendar-day-current-border);
   box-shadow: 0 0 0 1px rgba(49, 130, 206, 0.1);
 }
 
 .current-day .day-number {
-  color: #2c5282;
+  color: var(--calendar-day-current-border);
   font-weight: 700;
   font-size: 1.1em;
 }
@@ -238,14 +238,14 @@ function getHolidayName(holiday) {
 }
 
 .rest-badge {
-  background: #e53e3e;
-  color: white;
+  background: var(--badge-rest-bg);
+  color: var(--badge-text);
   box-shadow: 0 2px 4px rgba(229, 62, 62, 0.3);
 }
 
 .work-badge {
-  background: #3182ce;
-  color: white;
+  background: var(--badge-work-bg);
+  color: var(--badge-text);
   box-shadow: 0 2px 4px rgba(49, 130, 206, 0.3);
 }
 
@@ -255,7 +255,7 @@ function getHolidayName(holiday) {
   top: 8px;
   right: 40px;
   font-size: 0.7em;
-  color: #718096;
+  color: var(--text-secondary);
   z-index: 1;
   max-width: 80%;
   text-align: right;
@@ -265,12 +265,12 @@ function getHolidayName(holiday) {
 }
 
 .holiday-rest-day .holiday-name {
-  color: #e53e3e;
+  color: var(--badge-rest-bg);
   font-weight: 600;
 }
 
 .holiday-work-day .holiday-name {
-  color: #3182ce;
+  color: var(--badge-work-bg);
   font-weight: 600;
 }
 
@@ -289,24 +289,24 @@ function getHolidayName(holiday) {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  background: #f8fafc;
+  background: var(--todo-item-bg);
   border-radius: 4px;
-  border-left: 3px solid #4a6cf7;
+  border-left: 3px solid var(--todo-item-border-left);
   transition: all 0.2s;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .todo-item:hover {
-  background: #edf2f7;
+  background: var(--hover-color);
   transform: translateX(2px);
 }
 
 .todo-item.completed {
   text-decoration: line-through;
   text-decoration-thickness: 2px;
-  color: #a0aec0;
-  border-left-color: #48bb78;
-  background: #f0fff4;
+  color: var(--todo-item-completed-text);
+  border-left-color: var(--todo-item-completed-border-left);
+  background: var(--todo-item-completed-bg);
 }
 
 /* Mobile responsive styles */

@@ -112,9 +112,9 @@ defineEmits(['openAddTodoPopup', 'openTodoActions']);
   text-align: center;
   font-weight: 600;
   padding: 12px 0;
-  background: #dddddd75;
+  background: var(--hover-color);
   border-radius: 8px;
-  color: #4a5568;
+  color: var(--text-secondary);
   font-size: 15px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   z-index: 10;
@@ -122,8 +122,8 @@ defineEmits(['openAddTodoPopup', 'openTodoActions']);
 }
 
 .weekend-header {
-  color: #e53e3e;
-  background: #fff5f5;
+  color: var(--danger-color);
+  background: var(--calendar-day-holiday-rest-bg);
 }
 
 .week-number {
@@ -131,8 +131,8 @@ defineEmits(['openAddTodoPopup', 'openTodoActions']);
   align-items: center;
   justify-content: center;
   font-weight: 600;
-  color: #4a5568;
-  background: #f0f0f0;
+  color: var(--text-secondary);
+  background: var(--hover-color);
   border-radius: 8px;
   font-size: 14px;
   z-index: 10;
@@ -154,5 +154,4 @@ defineEmits(['openAddTodoPopup', 'openTodoActions']);
   .week-number {
     font-size: 12px;
   }
-}
-</style>
+}</style>

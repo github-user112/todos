@@ -34,20 +34,20 @@ import { getNextRepeatDates } from '../utils/repeatUtils';
 const props = defineProps({
   showPreview: {
     type: Boolean,
-    default: false
+    default: false,
   },
   baseDate: {
     type: Date,
-    required: true
+    required: true,
   },
   repeatType: {
     type: String,
-    required: true
+    required: true,
   },
   repeatInterval: {
     type: Number,
-    default: 1
-  }
+    default: 1,
+  },
 });
 
 const emit = defineEmits(['close']);
@@ -57,15 +57,15 @@ const repeatDescription = computed(() => {
   if (props.repeatType === 'none') {
     return '不重复';
   }
-  
+
   const interval = props.repeatInterval;
   const typeMap = {
     daily: interval === 1 ? '每天' : `每${interval}天`,
     weekly: interval === 1 ? '每周' : `每${interval}周`,
     monthly: interval === 1 ? '每月' : `每${interval}个月`,
-    yearly: interval === 1 ? '每年' : `每${interval}年`
+    yearly: interval === 1 ? '每年' : `每${interval}年`,
   };
-  
+
   return typeMap[props.repeatType] || '未知重复类型';
 });
 
@@ -74,9 +74,14 @@ const nextDates = computed(() => {
   if (props.repeatType === 'none') {
     return [];
   }
-  
+
   try {
-    return getNextRepeatDates(props.baseDate, props.repeatType, props.repeatInterval, 4);
+    return getNextRepeatDates(
+      props.baseDate,
+      props.repeatType,
+      props.repeatInterval,
+      4
+    );
   } catch (error) {
     console.error('生成重复日期预览失败:', error);
     return [];
@@ -91,7 +96,15 @@ const formatPreviewDate = (date) => {
 
 // 获取星期几
 const getWeekday = (date) => {
-  const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+  const weekdays = [
+    '星期日',
+    '星期一',
+    '星期二',
+    '星期三',
+    '星期四',
+    '星期五',
+    '星期六',
+  ];
   return weekdays[date.getDay()];
 };
 </script>
@@ -102,8 +115,8 @@ const getWeekday = (date) => {
   top: 100%;
   left: 0;
   right: 0;
-  background: white;
-  border: 1px solid #e2e8f0;
+  background: var(--card-background);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   z-index: 10;
@@ -117,15 +130,15 @@ const getWeekday = (date) => {
   justify-content: space-between;
   align-items: center;
   padding: 12px 15px;
-  background: #f8fafc;
-  border-bottom: 1px solid #e2e8f0;
+  background: var(--background-color);
+  border-bottom: 1px solid var(--border-color);
   border-radius: 8px 8px 0 0;
 }
 
 .preview-header h4 {
   margin: 0;
   font-size: 14px;
-  color: #2d3748;
+  color: var(--text-primary);
 }
 
 .close-btn {
@@ -133,7 +146,7 @@ const getWeekday = (date) => {
   border: none;
   font-size: 18px;
   cursor: pointer;
-  color: #a0aec0;
+  color: var(--text-secondary);
   padding: 0;
   width: 20px;
   height: 20px;
@@ -143,17 +156,18 @@ const getWeekday = (date) => {
 }
 
 .close-btn:hover {
-  color: #4a5568;
+  color: var(--text-primary);
 }
 
 .preview-content {
   padding: 15px;
 }
 
-.original-date, .repeat-setting {
+.original-date,
+.repeat-setting {
   margin-bottom: 12px;
   font-size: 13px;
-  color: #4a5568;
+  color: var(--text-secondary);
 }
 
 .next-occurrences {
@@ -164,7 +178,7 @@ const getWeekday = (date) => {
   display: block;
   margin-bottom: 8px;
   font-size: 13px;
-  color: #2d3748;
+  color: var(--text-primary);
 }
 
 .next-occurrences ul {
@@ -176,12 +190,12 @@ const getWeekday = (date) => {
 .next-occurrences li {
   margin-bottom: 4px;
   font-size: 12px;
-  color: #4a5568;
+  color: var(--text-secondary);
 }
 
 .no-preview {
   text-align: center;
-  color: #a0aec0;
+  color: var(--text-secondary);
   font-size: 12px;
   padding: 10px 0;
 }
@@ -197,7 +211,7 @@ const getWeekday = (date) => {
     border-radius: 16px 16px 0 0;
     max-height: 50vh;
   }
-  
+
   .preview-header {
     border-radius: 16px 16px 0 0;
   }

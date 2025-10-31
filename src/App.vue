@@ -340,6 +340,8 @@ onMounted(() => {
 </script>
 
 <style>
+@import './assets/theme.css';
+
 body {
   font-family: Arial, sans-serif;
   margin: 0;
