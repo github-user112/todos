@@ -2,44 +2,44 @@
   <div class="add-todo-popup">
     <div class="popup-content">
       <h2>添加待办事项</h2>
-      <input 
-        type="text" 
-        :value="todoText" 
-        @input="$emit('update:todoText', $event.target.value)" 
-        placeholder="待办事项" 
+      <input
+        type="text"
+        :value="todoText"
+        @input="$emit('update:todoText', $event.target.value)"
+        placeholder="待办事项"
       />
-      
+
       <!-- 重复类型选择 -->
       <div class="repeat-section">
         <label class="section-label">重复设置</label>
-        
+
         <!-- 不重复选项 -->
         <div class="repeat-option">
-          <input 
-            type="radio" 
-            id="repeat-none" 
-            value="none" 
+          <input
+            type="radio"
+            id="repeat-none"
+            value="none"
             :checked="todoRepeat === 'none'"
             @change="updateRepeatType('none')"
           />
           <label for="repeat-none">不重复</label>
         </div>
-        
+
         <!-- 每天选项 -->
         <div class="repeat-option">
-          <input 
-            type="radio" 
-            id="repeat-daily" 
-            value="daily" 
+          <input
+            type="radio"
+            id="repeat-daily"
+            value="daily"
             :checked="todoRepeat === 'daily'"
             @change="updateRepeatType('daily')"
           />
           <label for="repeat-daily">每</label>
-          <input 
-            type="number" 
+          <input
+            type="number"
             v-model.number="intervals.daily"
             :disabled="todoRepeat !== 'daily'"
-            min="1" 
+            min="1"
             max="365"
             class="interval-input"
             @blur="validateInterval('daily')"
@@ -47,22 +47,22 @@
           <label>天</label>
           <span class="hint" v-if="todoRepeat === 'daily'">(1-365天)</span>
         </div>
-        
+
         <!-- 每周选项 -->
         <div class="repeat-option">
-          <input 
-            type="radio" 
-            id="repeat-weekly" 
-            value="weekly" 
+          <input
+            type="radio"
+            id="repeat-weekly"
+            value="weekly"
             :checked="todoRepeat === 'weekly'"
             @change="updateRepeatType('weekly')"
           />
           <label for="repeat-weekly">每</label>
-          <input 
-            type="number" 
+          <input
+            type="number"
             v-model.number="intervals.weekly"
             :disabled="todoRepeat !== 'weekly'"
-            min="1" 
+            min="1"
             max="52"
             class="interval-input"
             @blur="validateInterval('weekly')"
@@ -70,22 +70,22 @@
           <label>周</label>
           <span class="hint" v-if="todoRepeat === 'weekly'">(1-52周)</span>
         </div>
-        
+
         <!-- 每月选项 -->
         <div class="repeat-option">
-          <input 
-            type="radio" 
-            id="repeat-monthly" 
-            value="monthly" 
+          <input
+            type="radio"
+            id="repeat-monthly"
+            value="monthly"
             :checked="todoRepeat === 'monthly'"
             @change="updateRepeatType('monthly')"
           />
           <label for="repeat-monthly">每</label>
-          <input 
-            type="number" 
+          <input
+            type="number"
             v-model.number="intervals.monthly"
             :disabled="todoRepeat !== 'monthly'"
-            min="1" 
+            min="1"
             max="12"
             class="interval-input"
             @blur="validateInterval('monthly')"
@@ -93,22 +93,22 @@
           <label>个月</label>
           <span class="hint" v-if="todoRepeat === 'monthly'">(1-12个月)</span>
         </div>
-        
+
         <!-- 每年选项 -->
         <div class="repeat-option">
-          <input 
-            type="radio" 
-            id="repeat-yearly" 
-            value="yearly" 
+          <input
+            type="radio"
+            id="repeat-yearly"
+            value="yearly"
             :checked="todoRepeat === 'yearly'"
             @change="updateRepeatType('yearly')"
           />
           <label for="repeat-yearly">每</label>
-          <input 
-            type="number" 
+          <input
+            type="number"
             v-model.number="intervals.yearly"
             :disabled="todoRepeat !== 'yearly'"
-            min="1" 
+            min="1"
             max="10"
             class="interval-input"
             @blur="validateInterval('yearly')"
@@ -117,17 +117,13 @@
           <span class="hint" v-if="todoRepeat === 'yearly'">(1-10年)</span>
         </div>
       </div>
-      
+
       <!-- 重复预览 -->
       <div class="preview-container" v-if="todoRepeat !== 'none'">
-        <button 
-          type="button" 
-          @click="togglePreview" 
-          class="preview-toggle"
-        >
+        <button type="button" @click="togglePreview" class="preview-toggle">
           {{ showPreview ? '隐藏预览' : '显示预览' }}
         </button>
-        
+
         <RepeatPreview
           :showPreview="showPreview"
           :baseDate="selectedDate"
@@ -136,7 +132,7 @@
           @close="showPreview = false"
         />
       </div>
-      
+
       <div class="button-group">
         <button @click="handleSave" class="save-button">保存</button>
         <button @click="$emit('close')" class="cancel-button">取消</button>
@@ -152,26 +148,31 @@ import RepeatPreview from './RepeatPreview.vue';
 const props = defineProps({
   todoText: {
     type: String,
-    required: true
+    required: true,
   },
   todoRepeat: {
     type: String,
-    required: true
+    required: true,
   },
   selectedDate: {
     type: Date,
-    default: () => new Date()
-  }
+    default: () => new Date(),
+  },
 });
 
-const emit = defineEmits(['update:todoText', 'update:todoRepeat', 'save', 'close']);
+const emit = defineEmits([
+  'update:todoText',
+  'update:todoRepeat',
+  'save',
+  'close',
+]);
 
 // 各类型的间隔值
 const intervals = ref({
   daily: 1,
   weekly: 1,
   monthly: 1,
-  yearly: 1
+  yearly: 1,
 });
 
 // 预览显示状态
@@ -182,7 +183,7 @@ const INTERVAL_LIMITS = {
   daily: { min: 1, max: 365, unit: '天' },
   weekly: { min: 1, max: 52, unit: '周' },
   monthly: { min: 1, max: 12, unit: '个月' },
-  yearly: { min: 1, max: 10, unit: '年' }
+  yearly: { min: 1, max: 10, unit: '年' },
 };
 
 // 计算当前活跃的间隔值
@@ -194,7 +195,7 @@ const currentInterval = computed(() => {
 const repeatConfig = computed(() => {
   return {
     type: props.todoRepeat,
-    interval: currentInterval.value
+    interval: currentInterval.value,
   };
 });
 
@@ -206,7 +207,7 @@ const togglePreview = () => {
 // 更新重复类型
 const updateRepeatType = (type) => {
   emit('update:todoRepeat', type);
-  
+
   // 选择重复类型时自动聚焦到输入框
   if (type !== 'none') {
     setTimeout(() => {
@@ -217,7 +218,7 @@ const updateRepeatType = (type) => {
       }
     }, 100);
   }
-  
+
   // 重置预览状态
   showPreview.value = false;
 };
@@ -226,13 +227,13 @@ const updateRepeatType = (type) => {
 const validateInterval = (type) => {
   const limit = INTERVAL_LIMITS[type];
   const currentValue = intervals.value[type];
-  
+
   if (currentValue < limit.min) {
     intervals.value[type] = limit.min;
   } else if (currentValue > limit.max) {
     intervals.value[type] = limit.max;
   }
-  
+
   // 间隔值变化时更新预览
   if (showPreview.value) {
     // 稍后更新预览，让用户看到变化
@@ -244,15 +245,21 @@ const validateInterval = (type) => {
 
 // 处理保存
 const handleSave = () => {
+  // 验证待办事项名称不为空
+  if (!props.todoText || !props.todoText.trim()) {
+    alert('请输入待办事项名称');
+    return;
+  }
+
   // 验证间隔值
   if (props.todoRepeat !== 'none') {
     validateInterval(props.todoRepeat);
   }
-  
+
   // 发送保存事件，带上间隔信息
   emit('save', {
     repeatType: props.todoRepeat,
-    repeatInterval: currentInterval.value
+    repeatInterval: currentInterval.value,
   });
 };
 </script>
@@ -291,7 +298,7 @@ const handleSave = () => {
   text-align: center;
 }
 
-.popup-content input[type="text"] {
+.popup-content input[type='text'] {
   width: 100%;
   padding: 12px;
   margin-bottom: 20px;
@@ -304,7 +311,7 @@ const handleSave = () => {
   color: var(--text-primary);
 }
 
-.popup-content input[type="text"]:focus {
+.popup-content input[type='text']:focus {
   outline: none;
   border-color: var(--button-primary-bg);
   box-shadow: 0 0 0 2px var(--form-input-focus-shadow);
@@ -340,7 +347,7 @@ const handleSave = () => {
   background: rgba(74, 108, 247, 0.05);
 }
 
-.repeat-option input[type="radio"] {
+.repeat-option input[type='radio'] {
   margin-right: 8px;
   cursor: pointer;
 }
@@ -420,7 +427,8 @@ const handleSave = () => {
   margin-top: 20px;
 }
 
-.save-button, .cancel-button {
+.save-button,
+.cancel-button {
   flex: 1;
   padding: 12px 16px;
   border: none;
@@ -459,17 +467,17 @@ const handleSave = () => {
     padding: 16px;
     max-height: 90vh;
   }
-  
+
   .repeat-option {
     flex-wrap: wrap;
     align-items: flex-start;
   }
-  
+
   .interval-input {
     width: 50px;
     margin: 2px 4px;
   }
-  
+
   .hint {
     flex-basis: 100%;
     margin-left: 28px;
@@ -482,13 +490,13 @@ const handleSave = () => {
     width: 98%;
     padding: 12px;
   }
-  
+
   .repeat-section {
     padding: 10px;
   }
-  
+
   .button-group {
     flex-direction: column;
   }
-}</style>
-
+}
+</style>
