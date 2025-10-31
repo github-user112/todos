@@ -497,12 +497,14 @@ const changeTheme = (newType) => {
 // 应用主题的方法
 const applyTheme = (theme) => {
   const root = document.documentElement;
-  root.classList.remove('classic-theme', 'orange-theme');
+  root.classList.remove('classic-theme', 'orange-theme', 'green-theme');
 
   if (theme === 'classic') {
     root.classList.add('classic-theme');
   } else if (theme === 'orange') {
     root.classList.add('orange-theme');
+  } else if (theme === 'green') {
+    root.classList.add('green-theme');
   }
 };
 

@@ -17,6 +17,7 @@
         <option value="default">默认</option>
         <option value="classic">经典</option>
         <option value="orange">橙色</option>
+        <option value="green">绿色护眼</option>
         <!-- 未来可以添加更多主题选项 -->
       </select>
     </div>
