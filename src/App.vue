@@ -66,26 +66,25 @@ const initializeUserId = () => {
 const fetchHolidayData = async (year) => {
   let result = {};
   const calendar = new HolidayCalendar();
-  const [cnDates, jpDates] = await Promise.all([
+  const [cnDates] = await Promise.all([
     calendar.getDates('CN', currentYear),
-  ]);
+  ]).catch((error) => {
+    console.error('获取节假日数据失败:', error);
+  });
 
   // Save original data
   result.dates = cnDates;
 
-    if (result && result.dates) {
-      // 将数据转换为前端需要的格式
-      const holidayMap = {};
-      result.dates.forEach((item) => {
-        holidayMap[item.date] = {
-          name: item.name_cn,
-          type: item.type,
-        };
-      });
-      holidayData.value = holidayMap;
-    }
-  } catch (error) {
-    console.error('获取节假日数据失败:', error);
+  if (result && result.dates) {
+    // 将数据转换为前端需要的格式
+    const holidayMap = {};
+    result.dates.forEach((item) => {
+      holidayMap[item.date] = {
+        name: item.name_cn,
+        type: item.type,
+      };
+    });
+    holidayData.value = holidayMap;
   }
 };
 console.log(holidayData);
