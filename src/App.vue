@@ -63,7 +63,7 @@ const initializeUserId = () => {
 
 // 初始化日历
 // 在App.vue的script setup部分添加
-const fetchHolidayData = async (year) => {
+const fetchHolidayData = async (currentYear) => {
   let result = {};
   const calendar = new HolidayCalendar();
   const [cnDates] = await Promise.all([
