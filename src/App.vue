@@ -64,16 +64,15 @@ const initializeUserId = () => {
 // 初始化日历
 // 在App.vue的script setup部分添加
 const fetchHolidayData = async (year) => {
-  try {
-    const result = await apiRequest(
-      `
-https://unpkg.com/holiday-calendar@1.3.0/data/CN/${year}.min.json?callback=holiday_1753945082090_8842`,
-      'GET',
-      null,
-      {
-        'X-User-ID': userId.value,
-      }
-    );
+  let result = {};
+  const calendar = new HolidayCalendar();
+  const [cnDates, jpDates] = await Promise.all([
+    calendar.getDates('CN', currentYear),
+  ]);
+
+  // Save original data
+  result.dates = cnDates;
+
     if (result && result.dates) {
       // 将数据转换为前端需要的格式
       const holidayMap = {};
