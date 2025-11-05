@@ -67,7 +67,7 @@ const fetchHolidayData = async (year) => {
   try {
     const result = await apiRequest(
       `
-https://unpkg.com/holiday-calendar@1.1.6/data/CN/${year}.min.json?callback=holiday_1753945082090_8842`,
+https://unpkg.com/holiday-calendar@1.3.0/data/CN/${year}.min.json?callback=holiday_1753945082090_8842`,
       'GET',
       null,
       {
