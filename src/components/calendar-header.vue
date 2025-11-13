@@ -7,6 +7,11 @@
     <button @click="copyUrlToClipboard" class="share-button">
       分享我的日程
     </button>
+    <div class="contact-info">
+      <a href="mailto:gonesc@foxmail.com" class="contact-link" title="联系我">
+        联系我
+      </a>
+    </div>
     <div class="theme-selector">
       <label for="theme-type">主题:</label>
       <select
@@ -191,6 +196,27 @@ const copyUrlToClipboard = () => {
   font-size: 14px;
   color: var(--text-primary);
   cursor: pointer;
+}
+
+/* 联系信息样式 */
+.contact-info {
+  margin-left: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.contact-link {
+  font-size: 12px;
+  color: var(--primary-color);
+  text-decoration: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.contact-link:hover {
+  background-color: var(--hover-color);
+  text-decoration: underline;
 }
 
 @media (max-width: 768px) {
