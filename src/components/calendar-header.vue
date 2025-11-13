@@ -7,11 +7,7 @@
     <button @click="copyUrlToClipboard" class="share-button">
       分享我的日程
     </button>
-    <div class="contact-info">
-      <a href="mailto:gonesc@foxmail.com" class="contact-link" title="联系我">
-        联系我
-      </a>
-    </div>
+   
     <div class="theme-selector">
       <label for="theme-type">主题:</label>
       <select
@@ -41,6 +37,11 @@
         <option value="default">默认</option>
         <!-- 未来可以添加更多动画选项 -->
       </select>
+    </div>
+     <div class="contact-info">
+      <a href="mailto:gonesc@foxmail.com" class="contact-link" title="联系我">
+        gonesc@foxmail.com
+      </a>
     </div>
   </div>
 </template>
