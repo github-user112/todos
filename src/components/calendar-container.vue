@@ -25,6 +25,7 @@
       v-if="showAddTodoPopup"
       v-model:todoText="todoText"
       v-model:todoRepeat="todoRepeat"
+      :selectedDate="selectedDate"
       @close="closeAddTodoPopup"
       @save="saveTodo"
     />

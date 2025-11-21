@@ -117,6 +117,20 @@
           <span class="hint" v-if="todoRepeat === 'yearly'">(1-10年)</span>
         </div>
 
+        <!-- 重复次数选项 -->
+        <div class="repeat-option" v-if="todoRepeat !== 'none'">
+          <label for="repeat-count">重复次数:</label>
+          <input
+            type="number"
+            id="repeat-count"
+            v-model.number="repeatCount"
+            min="1"
+            class="repeat-count-input"
+            @input="calculateEndDate"
+          />
+          <span class="hint">(可选，输入后自动计算结束日期)</span>
+        </div>
+
         <!-- 结束日期选项 -->
         <div class="repeat-option" v-if="todoRepeat !== 'none'">
           <label for="end-date">结束日期:</label>
@@ -125,6 +139,7 @@
             id="end-date"
             v-model="endDate"
             class="end-date-input"
+            @input="clearRepeatCount"
           />
           <span class="hint">(可选)</span>
         </div>
@@ -190,6 +205,9 @@ const intervals = ref({
 // 结束日期
 const endDate = ref('');
 
+// 重复次数
+const repeatCount = ref('');
+
 // 预览显示状态
 const showPreview = ref(false);
 
@@ -236,6 +254,9 @@ const updateRepeatType = (type) => {
 
   // 重置预览状态
   showPreview.value = false;
+  
+  // 清空重复次数
+  repeatCount.value = '';
 };
 
 // 验证间隔值
@@ -258,6 +279,57 @@ const validateInterval = (type) => {
   }
 };
 
+// 根据重复次数计算结束日期
+const calculateEndDate = () => {
+  // 如果没有输入重复次数，不做任何操作
+  if (!repeatCount.value || repeatCount.value <= 0) {
+    return;
+  }
+
+  // 获取当前选择的日期作为起始日期
+  const startDate = new Date(props.selectedDate);
+  
+  // 根据重复类型和间隔计算结束日期
+  const interval = currentInterval.value;
+  const repeatType = props.todoRepeat;
+  
+  // 创建结束日期副本
+  const calculatedEndDate = new Date(startDate);
+  
+  // 计算结束日期时需要减去1，因为重复次数包含起始日期
+  // 例如：重复2次 = 起始日期 + 1个间隔
+  const effectiveCount = repeatCount.value - 1;
+  
+  switch (repeatType) {
+    case 'daily':
+      calculatedEndDate.setDate(startDate.getDate() + (interval * effectiveCount));
+      break;
+    case 'weekly':
+      calculatedEndDate.setDate(startDate.getDate() + (interval * effectiveCount * 7));
+      break;
+    case 'monthly':
+      calculatedEndDate.setMonth(startDate.getMonth() + (interval * effectiveCount));
+      break;
+    case 'yearly':
+      calculatedEndDate.setFullYear(startDate.getFullYear() + (interval * effectiveCount));
+      break;
+    default:
+      return;
+  }
+  
+  // 将计算出的日期格式化为 YYYY-MM-DD 格式
+  const year = calculatedEndDate.getFullYear();
+  const month = String(calculatedEndDate.getMonth() + 1).padStart(2, '0');
+  const day = String(calculatedEndDate.getDate()).padStart(2, '0');
+  
+  endDate.value = `${year}-${month}-${day}`;
+};
+
+// 当手动输入结束日期时，清空重复次数
+const clearRepeatCount = () => {
+  repeatCount.value = '';
+};
+
 // 处理保存
 const handleSave = () => {
   // 验证待办事项名称不为空
@@ -271,11 +343,12 @@ const handleSave = () => {
     validateInterval(props.todoRepeat);
   }
 
-  // 发送保存事件，带上间隔信息和结束日期
+  // 发送保存事件，带上间隔信息、结束日期和重复次数
   emit('save', {
     repeatType: props.todoRepeat,
     repeatInterval: currentInterval.value,
     endDate: endDate.value || undefined,
+    repeatCount: repeatCount.value || undefined,
   });
 };
 </script>
@@ -409,7 +482,8 @@ const handleSave = () => {
   box-shadow: 0 0 0 2px var(--form-input-focus-shadow);
 }
 
-.end-date-input {
+.end-date-input,
+.repeat-count-input {
   margin-left: 8px;
   padding: 4px 8px;
   border: 1px solid var(--border-color);
@@ -419,7 +493,8 @@ const handleSave = () => {
   color: var(--text-primary);
 }
 
-.end-date-input:focus {
+.end-date-input:focus,
+.repeat-count-input:focus {
   outline: none;
   border-color: var(--button-primary-bg);
   box-shadow: 0 0 0 2px var(--form-input-focus-shadow);
