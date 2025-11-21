@@ -357,6 +357,7 @@ const handleSave = () => {
   padding: 8px;
   border-radius: 6px;
   transition: background-color 0.2s;
+  cursor: pointer;
 }
 
 .repeat-option:hover {
