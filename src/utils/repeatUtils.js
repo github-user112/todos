@@ -259,3 +259,76 @@ export function getNextRepeatDates(todoDate, repeatType, interval = 1, count = 1
   
   return dates;
 }
+
+/**
+ * 获取重复事件的下一个日期（考虑结束日期）
+ * @param {Date} todoDate - 原始待办事项日期
+ * @param {string} repeatType - 重复类型
+ * @param {number} interval - 间隔值
+ * @param {number} count - 获取后续几个日期，默认为1
+ * @param {string} endDate - 结束日期（YYYY-MM-DD格式）
+ * @returns {Date[]} - 下一个/几个重复日期数组
+ */
+export function getNextRepeatDatesWithEndDate(todoDate, repeatType, interval = 1, count = 1, endDate = '') {
+  const dates = [];
+  
+  if (!repeatType || repeatType === 'none') {
+    return dates;
+  }
+  
+  // 如果提供了结束日期，将其转换为Date对象
+  let endDateTime = null;
+  if (endDate) {
+    endDateTime = new Date(endDate);
+    // 将结束日期设置为当天的结束时间（23:59:59）
+    endDateTime.setHours(23, 59, 59, 999);
+  }
+  
+  for (let i = 1; i <= count; i++) {
+    let nextDate;
+    
+    switch (repeatType) {
+      case 'daily':
+        nextDate = new Date(todoDate);
+        nextDate.setDate(todoDate.getDate() + (interval * i));
+        break;
+        
+      case 'weekly':
+        nextDate = new Date(todoDate);
+        nextDate.setDate(todoDate.getDate() + (interval * 7 * i));
+        break;
+        
+      case 'monthly':
+        nextDate = new Date(todoDate);
+        nextDate.setMonth(todoDate.getMonth() + (interval * i));
+        // 处理月末日期调整
+        if (nextDate.getDate() !== todoDate.getDate()) {
+          nextDate = adjustMonthEndDate(todoDate, nextDate.getFullYear(), nextDate.getMonth());
+        }
+        break;
+        
+      case 'yearly':
+        nextDate = new Date(todoDate);
+        nextDate.setFullYear(todoDate.getFullYear() + (interval * i));
+        // 处理闰年2月29日的情况
+        if (todoDate.getMonth() === 1 && todoDate.getDate() === 29 && !isLeapYear(nextDate.getFullYear())) {
+          nextDate.setDate(28); // 非闰年调整为2月28日
+        }
+        break;
+        
+      default:
+        continue;
+    }
+    
+    // 如果提供了结束日期，并且计算出的日期超过了结束日期，则停止生成
+    if (nextDate && endDateTime && nextDate > endDateTime) {
+      break;
+    }
+    
+    if (nextDate) {
+      dates.push(nextDate);
+    }
+  }
+  
+  return dates;
+}

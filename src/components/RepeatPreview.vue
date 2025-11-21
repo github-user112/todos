@@ -29,7 +29,7 @@
 
 <script setup>
 import { computed } from 'vue';
-import { getNextRepeatDates } from '../utils/repeatUtils';
+import { getNextRepeatDatesWithEndDate } from '../utils/repeatUtils';
 
 const props = defineProps({
   showPreview: {
@@ -47,6 +47,10 @@ const props = defineProps({
   repeatInterval: {
     type: Number,
     default: 1,
+  },
+  endDate: {
+    type: String,
+    default: '',
   },
 });
 
@@ -76,11 +80,12 @@ const nextDates = computed(() => {
   }
 
   try {
-    return getNextRepeatDates(
-      props.baseDate,
+    return getNextRepeatDatesWithEndDate(
+      new Date(props.baseDate),
       props.repeatType,
       props.repeatInterval,
-      4
+      4,
+      props.endDate
     );
   } catch (error) {
     console.error('生成重复日期预览失败:', error);
@@ -91,6 +96,7 @@ const nextDates = computed(() => {
 // 格式化日期显示
 const formatPreviewDate = (date) => {
   if (!date) return '';
+  date = new Date(date);
   return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
 };
 
@@ -111,15 +117,11 @@ const getWeekday = (date) => {
 
 <style scoped>
 .repeat-preview {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
   background: var(--card-background);
   border: 1px solid var(--border-color);
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  z-index: 10;
+  z-index: 1001;
   margin-top: 8px;
   max-height: 300px;
   overflow-y: auto;

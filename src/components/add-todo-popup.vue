@@ -156,6 +156,7 @@
           :baseDate="selectedDate"
           :repeatType="todoRepeat"
           :repeatInterval="currentInterval"
+          :endDate="endDate"
           @close="showPreview = false"
         />
       </div>
