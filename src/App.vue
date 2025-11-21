@@ -149,6 +149,7 @@ const handleAddTodo = async (todoData) => {
         date: todoData.date,
         repeatType: todoData.repeatType,
         repeatInterval: todoData.repeatInterval || 1,
+        endDate: todoData.endDate || '2039-12-31',
       },
       null,
       true
@@ -201,6 +202,7 @@ const handleCompleteTodo = async ({ todoId, date: todoDate, allInstances }) => {
           {
             id: todoId,
             completed: !todo.completed,
+            endDate: todo.end_date || '2039-12-31',
           },
           null,
           true

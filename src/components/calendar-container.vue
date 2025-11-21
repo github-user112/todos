@@ -253,9 +253,9 @@ function getTodosForDate(date, dateStr) {
     const currentDate = new Date(dateStr);
     const interval = todo.repeat_interval || 1;
 
-    // 使用统一的间隔计算函数
+    // 使用统一的间隔计算函数，传入结束日期参数
     if (
-      shouldShowRepeatingTodo(todoDate, currentDate, todo.repeat_type, interval)
+      shouldShowRepeatingTodo(todoDate, currentDate, todo.repeat_type, interval, todo.end_date ? new Date(todo.end_date) : null)
     ) {
       const isCompleted = isInstanceCompleted(todo.id, dateStr);
       result.push({
@@ -337,6 +337,7 @@ const saveTodo = async (eventData) => {
       date: selectedDate.value,
       repeatType: eventData?.repeatType || todoRepeat.value,
       repeatInterval: eventData?.repeatInterval || 1,
+      endDate: eventData?.endDate,
     });
     closeAddTodoPopup();
   } catch (error) {

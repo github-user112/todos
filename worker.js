@@ -79,12 +79,12 @@ async function handleGetTodos(request, env, userId) {
       SELECT * FROM todos 
       WHERE user_id = ? AND (
         (date BETWEEN ? AND ?) OR
-        (repeat_type != 'none' AND date <= ?)
-      )
+        (repeat_type != 'none' AND date <= ? AND (end_date IS NULL OR end_date >= ?))
+      ) AND (end_date IS NULL OR end_date >= ?)
       ORDER BY date, repeat_type, repeat_interval
     `
     )
-      .bind(userId, startDate, endDate, endDate)
+      .bind(userId, startDate, endDate, endDate, startDate, startDate)
       .all();
 
     // 查询已完成的实例
@@ -140,6 +140,7 @@ async function handleCreateTodo(request, env, userId) {
 
     const repeatType = data.repeatType || 'none';
     const repeatInterval = data.repeatInterval || 1;
+    const endDate = data.endDate || '2039-12-31';
 
     // 验证间隔值
     const validationResult = validateRepeatInterval(repeatType, repeatInterval);
@@ -158,11 +159,11 @@ async function handleCreateTodo(request, env, userId) {
     // 插入新的待办事项
     const result = await env.DB.prepare(
       `
-      INSERT INTO todos (text, date, repeat_type, repeat_interval, completed, user_id)
-      VALUES (?, ?, ?, ?, 0, ?)
+      INSERT INTO todos (text, date, repeat_type, repeat_interval, end_date, completed, user_id)
+      VALUES (?, ?, ?, ?, ?, 0, ?)
     `
     )
-      .bind(data.text, data.date, repeatType, repeatInterval, userId)
+      .bind(data.text, data.date, repeatType, repeatInterval, endDate, userId)
       .run();
 
     if (result.success) {
@@ -272,13 +273,14 @@ async function handleUpdateTodo(request, env, userId) {
     // 更新待办事项
     const completed =
       data.completed !== undefined ? (data.completed ? 1 : 0) : todo.completed;
+    const endDate = data.endDate !== undefined ? data.endDate : todo.end_date;
 
     const result = await env.DB.prepare(
       `
-      UPDATE todos SET completed = ? WHERE id = ?
+      UPDATE todos SET completed = ?, end_date = ? WHERE id = ?
     `
     )
-      .bind(completed, data.id)
+      .bind(completed, endDate, data.id)
       .run();
 
     return new Response(

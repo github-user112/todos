@@ -9,11 +9,17 @@
  * @param {Date} currentDate - 当前检查的日期
  * @param {string} repeatType - 重复类型 ('none', 'daily', 'weekly', 'monthly', 'yearly')
  * @param {number} interval - 间隔值，默认为1
+ * @param {Date} endDate - 结束日期，可选
  * @returns {boolean} - 是否应该显示
  */
-export function shouldShowRepeatingTodo(todoDate, currentDate, repeatType, interval = 1) {
+export function shouldShowRepeatingTodo(todoDate, currentDate, repeatType, interval = 1, endDate = null) {
   // 当前日期不能早于原始日期
   if (currentDate < todoDate) {
+    return false;
+  }
+  
+  // 如果设置了结束日期，且当前日期超过了结束日期，则不显示
+  if (endDate && currentDate > endDate) {
     return false;
   }
   

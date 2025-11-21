@@ -116,6 +116,18 @@
           <label>年</label>
           <span class="hint" v-if="todoRepeat === 'yearly'">(1-10年)</span>
         </div>
+
+        <!-- 结束日期选项 -->
+        <div class="repeat-option" v-if="todoRepeat !== 'none'">
+          <label for="end-date">结束日期:</label>
+          <input
+            type="date"
+            id="end-date"
+            v-model="endDate"
+            class="end-date-input"
+          />
+          <span class="hint">(可选)</span>
+        </div>
       </div>
 
       <!-- 重复预览 -->
@@ -174,6 +186,9 @@ const intervals = ref({
   monthly: 1,
   yearly: 1,
 });
+
+// 结束日期
+const endDate = ref('');
 
 // 预览显示状态
 const showPreview = ref(false);
@@ -256,10 +271,11 @@ const handleSave = () => {
     validateInterval(props.todoRepeat);
   }
 
-  // 发送保存事件，带上间隔信息
+  // 发送保存事件，带上间隔信息和结束日期
   emit('save', {
     repeatType: props.todoRepeat,
     repeatInterval: currentInterval.value,
+    endDate: endDate.value || undefined,
   });
 };
 </script>
@@ -385,6 +401,22 @@ const handleSave = () => {
 }
 
 .interval-input:focus {
+  outline: none;
+  border-color: var(--button-primary-bg);
+  box-shadow: 0 0 0 2px var(--form-input-focus-shadow);
+}
+
+.end-date-input {
+  margin-left: 8px;
+  padding: 4px 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 14px;
+  background: var(--card-background);
+  color: var(--text-primary);
+}
+
+.end-date-input:focus {
   outline: none;
   border-color: var(--button-primary-bg);
   box-shadow: 0 0 0 2px var(--form-input-focus-shadow);

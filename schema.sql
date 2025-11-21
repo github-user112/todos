@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS todos (
   date TEXT NOT NULL,
   repeat_type TEXT DEFAULT 'none',
   repeat_interval INTEGER DEFAULT 1,
+  end_date TEXT,
   completed INTEGER DEFAULT 0,
   user_id TEXT NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
