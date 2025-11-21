@@ -14,7 +14,7 @@
         <label class="section-label">重复设置</label>
 
         <!-- 不重复选项 -->
-        <div class="repeat-option">
+        <div class="repeat-option" @click="updateRepeatType('none')">
           <input
             type="radio"
             id="repeat-none"
@@ -26,7 +26,7 @@
         </div>
 
         <!-- 每天选项 -->
-        <div class="repeat-option">
+        <div class="repeat-option" @click="updateRepeatType('daily')">
           <input
             type="radio"
             id="repeat-daily"
@@ -49,7 +49,7 @@
         </div>
 
         <!-- 每周选项 -->
-        <div class="repeat-option">
+        <div class="repeat-option" @click="updateRepeatType('weekly')">
           <input
             type="radio"
             id="repeat-weekly"
@@ -72,7 +72,7 @@
         </div>
 
         <!-- 每月选项 -->
-        <div class="repeat-option">
+        <div class="repeat-option" @click="updateRepeatType('monthly')">
           <input
             type="radio"
             id="repeat-monthly"
@@ -95,7 +95,7 @@
         </div>
 
         <!-- 每年选项 -->
-        <div class="repeat-option">
+        <div class="repeat-option" @click="updateRepeatType('yearly')">
           <input
             type="radio"
             id="repeat-yearly"
@@ -366,6 +366,7 @@ const handleSave = () => {
 .repeat-option input[type='radio'] {
   margin-right: 8px;
   cursor: pointer;
+  pointer-events: none;
 }
 
 .repeat-option label {
@@ -374,6 +375,7 @@ const handleSave = () => {
   font-size: 14px;
   color: var(--text-secondary);
   min-width: fit-content;
+  user-select: none;
 }
 
 .interval-input {
