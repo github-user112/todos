@@ -1,7 +1,8 @@
-/node_modules/
+
 .git/
 .DS_Store
 .wrangler.toml
 .wrangler/
 dist/
 /.idea
+node_modules

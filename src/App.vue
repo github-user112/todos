@@ -64,41 +64,48 @@ const initializeUserId = () => {
 // 初始化日历
 // 在App.vue的script setup部分添加
 const fetchHolidayData = async (currentYear) => {
-  let result = {};
-  const calendar = new HolidayCalendar();
-  const cnDates = await Promise.all([
-    calendar.getDates('CN', currentYear - 1),
-    calendar.getDates('CN', currentYear),
-    calendar.getDates('CN', currentYear + 1),
-  ]).catch((error) => {
+  try {
+    let result = {};
+    const calendar = new HolidayCalendar();
+    let ps = [
+      calendar.getDates('CN', currentYear - 1),
+      calendar.getDates('CN', currentYear),
+    ];
+    if (currentYear < new Date().getFullYear()) {
+      ps.push(calendar.getDates('CN', currentYear + 1));
+    }
+    const cnDates = await Promise.all(ps);
+
+    // Save original data
+    result.dates = cnDates.flat();
+
+    if (result && result.dates) {
+      // 将数据转换为前端需要的格式
+      const holidayMap = {};
+      result.dates.forEach((item) => {
+        holidayMap[item.date] = {
+          name: item.name_cn,
+          type: item.type,
+        };
+      });
+      holidayData.value = { ...holidayData.value, ...holidayMap };
+    }
+  } catch (error) {
     console.error('获取节假日数据失败:', error);
-  });
-
-  // Save original data
-  result.dates = cnDates.flat();
-
-  if (result && result.dates) {
-    // 将数据转换为前端需要的格式
-    const holidayMap = {};
-    result.dates.forEach((item) => {
-      holidayMap[item.date] = {
-        name: item.name_cn,
-        type: item.type,
-      };
-    });
-    holidayData.value = { ...holidayData.value, ...holidayMap };
+    // 失败时不抛出错误，继续执行
   }
 };
 console.log(holidayData);
 console.log(holidayData.value);
 provide('holidayData', holidayData);
+// 初始化日历
 // 在initCalendar方法中调用
 const initCalendar = async () => {
   try {
     const currentDate = new Date();
-    // 使用Promise.all并行调用两个API
+    // 使用Promise.allSettled并行调用两个API，确保即使某个请求失败，其他请求也能继续执行
     setLoading(true);
-    await Promise.all([
+    await Promise.allSettled([
       fetchHolidayData(currentDate.getFullYear()),
       fetchCalendarData(currentDate),
     ]);
