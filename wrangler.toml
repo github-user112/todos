@@ -1,0 +1,9 @@
+name = "calendar-app"
+main = "worker.js"
+compatibility_date = "2023-10-30"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "calendar_db"
+database_id = "6dd2ed1b-2c5d-4dcf-9a78-b8b14e828516"
+
