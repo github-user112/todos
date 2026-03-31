@@ -1,11 +1,15 @@
 <template>
   <div class="todo-actions">
-    <button @click="$emit('complete')" class="complete-button">
-      <span class="action-icon">✓</span>
+    <button class="action-btn complete-btn" @click="$emit('complete')">
+      <span class="action-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </span>
       <span>完成</span>
     </button>
-    <button @click="$emit('delete')" class="delete-button">
-      <span class="action-icon">✕</span>
+    <button class="action-btn delete-btn" @click="$emit('delete')">
+      <span class="action-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+      </span>
       <span>删除</span>
     </button>
   </div>
@@ -17,75 +21,84 @@ defineEmits(['complete', 'delete']);
 
 <style scoped>
 .todo-actions {
-  position: absolute;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background: var(--card-background);
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border-color);
   z-index: 100;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  border: 1px solid #e2e8f0;
+  min-width: 120px;
 }
 
-.todo-actions button {
-  padding: 12px 20px;
-  border: none;
-  background: none;
-  text-align: left;
-  cursor: pointer;
-  transition: all 0.2s;
-  font-size: 14px;
-  position: relative;
+.action-btn {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  padding: 12px 18px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.action-btn:hover {
+  background: var(--hover-color);
+}
+.action-btn:active {
+  opacity: 0.7;
 }
 
 .action-icon {
-  font-weight: bold;
-  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  flex-shrink: 0;
 }
 
-.todo-actions button:hover {
-  background: #f8fafc;
+.complete-btn .action-icon {
+  background: #f0fdf4;
+  color: var(--success-color);
+}
+.complete-btn:hover {
+  background: #f0fdf4;
+  color: var(--success-color);
 }
 
-.complete-button {
-  color: #48bb78;
+.delete-btn .action-icon {
+  background: #fef2f2;
+  color: var(--danger-color);
+}
+.delete-btn:hover {
+  background: #fef2f2;
+  color: var(--danger-color);
 }
 
-.complete-button:hover {
-  background: #f0fff4 !important;
-}
-
-.delete-button {
-  color: #f56565;
-}
-
-.delete-button:hover {
-  background: #fff5f5 !important;
-}
-
-/* Mobile device styles */
-@media (max-width: 768px) {
+/* ---- 移动端底部抽屉 ---- */
+@media (max-width: 480px) {
   .todo-actions {
-    width: 100%;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    display: flex;
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: auto !important;
+    width: 100% !important;
     flex-direction: row;
     justify-content: space-around;
-    border-radius: 12px 12px 0 0;
+    border-radius: 16px 16px 0 0;
     border-bottom: none;
+    padding: 8px 0;
+    padding-bottom: calc(8px + env(safe-area-inset-bottom));
   }
-  
-  .todo-actions button {
-    flex: 1;
-    justify-content: center;
-    padding: 16px;
+  .action-btn {
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px 20px;
+    font-size: 0.75rem;
   }
 }
 </style>
-

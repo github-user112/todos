@@ -1,12 +1,88 @@
-/* 全局样式 */
+/* ==============================
+   智能日历管家 — 全局样式系统
+   ============================== */
+
 @import './theme.css';
 
-body {
+/* ---- Reset & Base ---- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: Arial, sans-serif;
 }
 
-* {
-  box-sizing: border-box;
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: 'Inter', 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+  background: var(--background-color);
+  color: var(--text-primary);
+  overflow: hidden;
+  line-height: 1.5;
+}
+
+/* ---- Scrollbar ---- */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+
+/* ---- Selection ---- */
+::selection {
+  background: var(--primary-color);
+  color: white;
+}
+
+/* ---- Focus ring ---- */
+:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+/* ---- Button reset ---- */
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+/* ---- Smooth transitions ---- */
+a, button, input, select {
+  transition: all 0.2s ease;
+}
+
+/* ---- Input reset ---- */
+input, select {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+/* ---- Responsive root font ---- */
+@media (max-width: 768px) {
+  html {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  html {
+    font-size: 13px;
+  }
 }
