@@ -1,5 +1,5 @@
 <template>
-  <div class="calendar-grid">
+  <div class="calendar-grid" :style="{ '--week-count': weekCount }">
     <!-- 左上角空格 -->
     <div class="empty-corner"></div>
 
@@ -13,14 +13,14 @@
     </div>
 
     <!-- 周数 -->
-    <template v-for="(week, weekIndex) in 5" :key="`week-number-${weekIndex}`">
+    <template v-for="(week, weekIndex) in weekCount" :key="`week-number-${weekIndex}`">
       <div class="week-number" :style="{ gridRow: weekIndex + 2 }">
         {{ weekNumbers[weekIndex] }}
       </div>
     </template>
 
     <!-- 日历天 -->
-    <template v-for="(week, weekIndex) in 5" :key="`week-${weekIndex}`">
+    <template v-for="(week, weekIndex) in weekCount" :key="`week-${weekIndex}`">
       <CalendarDay
         v-for="(day, dayIndex) in calendarDays.slice(weekIndex * 7, (weekIndex + 1) * 7)"
         :key="`${day.dateStr}-${day.isOtherMonth}`"
@@ -41,11 +41,12 @@
 import { ref, onMounted, onUnmounted } from 'vue';
 import CalendarDay from './calendar-day.vue';
 
-defineProps({
+const props = defineProps({
   weekdays: { type: Array, required: true },
   calendarDays: { type: Array, required: true },
   weekNumbers: { type: Array, required: true },
   animationType: { type: String, required: true },
+  weekCount: { type: Number, default: 5 },
 });
 
 defineEmits(['openAddTodoPopup', 'openTodoActions']);
@@ -60,11 +61,10 @@ onUnmounted(() => window.removeEventListener('resize', onResize));
 .calendar-grid {
   display: grid;
   grid-template-columns: 36px repeat(7, 1fr);
-  grid-template-rows: 34px repeat(5, 1fr);
+  grid-template-rows: 34px repeat(var(--week-count, 5), 1fr);
   gap: 4px;
   flex: 1;
   min-height: 0;
-  height: calc(100vh - 80px);
   padding: 0 2px;
   position: relative;
 }
@@ -116,9 +116,7 @@ onUnmounted(() => window.removeEventListener('resize', onResize));
   .calendar-grid {
     gap: 3px;
     grid-template-columns: repeat(7, 1fr);
-    grid-template-rows: 30px repeat(5, 1fr);
-    height: calc(100vh - 64px);
-    height: calc(100dvh - 64px);
+    grid-template-rows: 30px repeat(var(--week-count, 5), 1fr);
     padding: 0 2px;
   }
   .empty-corner,
@@ -137,8 +135,6 @@ onUnmounted(() => window.removeEventListener('resize', onResize));
   .calendar-grid {
     grid-template-columns: repeat(7, 1fr);
     gap: 2px;
-    height: calc(100vh - 58px);
-    height: calc(100dvh - 58px);
     padding: 0 1px;
   }
   .empty-corner,

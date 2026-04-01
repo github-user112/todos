@@ -31,6 +31,19 @@
             </div>
             <div class="drawer-body">
               <div class="setting-group">
+                <label class="setting-label">👁️ 视图模式</label>
+                <div class="view-mode-chips">
+                  <button
+                    v-for="v in viewModeOptions"
+                    :key="v.value"
+                    :class="['theme-chip', { active: viewMode === v.value }]"
+                    @click="$emit('changeViewMode', v.value)"
+                  >
+                    {{ v.label }}
+                  </button>
+                </div>
+              </div>
+              <div class="setting-group">
                 <label class="setting-label">🎨 主题风格</label>
                 <div class="theme-grid">
                   <button
@@ -76,11 +89,17 @@ defineProps({
   currentMonth: { type: Number, required: true },
   animationType: { type: String, required: true },
   themeType: { type: String, required: true },
+  viewMode: { type: String, required: true },
 });
 
-defineEmits(['prevMonth', 'nextMonth', 'goToToday', 'changeAnimation', 'changeTheme']);
+defineEmits(['prevMonth', 'nextMonth', 'goToToday', 'changeAnimation', 'changeTheme', 'changeViewMode']);
 
 const showDrawer = ref(false);
+
+const viewModeOptions = [
+  { value: 'today-priority', label: '📅 今日优先' },
+  { value: 'full-month', label: '🗓️ 完整月' },
+];
 
 const themeOptions = [
   { value: 'default', label: '🔮 极光紫' },
@@ -278,6 +297,11 @@ const copyUrlToClipboard = () => {
   border-color: var(--form-input-focus-border);
   box-shadow: 0 0 0 3px var(--form-input-focus-shadow);
   outline: none;
+}
+
+.view-mode-chips {
+  display: flex;
+  gap: 10px;
 }
 
 .theme-grid {

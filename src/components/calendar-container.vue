@@ -5,11 +5,13 @@
       :currentMonth="currentMonth"
       :animationType="animationType"
       :themeType="themeType"
+      :viewMode="viewMode"
       @prevMonth="prevMonth"
       @nextMonth="nextMonth"
       @goToToday="goToToday"
       @changeAnimation="changeAnimation"
       @changeTheme="changeTheme"
+      @changeViewMode="changeViewMode"
     />
 
     <CalendarGrid
@@ -17,6 +19,7 @@
       :calendarDays="calendarDays"
       :weekNumbers="weekNumbers"
       :animationType="animationType"
+      :weekCount="calendarWeekCount"
       @openAddTodoPopup="openAddTodoPopup"
       @openTodoActions="openTodoActions"
     />
@@ -74,6 +77,8 @@ const savedAnimation = localStorage.getItem('calendar_animation_type');
 const animationType = ref(savedAnimation || 'slide-left');
 const savedTheme = localStorage.getItem('calendar_theme_type');
 const themeType = ref(savedTheme || 'default');
+const savedViewMode = localStorage.getItem('calendar_view_mode');
+const viewMode = ref(savedViewMode || 'today-priority');
 
 // ---- 状态 ----
 const currentDate = ref(new Date());
@@ -99,23 +104,54 @@ let touchStartX = 0;
 let touchStartY = 0;
 
 // ---- 日历计算 ----
+const calendarWeekCount = computed(() => {
+  if (viewMode.value === 'today-priority') return 5;
+
+  // 完整月视图：计算当月实际有几周
+  const year = currentYear.value;
+  const month = currentMonth.value;
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+
+  // 本月第一天是周几（周一=1 ... 周日=0→7）
+  const firstDow = firstDay.getDay() || 7;
+  // 本月最后一天是周几
+  const lastDow = lastDay.getDay() || 7;
+
+  // 总格子数 = 月初前面空位 + 本月天数 + 月末后面空位
+  const totalCells = (firstDow - 1) + lastDay.getDate() + (7 - lastDow);
+  return Math.ceil(totalCells / 7);
+});
+
 const calendarDays = computed(() => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  // 基于当前查看的月份来计算显示范围
-  const viewDate = new Date(currentDate.value);
-  const viewDayOfWeek = viewDate.getDay();
-  const offsetToMonday = viewDayOfWeek === 0 ? 6 : viewDayOfWeek - 1;
-  const viewMonday = new Date(viewDate);
-  viewMonday.setDate(viewDate.getDate() - offsetToMonday);
-  viewMonday.setHours(0, 0, 0, 0);
+  const weekCount = calendarWeekCount.value;
+  let startDate;
 
-  const startDate = new Date(viewMonday);
-  startDate.setDate(startDate.getDate() - 7);
+  if (viewMode.value === 'today-priority') {
+    // 今日优先：基于当前查看日期所在周，固定 5 周
+    const viewDate = new Date(currentDate.value);
+    const viewDayOfWeek = viewDate.getDay();
+    const offsetToMonday = viewDayOfWeek === 0 ? 6 : viewDayOfWeek - 1;
+    const viewMonday = new Date(viewDate);
+    viewMonday.setDate(viewDate.getDate() - offsetToMonday);
+    viewMonday.setHours(0, 0, 0, 0);
+    startDate = new Date(viewMonday);
+    startDate.setDate(startDate.getDate() - 7);
+  } else {
+    // 完整月视图：从本月 1 号所在周的周一开始
+    const firstOfMonth = new Date(currentYear.value, currentMonth.value, 1);
+    const dow = firstOfMonth.getDay() || 7; // 周日=7
+    startDate = new Date(firstOfMonth);
+    startDate.setDate(startDate.getDate() - (dow - 1));
+    startDate.setHours(0, 0, 0, 0);
+  }
 
   const result = [];
-  for (let i = 0; i < 35; i++) {
+  const totalDays = weekCount * 7;
+  for (let i = 0; i < totalDays; i++) {
     const date = new Date(startDate);
     date.setDate(date.getDate() + i);
 
@@ -141,8 +177,9 @@ const calendarDays = computed(() => {
 });
 
 const weekNumbers = computed(() => {
+  const weekCount = calendarWeekCount.value;
   const weeks = [];
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < weekCount; i++) {
     const firstDayOfWeek = new Date(calendarDays.value[i * 7].date);
     const dayOfWeek = firstDayOfWeek.getDay();
     const offsetToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
@@ -220,6 +257,10 @@ const changeTheme = (v) => {
   themeType.value = v;
   localStorage.setItem('calendar_theme_type', v);
   applyTheme(v);
+};
+const changeViewMode = (v) => {
+  viewMode.value = v;
+  localStorage.setItem('calendar_view_mode', v);
 };
 
 const applyTheme = (theme) => {
