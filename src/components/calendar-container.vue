@@ -1,5 +1,5 @@
 <template>
-  <div class="calendar-container">
+  <div :class="['calendar-container', { 'drawer-open': showTodoListDrawer }]">
     <CalendarHeader
       :currentYear="currentYear"
       :currentMonth="currentMonth"
@@ -12,6 +12,7 @@
       @changeAnimation="changeAnimation"
       @changeTheme="changeTheme"
       @changeViewMode="changeViewMode"
+      @toggleTodoList="showTodoListDrawer = !showTodoListDrawer"
     />
 
     <CalendarGrid
@@ -39,6 +40,16 @@
       @complete="completeTodo"
       @delete="deleteTodo"
     />
+
+    <TodoListDrawer
+      :show="showTodoListDrawer"
+      :todos="todos"
+      :completedInstances="completedInstances"
+      :deletedInstances="deletedInstances"
+      @close="showTodoListDrawer = false"
+      @complete-todo="handleListComplete"
+      @delete-todo="handleListDelete"
+    />
   </div>
 </template>
 
@@ -49,6 +60,7 @@ import CalendarHeader from './calendar-header.vue';
 import CalendarGrid from './calendar-grid.vue';
 import AddTodoPopup from './add-todo-popup.vue';
 import TodoActionsMenu from './todo-actions-menu.vue';
+import TodoListDrawer from './TodoListDrawer.vue';
 import { formatDate, getWeekNumber } from '../utils/dateUtils';
 import { shouldShowRepeatingTodo } from '../utils/repeatUtils';
 
@@ -91,6 +103,9 @@ const showAddTodoPopup = ref(false);
 const todoText = ref('');
 const todoRepeat = ref('none');
 const selectedDate = ref(null);
+
+// Todo list drawer
+const showTodoListDrawer = ref(false);
 
 // Todo actions
 const showTodoActions = ref(false);
@@ -358,6 +373,14 @@ const deleteTodo = async () => {
   showTodoActions.value = false;
 };
 
+// ---- 待办列表抽屉操作 ----
+const handleListComplete = async ({ todoId, date, allInstances }) => {
+  await emit('complete-todo', { todoId, date, allInstances });
+};
+const handleListDelete = async ({ todoId, date, allInstances }) => {
+  await emit('delete-todo', { todoId, date, allInstances });
+};
+
 // ---- 点击外部关闭 ----
 const closeActionsOnOutsideClick = (event) => {
   if (!event.target.closest('.todo-item') && !event.target.closest('.todo-actions')) {
@@ -407,6 +430,13 @@ onMounted(() => {
   font-family: 'Inter', 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
   color: var(--text-primary);
   overflow: hidden;
+  transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1), margin-right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (min-width: 769px) {
+  .calendar-container.drawer-open {
+    width: calc(100vw - 340px);
+  }
 }
 
 @media (max-width: 768px) {
