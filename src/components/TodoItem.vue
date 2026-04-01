@@ -53,14 +53,17 @@ const handleDelete = () => {
   border-radius: 4px;
   font-size: 14px;
   position: relative;
+  min-height: 36px;
 }
 
 .delete-btn {
-  display: none;
+  opacity: 0;
+  transition: opacity 0.15s;
 }
 
-.todo-item:hover .delete-btn {
-  display: block;
+.todo-item:hover .delete-btn,
+.todo-item:active .delete-btn {
+  opacity: 1;
 }
 
 .todo-item.completed {
@@ -75,13 +78,15 @@ const handleDelete = () => {
 
 button {
   margin-left: 8px;
-  padding: 2px 6px;
+  padding: 4px 10px;
   font-size: 12px;
   background-color: #ff4d4f;
   color: white;
   border: none;
-  border-radius: 2px;
+  border-radius: 4px;
   cursor: pointer;
+  min-height: 28px;
+  min-width: 36px;
 }
 
 .repeat-badge {
@@ -95,13 +100,27 @@ button {
 
 @media (max-width: 768px) {
   .todo-item {
-    font-size: 12px;
+    font-size: 13px;
+    min-height: 40px;
+    padding: 6px 10px;
   }
 
-  button,
+  .delete-btn {
+    opacity: 1;
+  }
+
+  button {
+    font-size: 11px;
+    padding: 6px 12px;
+    min-height: 32px;
+    min-width: 44px;
+    border-radius: 6px;
+  }
+
   .repeat-badge {
-    font-size: 10px;
-    padding: 1px 4px;
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 4px;
   }
 }
 </style>

@@ -351,18 +351,12 @@ onMounted(() => {
 <style>
 @import './assets/theme.css';
 
-body {
-  font-family: Arial, sans-serif;
-  margin: 0;
-  padding: 0;
-  overflow: hidden; /* 禁止全局滚动条 */
-}
-
 .app-container {
   display: flex;
   flex-direction: column;
-  height: 100vh; /* 使用视口高度 */
-  width: 100vw; /* 使用视口宽度 */
-  overflow: hidden; /* 禁止容器滚动 */
+  height: 100vh;
+  height: 100dvh;
+  width: 100%;
+  overflow: hidden;
 }
 </style>

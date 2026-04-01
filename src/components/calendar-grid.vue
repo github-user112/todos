@@ -27,16 +27,18 @@
         :day="day"
         :style="{
           gridRow: weekIndex + 2,
-          gridColumn: dayIndex + 2,
+          gridColumn: dayIndex + (isMobile ? 1 : 2),
         }"
         @dblclick="$emit('openAddTodoPopup', day.dateStr)"
         @openTodoActions="(todoId, event) => $emit('openTodoActions', todoId, day.dateStr, event)"
+        @openAddPopup="(dateStr) => $emit('openAddTodoPopup', dateStr)"
       />
     </template>
   </div>
 </template>
 
 <script setup>
+import { ref, onMounted, onUnmounted } from 'vue';
 import CalendarDay from './calendar-day.vue';
 
 defineProps({
@@ -47,13 +49,18 @@ defineProps({
 });
 
 defineEmits(['openAddTodoPopup', 'openTodoActions']);
+
+const isMobile = ref(window.innerWidth <= 768);
+const onResize = () => { isMobile.value = window.innerWidth <= 768; };
+onMounted(() => window.addEventListener('resize', onResize));
+onUnmounted(() => window.removeEventListener('resize', onResize));
 </script>
 
 <style scoped>
 .calendar-grid {
   display: grid;
   grid-template-columns: 36px repeat(7, 1fr);
-  grid-template-rows: 32px repeat(5, 1fr);
+  grid-template-rows: 34px repeat(5, 1fr);
   gap: 4px;
   flex: 1;
   min-height: 0;
@@ -82,6 +89,7 @@ defineEmits(['openAddTodoPopup', 'openTodoActions']);
   box-shadow: var(--shadow-sm);
   z-index: 10;
   position: relative;
+  user-select: none;
 }
 
 .weekend-header {
@@ -100,33 +108,48 @@ defineEmits(['openAddTodoPopup', 'openTodoActions']);
   font-size: 0.75rem;
   z-index: 10;
   position: relative;
+  user-select: none;
 }
 
-/* ---- 移动端 ---- */
+/* ========== 移动端 ========== */
 @media (max-width: 768px) {
   .calendar-grid {
-    gap: 2px;
-    grid-template-columns: 24px repeat(7, 1fr);
+    gap: 3px;
+    grid-template-columns: repeat(7, 1fr);
+    grid-template-rows: 30px repeat(5, 1fr);
     height: calc(100vh - 64px);
-  }
-  .calendar-weekday {
-    font-size: 0.72rem;
-    padding: 4px 0;
-    border-radius: 6px;
-  }
-  .week-number {
-    font-size: 0.65rem;
-    border-radius: 6px;
-  }
-}
-
-@media (max-width: 480px) {
-  .calendar-grid {
-    grid-template-columns: 0 repeat(7, 1fr);
+    height: calc(100dvh - 64px);
+    padding: 0 2px;
   }
   .empty-corner,
   .week-number {
     display: none;
+  }
+  .calendar-weekday {
+    font-size: 0.75rem;
+    padding: 5px 0;
+    border-radius: 6px;
+    font-weight: 700;
+  }
+}
+
+@media (max-width: 380px) {
+  .calendar-grid {
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+    height: calc(100vh - 58px);
+    height: calc(100dvh - 58px);
+    padding: 0 1px;
+  }
+  .empty-corner,
+  .week-number {
+    display: none;
+  }
+  .calendar-weekday {
+    font-size: 0.7rem;
+    border-radius: 5px;
+    padding: 4px 0;
+    font-weight: 700;
   }
 }
 </style>

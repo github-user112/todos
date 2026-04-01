@@ -17,6 +17,7 @@ html {
   font-size: 16px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
@@ -25,6 +26,7 @@ body {
   color: var(--text-primary);
   overflow: hidden;
   line-height: 1.5;
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* ---- Scrollbar ---- */
@@ -61,6 +63,7 @@ button {
   cursor: pointer;
   border: none;
   background: none;
+  padding: 0;
 }
 
 /* ---- Smooth transitions ---- */
@@ -74,15 +77,22 @@ input, select {
   font-size: inherit;
 }
 
-/* ---- Responsive root font ---- */
-@media (max-width: 768px) {
-  html {
-    font-size: 14px;
+/* ---- 移动端安全区域 ---- */
+@supports (padding: env(safe-area-inset-bottom)) {
+  body {
+    padding-bottom: env(safe-area-inset-bottom);
   }
 }
 
-@media (max-width: 480px) {
+/* ---- 响应式字号 ---- */
+@media (max-width: 768px) {
   html {
-    font-size: 13px;
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 380px) {
+  html {
+    font-size: 14px;
   }
 }

@@ -103,13 +103,15 @@ const calendarDays = computed(() => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const currentDayOfWeek = today.getDay();
-  const offsetToMonday = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
-  const currentMonday = new Date(today);
-  currentMonday.setDate(today.getDate() - offsetToMonday);
-  currentMonday.setHours(0, 0, 0, 0);
+  // 基于当前查看的月份来计算显示范围
+  const viewDate = new Date(currentDate.value);
+  const viewDayOfWeek = viewDate.getDay();
+  const offsetToMonday = viewDayOfWeek === 0 ? 6 : viewDayOfWeek - 1;
+  const viewMonday = new Date(viewDate);
+  viewMonday.setDate(viewDate.getDate() - offsetToMonday);
+  viewMonday.setHours(0, 0, 0, 0);
 
-  const startDate = new Date(currentMonday);
+  const startDate = new Date(viewMonday);
   startDate.setDate(startDate.getDate() - 7);
 
   const result = [];
@@ -260,18 +262,19 @@ const openTodoActions = (todoId, todoDate, event) => {
   selectedTodoDate.value = todoDate;
   showTodoActions.value = true;
 
-  if (window.innerWidth <= 480) {
-    todoActionsStyle.value = {};
-  } else {
+  // 桌面端定位
+  if (window.innerWidth > 768) {
     const target = event?.target || event?.currentTarget;
     if (target) {
       const rect = target.getBoundingClientRect();
       todoActionsStyle.value = {
         position: 'absolute',
         top: `${rect.bottom + 4}px`,
-        left: `${Math.min(rect.left, window.innerWidth - 140)}px`,
+        left: `${Math.min(rect.left, window.innerWidth - 150)}px`,
       };
     }
+  } else {
+    todoActionsStyle.value = {};
   }
 };
 
@@ -332,11 +335,8 @@ const handleTouchEnd = async (event) => {
   const dx = Math.abs(event.changedTouches[0].screenX - touchStartX);
   const dy = Math.abs(event.changedTouches[0].screenY - touchStartY);
 
-  if (dt < 300 && dx < 10 && dy < 10) {
-    const target = event.target.closest('.calendar-day');
-    if (target) openAddTodoPopup(target.dataset.date);
-  }
-  if (dx > 100 && dy < 50) {
+  // 左右滑切换月份
+  if (dx > 80 && dy < 40) {
     if (event.changedTouches[0].screenX < touchStartX) nextMonth();
     else prevMonth();
   }
@@ -346,8 +346,8 @@ onMounted(() => {
   document.addEventListener('click', closeActionsOnOutsideClick);
   const calendarEl = document.querySelector('.calendar-grid');
   if (calendarEl) {
-    calendarEl.addEventListener('touchstart', handleTouchStart);
-    calendarEl.addEventListener('touchend', handleTouchEnd);
+    calendarEl.addEventListener('touchstart', handleTouchStart, { passive: true });
+    calendarEl.addEventListener('touchend', handleTouchEnd, { passive: true });
   }
   applyTheme(themeType.value);
 });
@@ -370,13 +370,13 @@ onMounted(() => {
 
 @media (max-width: 768px) {
   .calendar-container {
-    padding: 6px;
+    padding: 6px 4px;
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 380px) {
   .calendar-container {
-    padding: 4px;
+    padding: 4px 3px;
   }
 }
 </style>

@@ -37,6 +37,8 @@ export default {
   align-items: center;
   z-index: 9999;
   transition: opacity 0.3s ease;
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
 }
 
 .loading-container {
@@ -46,17 +48,17 @@ export default {
 }
 
 .loading-spinner {
-  width: 60px;
-  height: 60px;
-  border: 5px solid var(--loading-spinner-border);
-  border-top: 5px solid var(--loading-spinner-border-top);
+  width: 48px;
+  height: 48px;
+  border: 4px solid var(--loading-spinner-border);
+  border-top: 4px solid var(--loading-spinner-border-top);
   border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: 20px;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 16px;
 }
 
 .loading-text {
-  font-size: 18px;
+  font-size: 15px;
   color: var(--loading-text);
   font-weight: 500;
   letter-spacing: 0.5px;
@@ -65,4 +67,17 @@ export default {
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+  .loading-spinner {
+    width: 40px;
+    height: 40px;
+    border-width: 3px;
+    border-top-width: 3px;
+    margin-bottom: 12px;
+  }
+  .loading-text {
+    font-size: 14px;
+  }
 }</style>

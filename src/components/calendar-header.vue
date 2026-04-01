@@ -1,23 +1,21 @@
 <template>
   <div class="calendar-header">
-    <!-- 左侧：导航 -->
     <div class="header-left">
       <button class="nav-btn" @click="$emit('prevMonth')" aria-label="上一月">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
       </button>
       <h2 class="header-title">{{ currentYear }}年{{ currentMonth + 1 }}月</h2>
       <button class="nav-btn" @click="$emit('nextMonth')" aria-label="下一月">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
       </button>
-      <button class="today-btn" @click="$emit('goToToday')">今天</button>
     </div>
 
-    <!-- 右侧：操作 -->
     <div class="header-right">
-      <button class="icon-btn" @click="copyUrlToClipboard" title="分享日程">
+      <button class="today-btn" @click="$emit('goToToday')">今天</button>
+      <button class="icon-btn" @click="copyUrlToClipboard" title="分享">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
       </button>
-      <button class="icon-btn settings-trigger" @click="showDrawer = true" title="设置">
+      <button class="icon-btn" @click="showDrawer = true" title="设置">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       </button>
     </div>
@@ -32,7 +30,6 @@
               <button class="drawer-close" @click="showDrawer = false">✕</button>
             </div>
             <div class="drawer-body">
-              <!-- 主题 -->
               <div class="setting-group">
                 <label class="setting-label">🎨 主题风格</label>
                 <div class="theme-grid">
@@ -46,8 +43,6 @@
                   </button>
                 </div>
               </div>
-
-              <!-- 动画 -->
               <div class="setting-group">
                 <label class="setting-label">🎬 切换动画</label>
                 <select
@@ -64,9 +59,7 @@
               </div>
             </div>
             <div class="drawer-footer">
-              <a href="mailto:gonesc@foxmail.com" class="contact-link">
-                📧 gonesc@foxmail.com
-              </a>
+              <a href="mailto:gonesc@foxmail.com" class="contact-link">📧 gonesc@foxmail.com</a>
             </div>
           </div>
         </Transition>
@@ -108,20 +101,26 @@ const copyUrlToClipboard = () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 16px;
-  margin-bottom: 8px;
+  padding: 10px 14px;
+  margin-bottom: 6px;
   background: var(--card-background);
-  border-radius: 16px;
+  border-radius: 14px;
   box-shadow: var(--shadow-sm);
   border: 1px solid var(--border-color);
   gap: 8px;
+  flex-shrink: 0;
 }
 
-/* ---- 左侧导航 ---- */
 .header-left {
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .nav-btn {
@@ -133,44 +132,38 @@ const copyUrlToClipboard = () => {
   border-radius: 10px;
   color: var(--text-secondary);
   background: var(--hover-color);
-  transition: all 0.2s;
+  -webkit-tap-highlight-color: transparent;
 }
-.nav-btn:hover {
+.nav-btn:active {
+  transform: scale(0.9);
   background: var(--primary-light);
   color: var(--primary-color);
-  transform: scale(1.05);
 }
 
 .header-title {
   margin: 0;
-  font-size: 1.25rem;
+  font-size: 1.15rem;
   font-weight: 700;
   color: var(--text-primary);
-  min-width: 120px;
+  min-width: 105px;
   text-align: center;
   letter-spacing: -0.02em;
+  user-select: none;
 }
 
 .today-btn {
-  padding: 6px 14px;
-  border-radius: 8px;
+  padding: 7px 14px;
+  border-radius: 9px;
   font-size: 0.8rem;
   font-weight: 600;
   color: white;
   background: var(--button-primary-bg);
   box-shadow: var(--shadow-sm);
+  -webkit-tap-highlight-color: transparent;
 }
-.today-btn:hover {
+.today-btn:active {
   background: var(--button-primary-hover-bg);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
-}
-
-/* ---- 右侧操作 ---- */
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 4px;
+  transform: scale(0.95);
 }
 
 .icon-btn {
@@ -181,11 +174,12 @@ const copyUrlToClipboard = () => {
   height: 36px;
   border-radius: 10px;
   color: var(--text-secondary);
-  transition: all 0.2s;
+  -webkit-tap-highlight-color: transparent;
 }
-.icon-btn:hover {
+.icon-btn:active {
   background: var(--hover-color);
   color: var(--primary-color);
+  transform: scale(0.9);
 }
 
 /* ---- 设置抽屉 ---- */
@@ -200,53 +194,55 @@ const copyUrlToClipboard = () => {
 }
 
 .drawer-panel {
-  width: 300px;
+  width: 280px;
   height: 100%;
   background: var(--card-background);
   box-shadow: var(--shadow-xl);
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .drawer-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px;
+  padding: 18px;
   border-bottom: 1px solid var(--border-color);
 }
 
 .drawer-title {
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   font-weight: 700;
   color: var(--text-primary);
 }
 
 .drawer-close {
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--text-secondary);
   font-size: 1rem;
+  -webkit-tap-highlight-color: transparent;
 }
-.drawer-close:hover {
+.drawer-close:active {
   background: var(--hover-color);
 }
 
 .drawer-body {
   flex: 1;
-  padding: 20px;
+  padding: 18px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 22px;
 }
 
 .drawer-footer {
-  padding: 16px 20px;
+  padding: 14px 18px;
   border-top: 1px solid var(--border-color);
 }
 
@@ -255,11 +251,7 @@ const copyUrlToClipboard = () => {
   color: var(--text-secondary);
   text-decoration: none;
 }
-.contact-link:hover {
-  color: var(--primary-color);
-}
 
-/* ---- 设置项 ---- */
 .setting-group {
   display: flex;
   flex-direction: column;
@@ -273,13 +265,14 @@ const copyUrlToClipboard = () => {
 }
 
 .setting-select {
-  padding: 8px 12px;
+  padding: 10px 12px;
   border: 1px solid var(--border-color);
   border-radius: 10px;
   background: var(--card-background);
   color: var(--text-primary);
-  font-size: 0.85rem;
+  font-size: 0.88rem;
   cursor: pointer;
+  -webkit-appearance: none;
 }
 .setting-select:focus {
   border-color: var(--form-input-focus-border);
@@ -287,7 +280,6 @@ const copyUrlToClipboard = () => {
   outline: none;
 }
 
-/* ---- 主题色块 ---- */
 .theme-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -295,18 +287,17 @@ const copyUrlToClipboard = () => {
 }
 
 .theme-chip {
-  padding: 10px 8px;
+  padding: 11px 6px;
   border-radius: 10px;
   border: 2px solid var(--border-color);
   background: var(--hover-color);
   color: var(--text-primary);
   font-size: 0.8rem;
   font-weight: 500;
-  transition: all 0.2s;
+  -webkit-tap-highlight-color: transparent;
 }
-.theme-chip:hover {
-  border-color: var(--primary-color);
-  background: var(--primary-light);
+.theme-chip:active {
+  transform: scale(0.96);
 }
 .theme-chip.active {
   border-color: var(--primary-color);
@@ -325,7 +316,6 @@ const copyUrlToClipboard = () => {
 .drawer-overlay-leave-to {
   opacity: 0;
 }
-
 .drawer-panel-enter-active {
   transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -337,26 +327,66 @@ const copyUrlToClipboard = () => {
   transform: translateX(100%);
 }
 
-/* ---- 移动端 ---- */
+/* ========== 移动端 ========== */
 @media (max-width: 768px) {
   .calendar-header {
-    padding: 8px 10px;
+    padding: 6px 10px;
     border-radius: 12px;
+    margin-bottom: 4px;
+  }
+  .header-left {
+    gap: 4px;
+  }
+  .header-right {
+    gap: 4px;
   }
   .header-title {
     font-size: 1rem;
-    min-width: auto;
+    min-width: 90px;
   }
   .today-btn {
-    padding: 5px 10px;
-    font-size: 0.75rem;
+    padding: 8px 12px;
+    font-size: 0.78rem;
+    border-radius: 8px;
+    min-height: 36px;
   }
   .nav-btn, .icon-btn {
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+  }
+  .nav-btn svg, .icon-btn svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+@media (max-width: 380px) {
+  .calendar-header {
+    padding: 5px 6px;
+    border-radius: 10px;
+    gap: 2px;
+  }
+  .header-title {
+    font-size: 0.95rem;
+    min-width: 82px;
+  }
+  .today-btn {
+    padding: 6px 10px;
+    font-size: 0.75rem;
+    min-height: 34px;
+  }
+  .nav-btn, .icon-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+  }
+  .nav-btn svg, .icon-btn svg {
+    width: 16px;
+    height: 16px;
   }
   .drawer-panel {
-    width: 260px;
+    width: 100%;
   }
 }
 </style>

@@ -17,14 +17,18 @@
       },
     ]"
     :data-date="day.dateStr"
+    @click="handleDayClick"
     @dblclick="$emit('dblclick')"
   >
-    <!-- 日期数字 -->
+    <!-- 日期头部 -->
     <div class="day-header">
       <span class="day-number">{{ day.dayNumber }}</span>
-      <span v-if="day.holiday" class="holiday-badge" :class="getHolidayBadgeClass(day.holiday)">
-        {{ getHolidayBadgeText(day.holiday) }}
-      </span>
+      <div class="day-badges">
+        <span v-if="day.holiday" class="holiday-badge" :class="getHolidayBadgeClass(day.holiday)">
+          {{ getHolidayBadgeText(day.holiday) }}
+        </span>
+        <span v-if="day.todos.length > 0" class="todo-count-badge">{{ day.todos.length }}</span>
+      </div>
     </div>
 
     <!-- 农历/节日名 -->
@@ -40,7 +44,7 @@
         :class="['todo-item', { completed: todo.isCompleted }]"
         :data-id="todo.id"
         :data-date="day.dateStr"
-        @click="$emit('openTodoActions', todo.id, $event)"
+        @click.stop="$emit('openTodoActions', todo.id, $event)"
       >
         <span class="todo-dot" :class="{ done: todo.isCompleted }"></span>
         <span class="todo-text">{{ todo.text }}</span>
@@ -50,15 +54,20 @@
 </template>
 
 <script setup>
-defineProps({
+const props = defineProps({
   day: { type: Object, required: true },
 });
 
-defineEmits(['dblclick', 'openTodoActions']);
+const emit = defineEmits(['dblclick', 'openTodoActions', 'openAddPopup']);
+
+function handleDayClick(e) {
+  if (window.innerWidth <= 768 && !e.target.closest('.todo-item')) {
+    emit('openAddPopup', props.day.dateStr);
+  }
+}
 
 function isWeekend(date) {
-  const d = date.getDay();
-  return d === 0 || d === 6;
+  return date.getDay() === 0 || date.getDay() === 6;
 }
 
 function getHolidayBadgeClass(holiday) {
@@ -90,9 +99,10 @@ function getHolidayName(holiday) {
   min-height: 0;
   position: relative;
   box-shadow: var(--shadow-sm);
-  transition: box-shadow 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
+  transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
   cursor: default;
   overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .calendar-day:hover {
@@ -149,6 +159,7 @@ function getHolidayName(holiday) {
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 2px;
+  flex-shrink: 0;
 }
 
 .day-number {
@@ -156,6 +167,12 @@ function getHolidayName(holiday) {
   color: var(--text-primary);
   font-size: 0.9rem;
   line-height: 1;
+}
+
+.day-badges {
+  display: flex;
+  align-items: center;
+  gap: 3px;
 }
 
 /* ---- 假期徽章 ---- */
@@ -175,6 +192,17 @@ function getHolidayName(holiday) {
   color: var(--badge-work-text);
 }
 
+/* ---- 待办数量徽章 ---- */
+.todo-count-badge {
+  font-size: 0.55rem;
+  font-weight: 700;
+  padding: 0 5px;
+  border-radius: 8px;
+  line-height: 1.5;
+  background: var(--primary-light);
+  color: var(--primary-color);
+}
+
 /* ---- 农历/节日 ---- */
 .holiday-name {
   font-size: 0.6rem;
@@ -183,6 +211,7 @@ function getHolidayName(holiday) {
   overflow: hidden;
   text-overflow: ellipsis;
   margin-bottom: 2px;
+  flex-shrink: 0;
 }
 .holiday-rest-day .holiday-name {
   color: var(--danger-color);
@@ -196,6 +225,7 @@ function getHolidayName(holiday) {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  min-height: 0;
 }
 
 .todo-item {
@@ -207,15 +237,12 @@ function getHolidayName(holiday) {
   background: var(--todo-item-bg);
   border-left: 3px solid var(--todo-item-border-left);
   cursor: pointer;
-  transition: background 0.15s, transform 0.15s;
+  transition: background 0.15s;
   min-height: 0;
-}
-.todo-item:hover {
-  background: var(--todo-item-hover-bg);
-  transform: translateX(1px);
+  -webkit-tap-highlight-color: transparent;
 }
 .todo-item:active {
-  opacity: 0.8;
+  background: var(--todo-item-hover-bg);
 }
 
 .todo-dot {
@@ -224,12 +251,9 @@ function getHolidayName(holiday) {
   height: 5px;
   border-radius: 50%;
   background: var(--primary-color);
-  transition: all 0.2s;
 }
 .todo-dot.done {
   background: var(--success-color);
-  width: 6px;
-  height: 6px;
 }
 
 .todo-text {
@@ -250,38 +274,101 @@ function getHolidayName(holiday) {
   color: var(--todo-item-completed-text);
 }
 
-/* ---- 移动端 ---- */
+/* ========== 移动端 ========== */
 @media (max-width: 768px) {
   .calendar-day {
-    padding: 3px;
+    padding: 3px 3px 2px;
     border-radius: 8px;
+    border-width: 1px;
+    transition: none;
   }
   .calendar-day:hover {
     transform: none;
+    box-shadow: none;
+    border-color: var(--calendar-day-border);
   }
-  .todo-item {
-    padding: 2px 4px;
-    border-left-width: 2px;
-    border-radius: 4px;
+  .calendar-day:active {
+    background: var(--hover-color);
   }
-  .todo-text {
-    font-size: 0.65em;
-  }
-  .holiday-badge {
-    font-size: 0.55rem;
-    padding: 0 4px;
+  .day-header {
+    margin-bottom: 1px;
   }
   .day-number {
     font-size: 0.8rem;
   }
-}
-
-@media (max-width: 480px) {
-  .holiday-name {
-    display: none;
+  .day-badges {
+    gap: 2px;
+  }
+  .todo-item {
+    padding: 3px 4px;
+    border-left-width: 2px;
+    border-radius: 4px;
+    gap: 3px;
+    min-height: 22px;
   }
   .todo-dot {
-    display: none;
+    width: 4px;
+    height: 4px;
+  }
+  .todo-text {
+    font-size: 0.65rem;
+    line-height: 1.3;
+  }
+  .holiday-badge {
+    font-size: 0.55rem;
+    padding: 1px 4px;
+    border-radius: 5px;
+    line-height: 1.4;
+  }
+  .todo-count-badge {
+    font-size: 0.52rem;
+    padding: 0 4px;
+    border-radius: 5px;
+    line-height: 1.5;
+  }
+  .holiday-name {
+    font-size: 0.55rem;
+    margin-bottom: 1px;
+  }
+  .todo-list {
+    gap: 2px;
+  }
+  .current-day {
+    box-shadow: 0 0 0 2px var(--form-input-focus-shadow);
+  }
+}
+
+@media (max-width: 380px) {
+  .calendar-day {
+    padding: 2px 2px 1px;
+    border-radius: 6px;
+  }
+  .day-number {
+    font-size: 0.75rem;
+  }
+  .holiday-name {
+    font-size: 0.5rem;
+  }
+  .todo-dot {
+    width: 3px;
+    height: 3px;
+  }
+  .todo-text {
+    font-size: 0.6rem;
+    line-height: 1.2;
+  }
+  .todo-item {
+    padding: 2px 3px;
+    border-radius: 3px;
+    min-height: 18px;
+  }
+  .todo-count-badge {
+    font-size: 0.48rem;
+    padding: 0 3px;
+  }
+  .holiday-badge {
+    font-size: 0.5rem;
+    padding: 0 3px;
   }
 }
 </style>

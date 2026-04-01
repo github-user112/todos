@@ -2,18 +2,15 @@
   <Transition name="popup">
     <div class="add-todo-popup" @click.self="$emit('close')">
       <div class="popup-card">
-        <!-- 头部 -->
+        <div class="drag-bar"></div>
+
         <div class="popup-header">
-          <h2>添加待办事项</h2>
+          <h2>添加待办</h2>
           <button class="close-btn" @click="$emit('close')">✕</button>
         </div>
 
-        <!-- 日期显示 -->
-        <div class="date-badge">
-          📅 {{ selectedDate }}
-        </div>
+        <div class="date-badge">📅 {{ selectedDate }}</div>
 
-        <!-- 输入框 -->
         <input
           ref="inputRef"
           type="text"
@@ -22,9 +19,9 @@
           placeholder="输入待办事项..."
           class="todo-input"
           @keydown.enter="handleSave"
+          enterkeyhint="done"
         />
 
-        <!-- 重复设置 -->
         <div class="repeat-section">
           <label class="section-label">🔄 重复</label>
           <div class="repeat-chips">
@@ -38,11 +35,12 @@
             </button>
           </div>
 
-          <!-- 间隔输入 -->
           <div v-if="todoRepeat !== 'none'" class="interval-row">
             <span class="interval-prefix">每</span>
             <input
               type="number"
+              inputmode="numeric"
+              pattern="[0-9]*"
               v-model.number="intervals[todoRepeat]"
               :min="1"
               :max="INTERVAL_LIMITS[todoRepeat]?.max"
@@ -53,20 +51,13 @@
             <span class="interval-hint">{{ INTERVAL_LIMITS[todoRepeat]?.min }}-{{ INTERVAL_LIMITS[todoRepeat]?.max }}{{ INTERVAL_LIMITS[todoRepeat]?.unit }}</span>
           </div>
 
-          <!-- 结束日期 -->
           <div v-if="todoRepeat !== 'none'" class="interval-row">
             <label class="interval-prefix" for="end-date">结束</label>
-            <input
-              type="date"
-              id="end-date"
-              v-model="endDate"
-              class="interval-input date-input"
-            />
+            <input type="date" id="end-date" v-model="endDate" class="interval-input date-input" />
             <span class="interval-hint">可选</span>
           </div>
         </div>
 
-        <!-- 预览 -->
         <div v-if="todoRepeat !== 'none'" class="preview-section">
           <button type="button" @click="showPreview = !showPreview" class="preview-toggle">
             {{ showPreview ? '▲ 隐藏预览' : '▼ 显示未来日期' }}
@@ -82,7 +73,6 @@
           />
         </div>
 
-        <!-- 按钮 -->
         <div class="popup-actions">
           <button class="btn-cancel" @click="$emit('close')">取消</button>
           <button class="btn-save" @click="handleSave">保存</button>
@@ -107,7 +97,6 @@ const emit = defineEmits(['update:todoText', 'update:todoRepeat', 'save', 'close
 const inputRef = ref(null);
 const showPreview = ref(false);
 const endDate = ref('');
-
 const intervals = ref({ daily: 1, weekly: 1, monthly: 1, yearly: 1 });
 
 const INTERVAL_LIMITS = {
@@ -177,59 +166,68 @@ onMounted(() => {
   overflow-y: auto;
   box-shadow: var(--shadow-xl);
   border: 1px solid var(--border-color);
+  -webkit-overflow-scrolling: touch;
 }
 
-/* ---- 头部 ---- */
+.drag-bar {
+  display: none;
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border-color);
+  margin: 8px auto 0;
+}
+
 .popup-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 20px 0;
+  padding: 18px 18px 0;
 }
 .popup-header h2 {
   margin: 0;
-  font-size: 1.15rem;
+  font-size: 1.1rem;
   font-weight: 700;
   color: var(--text-primary);
 }
+
 .close-btn {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--text-secondary);
   font-size: 1rem;
+  -webkit-tap-highlight-color: transparent;
 }
-.close-btn:hover {
+.close-btn:active {
   background: var(--hover-color);
 }
 
-/* ---- 日期徽章 ---- */
 .date-badge {
-  margin: 12px 20px 0;
-  padding: 6px 12px;
+  margin: 10px 18px 0;
+  padding: 5px 10px;
   background: var(--hover-color);
-  border-radius: 8px;
+  border-radius: 7px;
   font-size: 0.8rem;
   color: var(--text-secondary);
   display: inline-block;
   width: fit-content;
 }
 
-/* ---- 输入框 ---- */
 .todo-input {
   display: block;
-  width: calc(100% - 40px);
-  margin: 16px 20px;
+  width: calc(100% - 36px);
+  margin: 14px 18px;
   padding: 12px 14px;
   border: 2px solid var(--border-color);
   border-radius: 10px;
   font-size: 0.95rem;
   background: var(--card-background);
   color: var(--text-primary);
-  transition: border-color 0.2s, box-shadow 0.2s;
+  -webkit-appearance: none;
 }
 .todo-input:focus {
   outline: none;
@@ -240,39 +238,37 @@ onMounted(() => {
   color: var(--other-month-text);
 }
 
-/* ---- 重复设置 ---- */
 .repeat-section {
-  margin: 0 20px 16px;
-  padding: 14px;
+  margin: 0 18px 14px;
+  padding: 12px;
   background: var(--hover-color);
-  border-radius: 12px;
+  border-radius: 10px;
 }
 .section-label {
   display: block;
   font-size: 0.8rem;
   font-weight: 600;
   color: var(--text-primary);
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .repeat-chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 5px;
 }
 .repeat-chip {
-  padding: 6px 12px;
-  border-radius: 20px;
+  padding: 7px 12px;
+  border-radius: 18px;
   border: 1.5px solid var(--border-color);
   background: var(--card-background);
   color: var(--text-secondary);
   font-size: 0.78rem;
   font-weight: 500;
-  transition: all 0.2s;
+  -webkit-tap-highlight-color: transparent;
 }
-.repeat-chip:hover {
-  border-color: var(--primary-color);
-  color: var(--primary-color);
+.repeat-chip:active {
+  transform: scale(0.95);
 }
 .repeat-chip.active {
   background: var(--primary-color);
@@ -281,28 +277,28 @@ onMounted(() => {
   font-weight: 600;
 }
 
-/* ---- 间隔输入 ---- */
 .interval-row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-top: 10px;
+  gap: 6px;
+  margin-top: 8px;
 }
 .interval-prefix {
   font-size: 0.82rem;
   color: var(--text-secondary);
   font-weight: 500;
-  min-width: 24px;
+  min-width: 26px;
 }
 .interval-input {
-  width: 60px;
-  padding: 6px 8px;
+  width: 58px;
+  padding: 7px 8px;
   border: 1.5px solid var(--border-color);
   border-radius: 8px;
   text-align: center;
   font-size: 0.85rem;
   background: var(--card-background);
   color: var(--text-primary);
+  -webkit-appearance: none;
 }
 .interval-input:focus {
   outline: none;
@@ -318,51 +314,48 @@ onMounted(() => {
   color: var(--text-secondary);
 }
 .interval-hint {
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   color: var(--other-month-text);
   margin-left: auto;
 }
 
-/* ---- 预览 ---- */
 .preview-section {
-  margin: 0 20px 16px;
+  margin: 0 18px 14px;
 }
 .preview-toggle {
   width: 100%;
-  padding: 8px;
+  padding: 9px;
   background: var(--preview-bg);
   border: 1px solid var(--preview-border);
   border-radius: 8px;
   color: var(--preview-text);
-  font-size: 0.78rem;
-  cursor: pointer;
-  transition: all 0.2s;
+  font-size: 0.8rem;
+  -webkit-tap-highlight-color: transparent;
 }
-.preview-toggle:hover {
+.preview-toggle:active {
   background: var(--preview-hover-bg);
 }
 
-/* ---- 按钮 ---- */
 .popup-actions {
   display: flex;
-  gap: 10px;
-  padding: 0 20px 20px;
+  gap: 8px;
+  padding: 0 18px 18px;
 }
 .btn-cancel,
 .btn-save {
   flex: 1;
-  padding: 11px 16px;
+  padding: 12px 14px;
   border-radius: 10px;
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   font-weight: 600;
-  transition: all 0.2s;
+  -webkit-tap-highlight-color: transparent;
 }
 .btn-cancel {
   background: var(--button-secondary-bg);
   color: var(--text-secondary);
   border: 1px solid var(--border-color);
 }
-.btn-cancel:hover {
+.btn-cancel:active {
   background: var(--button-secondary-hover-bg);
 }
 .btn-save {
@@ -370,13 +363,12 @@ onMounted(() => {
   color: white;
   box-shadow: var(--shadow-sm);
 }
-.btn-save:hover {
+.btn-save:active {
   background: var(--button-primary-hover-bg);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
+  transform: scale(0.97);
 }
 
-/* ---- 弹窗动画 ---- */
+/* ---- 动画 ---- */
 .popup-enter-active {
   transition: opacity 0.25s ease;
 }
@@ -404,16 +396,87 @@ onMounted(() => {
   opacity: 0;
 }
 
-/* ---- 移动端 ---- */
-@media (max-width: 480px) {
+/* ========== 移动端 ========== */
+@media (max-width: 768px) {
   .add-todo-popup {
     align-items: flex-end;
     padding: 0;
   }
   .popup-card {
-    max-height: 90vh;
-    border-radius: 16px 16px 0 0;
+    max-height: 92vh;
+    max-height: 92dvh;
+    border-radius: 18px 18px 0 0;
     max-width: 100%;
+    width: 100%;
+  }
+  .drag-bar {
+    display: block;
+  }
+  .popup-header {
+    padding: 10px 16px 0;
+  }
+  .popup-header h2 {
+    font-size: 1.05rem;
+  }
+  .date-badge {
+    margin: 8px 16px 0;
+    font-size: 0.78rem;
+  }
+  .todo-input {
+    width: calc(100% - 32px);
+    margin: 12px 16px;
+    padding: 14px 14px;
+    font-size: 1rem;
+  }
+  .repeat-section {
+    margin: 0 16px 10px;
+    padding: 10px;
+  }
+  .repeat-chip {
+    padding: 8px 12px;
+    font-size: 0.78rem;
+    min-height: 36px;
+  }
+  .preview-section {
+    margin: 0 16px 10px;
+  }
+  .preview-toggle {
+    min-height: 44px;
+  }
+  .popup-actions {
+    padding: 0 16px 14px;
+    padding-bottom: max(14px, env(safe-area-inset-bottom));
+    gap: 10px;
+  }
+  .btn-cancel,
+  .btn-save {
+    padding: 14px 14px;
+    font-size: 0.95rem;
+    min-height: 48px;
+  }
+}
+
+@media (max-width: 380px) {
+  .popup-card {
+    max-height: 95vh;
+    max-height: 95dvh;
+  }
+  .repeat-chips {
+    gap: 4px;
+  }
+  .repeat-chip {
+    padding: 7px 10px;
+    font-size: 0.75rem;
+    min-height: 34px;
+  }
+  .interval-input {
+    width: 54px;
+    padding: 8px 8px;
+    font-size: 0.85rem;
+    min-height: 36px;
+  }
+  .interval-prefix, .interval-suffix {
+    font-size: 0.82rem;
   }
 }
 </style>

@@ -205,17 +205,29 @@ const getWeekday = (date) => {
 /* 移动设备适配 */
 @media (max-width: 768px) {
   .repeat-preview {
-    position: fixed;
-    top: auto;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    border-radius: 16px 16px 0 0;
-    max-height: 50vh;
+    max-height: 250px;
+    margin-top: 8px;
   }
 
   .preview-header {
-    border-radius: 16px 16px 0 0;
+    padding: 10px 14px;
+  }
+
+  .preview-header h4 {
+    font-size: 13px;
+  }
+
+  .preview-content {
+    padding: 12px;
+  }
+
+  .original-date,
+  .repeat-setting {
+    font-size: 12px;
+  }
+
+  .next-occurrences li {
+    font-size: 11px;
   }
 }
 </style>
