@@ -12,7 +12,7 @@
     </div>
 
     <div class="header-right">
-      <button class="icon-btn" @click="$emit('toggleTodoList')" title="待办列表">
+      <button :class="['icon-btn', { active: showTodoList }]" @click="$emit('toggleTodoList')" title="待办列表">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
       </button>
       <button class="icon-btn" @click="copyUrlToClipboard" title="分享">
@@ -86,13 +86,14 @@
 
 <script setup>
 import { ref } from 'vue';
-
+import { apiRequest } from '../utils/api';
 defineProps({
   currentYear: { type: Number, required: true },
   currentMonth: { type: Number, required: true },
   animationType: { type: String, required: true },
   themeType: { type: String, required: true },
   viewMode: { type: String, required: true },
+  showTodoList: { type: Boolean, default: false },
 });
 
 defineEmits(['prevMonth', 'nextMonth', 'goToToday', 'changeAnimation', 'changeTheme', 'changeViewMode', 'openTodoList']);
@@ -202,6 +203,10 @@ const copyUrlToClipboard = () => {
   background: var(--hover-color);
   color: var(--primary-color);
   transform: scale(0.9);
+}
+.icon-btn.active {
+  background: var(--primary-light);
+  color: var(--primary-color);
 }
 
 /* ---- 设置抽屉 ---- */

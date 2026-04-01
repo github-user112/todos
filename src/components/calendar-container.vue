@@ -6,13 +6,14 @@
       :animationType="animationType"
       :themeType="themeType"
       :viewMode="viewMode"
+      :showTodoList="showTodoListDrawer"
       @prevMonth="prevMonth"
       @nextMonth="nextMonth"
       @goToToday="goToToday"
       @changeAnimation="changeAnimation"
       @changeTheme="changeTheme"
       @changeViewMode="changeViewMode"
-      @toggleTodoList="showTodoListDrawer = !showTodoListDrawer"
+      @toggleTodoList="toggleTodoList"
     />
 
     <CalendarGrid
@@ -63,7 +64,7 @@ import TodoActionsMenu from './todo-actions-menu.vue';
 import TodoListDrawer from './TodoListDrawer.vue';
 import { formatDate, getWeekNumber } from '../utils/dateUtils';
 import { shouldShowRepeatingTodo } from '../utils/repeatUtils';
-
+import { apiRequest } from '../utils/api';
 const dialog = useDialog();
 const message = useMessage();
 
@@ -84,13 +85,61 @@ const emit = defineEmits([
   'delete-todo',
 ]);
 
-// ---- 设置 ----
-const savedAnimation = localStorage.getItem('calendar_animation_type');
-const animationType = ref(savedAnimation || 'slide-left');
-const savedTheme = localStorage.getItem('calendar_theme_type');
-const themeType = ref(savedTheme || 'default');
-const savedViewMode = localStorage.getItem('calendar_view_mode');
-const viewMode = ref(savedViewMode || 'today-priority');
+// ---- 设置（从 API 加载，fallback localStorage） ----
+const animationType = ref(localStorage.getItem('calendar_animation_type') || 'slide-left');
+const themeType = ref(localStorage.getItem('calendar_theme_type') || 'default');
+const viewMode = ref(localStorage.getItem('calendar_view_mode') || 'today-priority');
+const showTodoList = ref(localStorage.getItem('calendar_show_todo_list') === '1');
+
+// 从 API 加载用户设置
+const loadUserSettings = async () => {
+  try {
+    const settings = await apiRequest('/api/user-settings');
+    if (settings.animation_type) {
+      animationType.value = settings.animation_type;
+      localStorage.setItem('calendar_animation_type', settings.animation_type);
+    }
+    if (settings.theme_type) {
+      themeType.value = settings.theme_type;
+      localStorage.setItem('calendar_theme_type', settings.theme_type);
+    }
+    if (settings.view_mode) {
+      viewMode.value = settings.view_mode;
+      localStorage.setItem('calendar_view_mode', settings.view_mode);
+    }
+    if (settings.show_todo_list !== undefined) {
+      showTodoList.value = !!settings.show_todo_list;
+      localStorage.setItem('calendar_show_todo_list', settings.show_todo_list ? '1' : '0');
+      showTodoListDrawer.value = !!settings.show_todo_list;
+    }
+  } catch (e) {
+    console.warn('加载用户设置失败，使用本地缓存:', e);
+  }
+};
+
+// 保存设置到 API + localStorage
+const saveUserSettings = async (field, value) => {
+  const fieldMap = {
+    animationType: 'animation_type',
+    themeType: 'theme_type',
+    viewMode: 'view_mode',
+    showTodoList: 'show_todo_list',
+  };
+  const localStorageMap = {
+    animationType: 'calendar_animation_type',
+    themeType: 'calendar_theme_type',
+    viewMode: 'calendar_view_mode',
+    showTodoList: 'calendar_show_todo_list',
+  };
+  const apiValue = field === 'showTodoList' ? (value ? 1 : 0) : value;
+  const localValue = field === 'showTodoList' ? (value ? '1' : '0') : value;
+  localStorage.setItem(localStorageMap[field], localValue);
+  try {
+    await apiRequest('/api/user-settings', 'PUT', { [fieldMap[field]]: apiValue });
+  } catch (e) {
+    console.warn('保存用户设置到 API 失败:', e);
+  }
+};
 
 // ---- 状态 ----
 const currentDate = ref(new Date());
@@ -266,16 +315,16 @@ watch(currentDate, (newDate, oldValue) => {
 // ---- 设置 ----
 const changeAnimation = (v) => {
   animationType.value = v;
-  localStorage.setItem('calendar_animation_type', v);
+  saveUserSettings('animationType', v);
 };
 const changeTheme = (v) => {
   themeType.value = v;
-  localStorage.setItem('calendar_theme_type', v);
   applyTheme(v);
+  saveUserSettings('themeType', v);
 };
 const changeViewMode = (v) => {
   viewMode.value = v;
-  localStorage.setItem('calendar_view_mode', v);
+  saveUserSettings('viewMode', v);
 };
 
 const applyTheme = (theme) => {
@@ -373,6 +422,13 @@ const deleteTodo = async () => {
   showTodoActions.value = false;
 };
 
+// ---- 待办列表开关 ----
+const toggleTodoList = () => {
+  showTodoListDrawer.value = !showTodoListDrawer.value;
+  showTodoList.value = showTodoListDrawer.value;
+  saveUserSettings('showTodoList', showTodoListDrawer.value);
+};
+
 // ---- 待办列表抽屉操作 ----
 const handleListComplete = async ({ todoId, date, allInstances }) => {
   await emit('complete-todo', { todoId, date, allInstances });
@@ -414,6 +470,7 @@ onMounted(() => {
     calendarEl.addEventListener('touchend', handleTouchEnd, { passive: true });
   }
   applyTheme(themeType.value);
+  loadUserSettings();
 });
 </script>
 
