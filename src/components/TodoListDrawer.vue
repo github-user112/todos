@@ -10,7 +10,7 @@
             <button class="drawer-close" @click="$emit('close')">✕</button>
           </div>
           <div class="drawer-body" ref="scrollBody" @scroll="onScroll">
-            <div class="load-zone" v-if="hasMorePast"><div class="loading-spinner"></div></div>
+            <div class="load-zone" v-if="hasMorePast"></div>
             <template v-for="(group, gi) in groupedTodos" :key="'m'+gi">
               <div :class="['section-divider', { 'today-divider': group.isToday || group.isBase }]" :ref="el => { if (group.isToday) todayEl = el; if (group.isBase) baseEl = el }">
                 {{ group.label }}
@@ -30,7 +30,7 @@
                 </div>
               </div>
             </template>
-            <div class="load-zone" v-if="hasMoreFuture"><div class="loading-spinner"></div></div>
+            <div class="load-zone" v-if="hasMoreFuture"></div>
             <div v-if="!groupedTodos.length" class="empty-state"><div class="empty-icon">🎉</div><div class="empty-text">暂无待办事项</div></div>
           </div>
           <div class="drawer-footer"><span class="todo-summary">共 {{totalCount}} 项待办</span></div>
@@ -48,7 +48,7 @@
         <button class="drawer-close" @click="$emit('close')">✕</button>
       </div>
       <div class="drawer-body" ref="scrollBody2" @scroll="onScroll">
-        <div class="load-zone" v-if="hasMorePast"><div class="loading-spinner"></div></div>
+        <div class="load-zone" v-if="hasMorePast"></div>
         <template v-for="(group, gi) in groupedTodos" :key="'p'+gi">
           <div :class="['section-divider', { 'today-divider': group.isToday || group.isBase }]" :ref="el => { if (group.isToday) todayEl = el; if (group.isBase) baseEl = el }">
             {{ group.label }}
@@ -68,7 +68,7 @@
             </div>
           </div>
         </template>
-        <div class="load-zone" v-if="hasMoreFuture"><div class="loading-spinner"></div></div>
+        <div class="load-zone" v-if="hasMoreFuture"></div>
         <div v-if="!groupedTodos.length" class="empty-state"><div class="empty-icon">🎉</div><div class="empty-text">暂无待办事项</div></div>
       </div>
       <div class="drawer-footer"><span class="todo-summary">共 {{totalCount}} 项待办</span></div>
@@ -248,20 +248,6 @@ defineExpose({ isOpen: computed(() => props.show) });
 .drawer-footer { padding: 10px 18px; border-top: 1px solid var(--border-color); flex-shrink: 0; }
 .todo-summary { font-size: 0.78rem; color: var(--text-secondary); }
 .load-zone { text-align: center; padding: 12px; }
-.loading-spinner {
-  width: 20px;
-  height: 20px;
-  border: 2px solid var(--border-color);
-  border-top: 2px solid var(--primary-color);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin: 0 auto;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
 
 .section-divider { font-size: 0.72rem; font-weight: 700; color: var(--text-secondary); padding: 10px 8px 6px; letter-spacing: 0.05em; }
 .today-divider { color: var(--primary-color); }
