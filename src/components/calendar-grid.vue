@@ -25,6 +25,7 @@
         v-for="(day, dayIndex) in calendarDays.slice(weekIndex * 7, (weekIndex + 1) * 7)"
         :key="`${day.dateStr}-${day.isOtherMonth}`"
         :day="day"
+        :selectedDate="selectedDate"
         :style="{
           gridRow: weekIndex + 2,
           gridColumn: dayIndex + (isMobile ? 1 : 2),
@@ -32,6 +33,7 @@
         @dblclick="$emit('openAddTodoPopup', day.dateStr)"
         @openTodoActions="(todoId, event) => $emit('openTodoActions', todoId, day.dateStr, event)"
         @openAddPopup="(dateStr) => $emit('openAddTodoPopup', dateStr)"
+        @selectDate="(dateStr) => $emit('selectDate', dateStr)"
       />
     </template>
   </div>
@@ -47,9 +49,10 @@ const props = defineProps({
   weekNumbers: { type: Array, required: true },
   animationType: { type: String, required: true },
   weekCount: { type: Number, default: 5 },
+  selectedDate: { type: String, default: '' },
 });
 
-defineEmits(['openAddTodoPopup', 'openTodoActions']);
+defineEmits(['openAddTodoPopup', 'openTodoActions', 'selectDate']);
 
 const isMobile = ref(window.innerWidth <= 768);
 const onResize = () => { isMobile.value = window.innerWidth <= 768; };

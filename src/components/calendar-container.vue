@@ -22,8 +22,10 @@
       :weekNumbers="weekNumbers"
       :animationType="animationType"
       :weekCount="calendarWeekCount"
+      :selectedDate="selectedDate"
       @openAddTodoPopup="openAddTodoPopup"
       @openTodoActions="openTodoActions"
+      @selectDate="handleSelectDate"
     />
 
     <AddTodoPopup
@@ -47,6 +49,7 @@
       :todos="todos"
       :completedInstances="completedInstances"
       :deletedInstances="deletedInstances"
+      :selectedDate="selectedDate"
       @close="showTodoListDrawer = false"
       @complete-todo="handleListComplete"
       @delete-todo="handleListDelete"
@@ -303,7 +306,10 @@ const nextMonth = () => {
   d.setMonth(d.getMonth() + 1);
   currentDate.value = d;
 };
-const goToToday = () => { currentDate.value = new Date(); };
+const goToToday = () => { 
+  currentDate.value = new Date(); 
+  selectedDate.value = formatDate(new Date()); 
+};
 
 watch(currentDate, (newDate, oldValue) => {
   emit('fetch-calendar-data', newDate);
@@ -420,6 +426,15 @@ const deleteTodo = async () => {
 
   await emit('delete-todo', { todoId: selectedTodo.value, date: selectedTodoDate.value, allInstances: false });
   showTodoActions.value = false;
+};
+
+// ---- 选中日期 ----
+const handleSelectDate = (dateStr) => {
+  selectedDate.value = dateStr;
+  if (!showTodoListDrawer.value) {
+    showTodoListDrawer.value = true;
+  }
+  saveUserSettings('showTodoList', true);
 };
 
 // ---- 待办列表开关 ----

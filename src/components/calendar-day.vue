@@ -3,7 +3,8 @@
     :class="[
       'calendar-day',
       { 'other-month': day.isOtherMonth },
-      { 'current-day': day.isToday },
+      { 'current-day': day.isToday && (!selectedDate || selectedDate === day.dateStr) },
+      { 'selected-day': selectedDate === day.dateStr },
       { 'weekend-day': isWeekend(day.date) && !day.holiday },
       {
         'holiday-rest-day':
@@ -56,13 +57,17 @@
 <script setup>
 const props = defineProps({
   day: { type: Object, required: true },
+  selectedDate: { type: String, default: '' },
 });
 
-const emit = defineEmits(['dblclick', 'openTodoActions', 'openAddPopup']);
+const emit = defineEmits(['dblclick', 'openTodoActions', 'openAddPopup', 'selectDate']);
 
 function handleDayClick(e) {
-  if (window.innerWidth <= 768 && !e.target.closest('.todo-item')) {
+  if (e.target.closest('.todo-item')) return;
+  if (window.innerWidth <= 768) {
     emit('openAddPopup', props.day.dateStr);
+  } else {
+    emit('selectDate', props.day.dateStr);
   }
 }
 
@@ -139,6 +144,17 @@ function getHolidayName(holiday) {
 .other-month .day-number {
   color: var(--other-month-text);
   font-size: 0.85em;
+}
+
+/* ---- 选中 ---- */
+.selected-day {
+  background: var(--primary-light);
+  border: 2px solid var(--primary-color);
+  box-shadow: 0 0 0 2px var(--form-input-focus-shadow);
+}
+.selected-day .day-number {
+  color: var(--primary-color);
+  font-weight: 700;
 }
 
 /* ---- 今天 ---- */
