@@ -110,6 +110,11 @@ const themeOptions = [
   { value: 'classic', label: '💎 经典蓝' },
   { value: 'orange', label: '🌅 暖橙' },
   { value: 'green', label: '🌿 护眼绿' },
+  { value: 'rose', label: '🌹 玫瑰粉' },
+  { value: 'lavender', label: '💜 薰衣草' },
+  { value: 'mint', label: '🌊 薄荷青' },
+  { value: 'amber', label: '🟠 琥珀橙' },
+  { value: 'primrose', label: '🌼 樱草黄' },
 ];
 
 const copyUrlToClipboard = () => {

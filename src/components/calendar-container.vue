@@ -335,11 +335,25 @@ const changeViewMode = (v) => {
 
 const applyTheme = (theme) => {
   const root = document.documentElement;
-  root.classList.remove('classic-theme', 'orange-theme', 'green-theme');
-  root.classList.remove('dark-mode');
-  if (theme === 'classic') root.classList.add('classic-theme');
-  else if (theme === 'orange') root.classList.add('orange-theme');
-  else if (theme === 'green') root.classList.add('green-theme');
+  root.classList.remove(
+    'classic-theme', 'orange-theme', 'green-theme',
+    'rose-theme', 'lavender-theme', 'mint-theme',
+    'amber-theme', 'primrose-theme',
+    'dark-mode'
+  );
+  const map = {
+    default: '',
+    classic: 'classic-theme',
+    orange: 'orange-theme',
+    green: 'green-theme',
+    rose: 'rose-theme',
+    lavender: 'lavender-theme',
+    mint: 'mint-theme',
+    amber: 'amber-theme',
+    primrose: 'primrose-theme',
+    dark: 'dark-mode',
+  };
+  if (map[theme]) root.classList.add(map[theme]);
 };
 
 // ---- Todo 弹窗 ----
