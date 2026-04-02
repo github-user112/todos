@@ -244,7 +244,7 @@ defineExpose({ isOpen: computed(() => props.show) });
 .today-jump-btn:active { background: var(--button-primary-hover-bg); transform: scale(0.95); }
 .drawer-close { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--text-secondary); font-size: 0.95rem; cursor: pointer; -webkit-tap-highlight-color: transparent; }
 .drawer-close:hover { background: var(--hover-color); }
-.drawer-body { flex: 1; overflow-y: auto; padding: 10px 12px; -webkit-overflow-scrolling: touch; }
+.drawer-body { flex: 1; overflow-y: scroll; padding: 10px 12px; -webkit-overflow-scrolling: touch; }
 .drawer-footer { padding: 10px 18px; border-top: 1px solid var(--border-color); flex-shrink: 0; }
 .todo-summary { font-size: 0.78rem; color: var(--text-secondary); }
 .load-zone { text-align: center; padding: 12px; }
