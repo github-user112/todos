@@ -21,7 +21,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, provide } from 'vue';
+import { ref, onMounted, onUnmounted, provide } from 'vue';
 import CalendarContainer from './components/calendar-container.vue';
 import LoadingComponent from './components/LoadingComponent.vue';
 import { formatDate } from './utils/dateUtils';
@@ -132,7 +132,7 @@ const fetchCalendarData = async (currentDate) => {
 
   try {
     const result = await apiRequest(
-      `/api/todos?startDate=${startDate}&endDate=${endDate}`
+      `/api/todos?startDate=${startDate}&endDate=${endDate}`,
     );
     todos.value = result.todos || [];
     completedInstances.value = result.completedInstances || [];
@@ -159,7 +159,7 @@ const handleAddTodo = async (todoData) => {
         endDate: todoData.endDate || '2039-12-31',
       },
       null,
-      true
+      true,
     );
 
     if (result.success) {
@@ -193,7 +193,7 @@ const handleCompleteTodo = async ({ todoId, date: todoDate, allInstances }) => {
           completed: !todo.completed,
         },
         null,
-        true
+        true,
       );
 
       if (result.success) {
@@ -212,7 +212,7 @@ const handleCompleteTodo = async ({ todoId, date: todoDate, allInstances }) => {
             endDate: todo.end_date || '2039-12-31',
           },
           null,
-          true
+          true,
         );
 
         if (result.success) {
@@ -229,7 +229,7 @@ const handleCompleteTodo = async ({ todoId, date: todoDate, allInstances }) => {
             date: todoDate,
           },
           null,
-          true
+          true,
         );
 
         if (result.success) {
@@ -243,7 +243,7 @@ const handleCompleteTodo = async ({ todoId, date: todoDate, allInstances }) => {
             // 移除完成记录
             const index = completedInstances.value.findIndex(
               (instance) =>
-                instance.todo_id == todoId && instance.date === todoDate
+                instance.todo_id == todoId && instance.date === todoDate,
             );
             if (index >= 0) {
               completedInstances.value.splice(index, 1);
@@ -278,7 +278,7 @@ const handleDeleteTodo = async ({ todoId, date: todoDate, allInstances }) => {
           'DELETE',
           null,
           null,
-          true
+          true,
         );
 
         if (result.success) {
@@ -293,7 +293,7 @@ const handleDeleteTodo = async ({ todoId, date: todoDate, allInstances }) => {
             'DELETE',
             null,
             null,
-            true
+            true,
           );
 
           if (result.success) {
@@ -311,7 +311,7 @@ const handleDeleteTodo = async ({ todoId, date: todoDate, allInstances }) => {
             },
             null,
             null,
-            true
+            true,
           );
 
           if (result.success) {
@@ -342,9 +342,25 @@ window.addEventListener('hashchange', () => {
   }
 });
 
+// 处理pageshow事件，从缓存加载时刷新数据
+const handlePageShow = (event) => {
+  if (event.persisted) {
+    // 页面从缓存(bfcache)加载，刷新待办数据
+    console.log('页面从缓存加载，刷新待办数据');
+    const currentDate = new Date();
+    fetchCalendarData(currentDate);
+  }
+};
+
 // 页面加载时初始化用户ID
 onMounted(() => {
   initializeUserId();
+  window.addEventListener('pageshow', handlePageShow);
+});
+
+// 组件卸载时清理事件监听
+onUnmounted(() => {
+  window.removeEventListener('pageshow', handlePageShow);
 });
 </script>
 
