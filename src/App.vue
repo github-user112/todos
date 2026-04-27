@@ -342,11 +342,11 @@ window.addEventListener('hashchange', () => {
   }
 });
 
-// 处理pageshow事件，从缓存加载时刷新数据
+// 处理pageshow事件，页面显示时刷新数据
 const handlePageShow = (event) => {
-  if (event.persisted) {
-    // 页面从缓存(bfcache)加载，刷新待办数据
-    console.log('页面从缓存加载，刷新待办数据');
+  console.log('pageshow事件触发，event.persisted:', event.persisted);
+  if (document.visibilityState === 'visible') {
+    console.log('页面从bfcache缓存加载，刷新待办数据');
     const currentDate = new Date();
     fetchCalendarData(currentDate);
   }
@@ -355,12 +355,15 @@ const handlePageShow = (event) => {
 // 页面加载时初始化用户ID
 onMounted(() => {
   initializeUserId();
-  window.addEventListener('pageshow', handlePageShow);
+  window.addEventListener('visibilitychange', handlePageShow);
+  setTimeout(() => {
+    window.removeEventListener('visibilitychange', handlePageShow);
+  }, 2000);
 });
 
 // 组件卸载时清理事件监听
 onUnmounted(() => {
-  window.removeEventListener('pageshow', handlePageShow);
+  window.removeEventListener('visibilitychange', handlePageShow);
 });
 </script>
 
