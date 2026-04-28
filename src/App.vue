@@ -133,7 +133,7 @@ const fetchCalendarData = async (currentDate) => {
   try {
     const result = await apiRequest(
       `/api/todos?startDate=${startDate}&endDate=${endDate}`,
-      null,
+      'GET',
       null,
       null,
       false,
