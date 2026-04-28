@@ -133,6 +133,10 @@ const fetchCalendarData = async (currentDate) => {
   try {
     const result = await apiRequest(
       `/api/todos?startDate=${startDate}&endDate=${endDate}`,
+      null,
+      null,
+      null,
+      false,
     );
     todos.value = result.todos || [];
     completedInstances.value = result.completedInstances || [];
@@ -356,9 +360,6 @@ const handlePageShow = (event) => {
 onMounted(() => {
   initializeUserId();
   window.addEventListener('visibilitychange', handlePageShow);
-  setTimeout(() => {
-    window.removeEventListener('visibilitychange', handlePageShow);
-  }, 2000);
 });
 
 // 组件卸载时清理事件监听
