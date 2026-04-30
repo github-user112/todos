@@ -2,35 +2,110 @@
   <div class="calendar-header">
     <div class="header-left">
       <button class="nav-btn" @click="$emit('prevMonth')" aria-label="上一月">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <polyline points="15 18 9 12 15 6" />
+        </svg>
       </button>
       <h2 class="header-title">{{ currentYear }}年{{ currentMonth + 1 }}月</h2>
       <button class="nav-btn" @click="$emit('nextMonth')" aria-label="下一月">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <polyline points="9 18 15 12 9 6" />
+        </svg>
       </button>
       <button class="today-btn" @click="$emit('goToToday')">今天</button>
     </div>
 
     <div class="header-right">
-      <button :class="['icon-btn', { active: showTodoList }]" @click="$emit('toggleTodoList')" title="待办列表">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      <button
+        :class="['icon-btn', { active: showTodoList }]"
+        @click="$emit('toggleTodoList')"
+        title="待办列表"
+      >
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <line x1="8" y1="6" x2="21" y2="6" />
+          <line x1="8" y1="12" x2="21" y2="12" />
+          <line x1="8" y1="18" x2="21" y2="18" />
+          <line x1="3" y1="6" x2="3.01" y2="6" />
+          <line x1="3" y1="12" x2="3.01" y2="12" />
+          <line x1="3" y1="18" x2="3.01" y2="18" />
+        </svg>
       </button>
       <button class="icon-btn" @click="copyUrlToClipboard" title="分享">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+          <polyline points="16 6 12 2 8 6" />
+          <line x1="12" y1="2" x2="12" y2="15" />
+        </svg>
       </button>
       <button class="icon-btn" @click="showDrawer = true" title="设置">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="12" cy="12" r="3" />
+          <path
+            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"
+          />
+        </svg>
       </button>
     </div>
 
     <!-- 设置抽屉 -->
     <Transition name="drawer-overlay">
-      <div v-if="showDrawer" class="drawer-overlay" @click.self="showDrawer = false">
+      <div
+        v-if="showDrawer"
+        class="drawer-overlay"
+        @click.self="showDrawer = false"
+      >
         <Transition name="drawer-panel">
           <div v-if="showDrawer" class="drawer-panel">
             <div class="drawer-header">
               <span class="drawer-title">⚙️ 设置</span>
-              <button class="drawer-close" @click="showDrawer = false">✕</button>
+              <button class="drawer-close" @click="showDrawer = false">
+                ✕
+              </button>
             </div>
             <div class="drawer-body">
               <div class="setting-group">
@@ -73,9 +148,23 @@
                   <option value="random">随机</option>
                 </select>
               </div>
+              <div class="setting-group">
+                <label class="setting-label">🌙 农历显示</label>
+                <div class="toggle-row">
+                  <span class="toggle-desc">在日期旁显示农历/节气</span>
+                  <button
+                    :class="['toggle-btn', { active: showLunar }]"
+                    @click="$emit('changeShowLunar', !showLunar)"
+                  >
+                    <span class="toggle-thumb"></span>
+                  </button>
+                </div>
+              </div>
             </div>
             <div class="drawer-footer">
-              <a href="mailto:gonesc@foxmail.com" class="contact-link">📧 gonesc@foxmail.com</a>
+              <a href="mailto:gonesc@foxmail.com" class="contact-link"
+                >📧 gonesc@foxmail.com</a
+              >
             </div>
           </div>
         </Transition>
@@ -94,9 +183,19 @@ defineProps({
   themeType: { type: String, required: true },
   viewMode: { type: String, required: true },
   showTodoList: { type: Boolean, default: false },
+  showLunar: { type: Boolean, default: true },
 });
 
-defineEmits(['prevMonth', 'nextMonth', 'goToToday', 'changeAnimation', 'changeTheme', 'changeViewMode', 'openTodoList']);
+defineEmits([
+  'prevMonth',
+  'nextMonth',
+  'goToToday',
+  'changeAnimation',
+  'changeTheme',
+  'changeViewMode',
+  'openTodoList',
+  'changeShowLunar',
+]);
 
 const showDrawer = ref(false);
 
@@ -118,7 +217,8 @@ const themeOptions = [
 ];
 
 const copyUrlToClipboard = () => {
-  navigator.clipboard.writeText(window.location.href)
+  navigator.clipboard
+    .writeText(window.location.href)
     .then(() => alert('链接已复制到剪贴板'))
     .catch(() => alert('复制失败'));
 };
@@ -344,6 +444,47 @@ const copyUrlToClipboard = () => {
   box-shadow: 0 0 0 3px var(--form-input-focus-shadow);
 }
 
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.toggle-desc {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.toggle-btn {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  border-radius: 12px;
+  background: var(--border-color);
+  transition: background 0.25s ease;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+.toggle-btn.active {
+  background: var(--primary-color);
+}
+
+.toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transition: transform 0.25s ease;
+}
+.toggle-btn.active .toggle-thumb {
+  transform: translateX(20px);
+}
+
 /* ---- 抽屉动画 ---- */
 .drawer-overlay-enter-active,
 .drawer-overlay-leave-active {
@@ -387,12 +528,14 @@ const copyUrlToClipboard = () => {
     border-radius: 8px;
     min-height: 36px;
   }
-  .nav-btn, .icon-btn {
+  .nav-btn,
+  .icon-btn {
     width: 36px;
     height: 36px;
     border-radius: 10px;
   }
-  .nav-btn svg, .icon-btn svg {
+  .nav-btn svg,
+  .icon-btn svg {
     width: 18px;
     height: 18px;
   }
@@ -413,12 +556,14 @@ const copyUrlToClipboard = () => {
     font-size: 0.75rem;
     min-height: 34px;
   }
-  .nav-btn, .icon-btn {
+  .nav-btn,
+  .icon-btn {
     width: 34px;
     height: 34px;
     border-radius: 8px;
   }
-  .nav-btn svg, .icon-btn svg {
+  .nav-btn svg,
+  .icon-btn svg {
     width: 16px;
     height: 16px;
   }

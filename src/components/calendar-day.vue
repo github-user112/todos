@@ -28,7 +28,12 @@
   >
     <!-- 日期头部 -->
     <div class="day-header">
-      <span class="day-number">{{ day.dayNumber }}</span>
+      <div class="day-number-wrap">
+        <span class="day-number">{{ day.dayNumber }}</span>
+        <span v-if="showLunar && displayLabel" class="day-lunar">{{
+          displayLabel
+        }}</span>
+      </div>
       <div class="day-badges">
         <span
           v-if="day.holiday"
@@ -41,14 +46,6 @@
           filteredTodos.length
         }}</span>
       </div>
-    </div>
-
-    <!-- 农历/节日名 -->
-    <div
-      v-if="getHolidayName(day.holiday) || day.lunarDate"
-      class="holiday-name"
-    >
-      {{ getHolidayName(day.holiday) || day.lunarDate }}
     </div>
 
     <!-- 待办列表 -->
@@ -85,6 +82,7 @@ const props = defineProps({
   holidayData: { type: Object, required: true },
   completedInstances: { type: Array, required: true },
   deletedInstances: { type: Array, required: true },
+  showLunar: { type: Boolean, default: true },
 });
 
 const emit = defineEmits([
@@ -93,6 +91,11 @@ const emit = defineEmits([
   'openAddPopup',
   'selectDate',
 ]);
+
+const displayLabel = computed(() => {
+  const holidayName = getHolidayName(props.day.holiday);
+  return holidayName || props.day.lunarDate || '';
+});
 
 const isInstanceCompleted = (todoId, dateStr) => {
   return props.completedInstances.some(
@@ -340,11 +343,33 @@ function getHolidayName(holiday) {
   flex-shrink: 0;
 }
 
+.day-number-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+  min-width: 0;
+}
+
 .day-number {
   font-weight: 600;
   color: var(--text-primary);
   font-size: 0.9rem;
   line-height: 1;
+  flex-shrink: 0;
+}
+
+.day-lunar {
+  font-size: 0.55rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1;
+  font-weight: 400;
+}
+.holiday-rest-day .day-lunar {
+  color: var(--danger-color);
+  font-weight: 500;
 }
 
 .day-badges {
@@ -377,20 +402,6 @@ function getHolidayName(holiday) {
   line-height: 1.5;
   background: var(--primary-light);
   color: var(--primary-color);
-}
-
-.holiday-name {
-  font-size: 0.6rem;
-  color: var(--text-secondary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-bottom: 2px;
-  flex-shrink: 0;
-}
-.holiday-rest-day .holiday-name {
-  color: var(--danger-color);
-  font-weight: 600;
 }
 
 .todo-list {
@@ -469,6 +480,9 @@ function getHolidayName(holiday) {
   .day-number {
     font-size: 0.8rem;
   }
+  .day-lunar {
+    font-size: 0.5rem;
+  }
   .day-badges {
     gap: 2px;
   }
@@ -499,10 +513,6 @@ function getHolidayName(holiday) {
     border-radius: 5px;
     line-height: 1.5;
   }
-  .holiday-name {
-    font-size: 0.55rem;
-    margin-bottom: 1px;
-  }
   .todo-list {
     gap: 2px;
   }
@@ -519,8 +529,8 @@ function getHolidayName(holiday) {
   .day-number {
     font-size: 0.75rem;
   }
-  .holiday-name {
-    font-size: 0.5rem;
+  .day-lunar {
+    font-size: 0.45rem;
   }
   .todo-dot {
     width: 3px;

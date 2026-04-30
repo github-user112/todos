@@ -13,7 +13,10 @@
     </div>
 
     <!-- 周数 -->
-    <template v-for="(week, weekIndex) in weekCount" :key="`week-number-${weekIndex}`">
+    <template
+      v-for="(week, weekIndex) in weekCount"
+      :key="`week-number-${weekIndex}`"
+    >
       <div class="week-number" :style="{ gridRow: weekIndex + 2 }">
         {{ weekNumbers[weekIndex] }}
       </div>
@@ -22,7 +25,10 @@
     <!-- 日历天 -->
     <template v-for="(week, weekIndex) in weekCount" :key="`week-${weekIndex}`">
       <CalendarDay
-        v-for="(day, dayIndex) in calendarDays.slice(weekIndex * 7, (weekIndex + 1) * 7)"
+        v-for="(day, dayIndex) in calendarDays.slice(
+          weekIndex * 7,
+          (weekIndex + 1) * 7,
+        )"
         :key="`${day.dateStr}-${day.isOtherMonth}`"
         :day="day"
         :selectedDate="selectedDate"
@@ -30,12 +36,16 @@
         :holidayData="holidayData"
         :completedInstances="completedInstances"
         :deletedInstances="deletedInstances"
+        :showLunar="showLunar"
         :style="{
           gridRow: weekIndex + 2,
           gridColumn: dayIndex + (isMobile ? 1 : 2),
         }"
         @dblclick="$emit('openAddTodoPopup', day.dateStr)"
-        @openTodoActions="(todoId, event) => $emit('openTodoActions', todoId, day.dateStr, event)"
+        @openTodoActions="
+          (todoId, event) =>
+            $emit('openTodoActions', todoId, day.dateStr, event)
+        "
         @openAddPopup="(dateStr) => $emit('openAddTodoPopup', dateStr)"
         @selectDate="(dateStr) => $emit('selectDate', dateStr)"
       />
@@ -58,12 +68,15 @@ const props = defineProps({
   holidayData: { type: Object, required: true },
   completedInstances: { type: Array, required: true },
   deletedInstances: { type: Array, required: true },
+  showLunar: { type: Boolean, default: true },
 });
 
 defineEmits(['openAddTodoPopup', 'openTodoActions', 'selectDate']);
 
 const isMobile = ref(window.innerWidth <= 768);
-const onResize = () => { isMobile.value = window.innerWidth <= 768; };
+const onResize = () => {
+  isMobile.value = window.innerWidth <= 768;
+};
 onMounted(() => window.addEventListener('resize', onResize));
 onUnmounted(() => window.removeEventListener('resize', onResize));
 </script>

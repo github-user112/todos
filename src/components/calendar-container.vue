@@ -7,6 +7,7 @@
       :themeType="themeType"
       :viewMode="viewMode"
       :showTodoList="showTodoListDrawer"
+      :showLunar="showLunar"
       @prevMonth="prevMonth"
       @nextMonth="nextMonth"
       @goToToday="goToToday"
@@ -14,6 +15,7 @@
       @changeTheme="changeTheme"
       @changeViewMode="changeViewMode"
       @toggleTodoList="toggleTodoList"
+      @changeShowLunar="changeShowLunar"
     />
 
     <CalendarGrid
@@ -27,6 +29,7 @@
       :holidayData="holidayData"
       :completedInstances="completedInstances"
       :deletedInstances="deletedInstances"
+      :showLunar="showLunar"
       @openAddTodoPopup="openAddTodoPopup"
       @openTodoActions="openTodoActions"
       @selectDate="handleSelectDate"
@@ -70,6 +73,7 @@ import AddTodoPopup from './add-todo-popup.vue';
 import TodoActionsMenu from './todo-actions-menu.vue';
 import TodoListDrawer from './TodoListDrawer.vue';
 import { formatDate, getWeekNumber } from '../utils/dateUtils';
+import { getLunarDateStr } from '../utils/lunarUtils';
 import { apiRequest } from '../utils/api';
 const dialog = useDialog();
 const message = useMessage();
@@ -78,7 +82,6 @@ const props = defineProps({
   todos: { type: Array, required: true },
   completedInstances: { type: Array, required: true },
   deletedInstances: { type: Array, required: true },
-  lunarData: { type: Object, required: true },
   holidayData: { type: Object, required: true },
   userId: { type: String, required: true },
 });
@@ -102,6 +105,7 @@ const viewMode = ref(
 const showTodoList = ref(
   localStorage.getItem('calendar_show_todo_list') === '1',
 );
+const showLunar = ref(localStorage.getItem('calendar_show_lunar') !== '0');
 
 // 从 API 加载用户设置
 const loadUserSettings = async () => {
@@ -127,6 +131,13 @@ const loadUserSettings = async () => {
       );
       showTodoListDrawer.value = !!settings.show_todo_list;
     }
+    if (settings.show_lunar !== undefined) {
+      showLunar.value = !!settings.show_lunar;
+      localStorage.setItem(
+        'calendar_show_lunar',
+        settings.show_lunar ? '1' : '0',
+      );
+    }
   } catch (e) {
     console.warn('加载用户设置失败，使用本地缓存:', e);
   }
@@ -139,15 +150,23 @@ const saveUserSettings = async (field, value) => {
     themeType: 'theme_type',
     viewMode: 'view_mode',
     showTodoList: 'show_todo_list',
+    showLunar: 'show_lunar',
   };
   const localStorageMap = {
     animationType: 'calendar_animation_type',
     themeType: 'calendar_theme_type',
     viewMode: 'calendar_view_mode',
     showTodoList: 'calendar_show_todo_list',
+    showLunar: 'calendar_show_lunar',
   };
-  const apiValue = field === 'showTodoList' ? (value ? 1 : 0) : value;
-  const localValue = field === 'showTodoList' ? (value ? '1' : '0') : value;
+  const apiValue =
+    field === 'showTodoList' || field === 'showLunar' ? (value ? 1 : 0) : value;
+  const localValue =
+    field === 'showTodoList' || field === 'showLunar'
+      ? value
+        ? '1'
+        : '0'
+      : value;
   localStorage.setItem(localStorageMap[field], localValue);
   try {
     await apiRequest('/api/user-settings', 'PUT', {
@@ -249,7 +268,7 @@ const calendarDays = computed(() => {
       isToday,
       date,
       dateStr,
-      lunarDate: getLunarDate(date),
+      lunarDate: getLunarDateStr(date),
       holiday: props.holidayData[dateStr] || '',
     });
   }
@@ -269,10 +288,6 @@ const weekNumbers = computed(() => {
   }
   return weeks;
 });
-
-function getLunarDate(date) {
-  return props.lunarData[formatDate(date)] || '';
-}
 
 // ---- 导航 ----
 const prevMonth = () => {
@@ -312,6 +327,10 @@ const changeTheme = (v) => {
 const changeViewMode = (v) => {
   viewMode.value = v;
   saveUserSettings('viewMode', v);
+};
+const changeShowLunar = (v) => {
+  showLunar.value = v;
+  saveUserSettings('showLunar', v);
 };
 
 const applyTheme = (theme) => {

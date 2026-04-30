@@ -7,7 +7,6 @@
           :todos="todos"
           :completedInstances="completedInstances"
           :deletedInstances="deletedInstances"
-          :lunarData="lunarData"
           :holidayData="holidayData"
           :userId="userId"
           @fetch-calendar-data="fetchCalendarData"
@@ -37,9 +36,6 @@ const userId = ref(null);
 const todos = ref([]);
 const completedInstances = ref([]);
 const deletedInstances = ref([]);
-
-// 农历和节假日数据
-const lunarData = ref({});
 
 const holidayData = ref({});
 
