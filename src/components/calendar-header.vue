@@ -160,6 +160,43 @@
                   </button>
                 </div>
               </div>
+              <div class="setting-group">
+                <label class="setting-label">🔗 Webhook 推送</label>
+                <p class="webhook-desc">
+                  每天早上 8:00 将当日待办推送到指定 URL
+                </p>
+                <input
+                  type="url"
+                  class="webhook-input"
+                  v-model="webhookUrl"
+                  placeholder="https://example.com/webhook"
+                />
+                <div class="webhook-actions">
+                  <button
+                    class="webhook-test-btn"
+                    :disabled="webhookTesting || !webhookUrl"
+                    @click="testWebhook"
+                  >
+                    {{ webhookTesting ? '测试中...' : '🧪 测试' }}
+                  </button>
+                  <button
+                    class="webhook-save-btn"
+                    :disabled="webhookSaving"
+                    @click="saveWebhook"
+                  >
+                    {{ webhookSaving ? '保存中...' : '💾 保存' }}
+                  </button>
+                </div>
+                <p
+                  v-if="webhookTestResult"
+                  :class="[
+                    'webhook-result',
+                    webhookTestResult.success ? 'success' : 'error',
+                  ]"
+                >
+                  {{ webhookTestResult.message }}
+                </p>
+              </div>
             </div>
             <div class="drawer-footer">
               <a href="mailto:gonesc@foxmail.com" class="contact-link"
@@ -184,6 +221,7 @@ defineProps({
   viewMode: { type: String, required: true },
   showTodoList: { type: Boolean, default: false },
   showLunar: { type: Boolean, default: true },
+  webhookUrlProp: { type: String, default: '' },
 });
 
 defineEmits([
@@ -195,9 +233,14 @@ defineEmits([
   'changeViewMode',
   'openTodoList',
   'changeShowLunar',
+  'changeWebhookUrl',
 ]);
 
 const showDrawer = ref(false);
+const webhookUrl = ref('');
+const webhookTesting = ref(false);
+const webhookSaving = ref(false);
+const webhookTestResult = ref(null);
 
 const viewModeOptions = [
   { value: 'today-priority', label: '📅 今日优先' },
@@ -215,6 +258,53 @@ const themeOptions = [
   { value: 'amber', label: '🟠 琥珀橙' },
   { value: 'primrose', label: '🌼 樱草黄' },
 ];
+
+const testWebhook = async () => {
+  if (!webhookUrl.value) return;
+  webhookTesting.value = true;
+  webhookTestResult.value = null;
+  try {
+    const result = await apiRequest('/api/webhook/test', 'POST', {});
+    if (result.success) {
+      webhookTestResult.value = {
+        success: true,
+        message: `✅ 测试成功！推送了 ${result.todoCount} 条待办（HTTP ${result.status}）`,
+      };
+    } else {
+      webhookTestResult.value = {
+        success: false,
+        message: `❌ 测试失败：${result.error || '未知错误'}`,
+      };
+    }
+  } catch (error) {
+    webhookTestResult.value = {
+      success: false,
+      message: `❌ 请求失败：${error.message}`,
+    };
+  } finally {
+    webhookTesting.value = false;
+  }
+};
+
+const saveWebhook = async () => {
+  webhookSaving.value = true;
+  try {
+    await apiRequest('/api/user-settings', 'PUT', {
+      webhook_url: webhookUrl.value,
+    });
+    webhookTestResult.value = {
+      success: true,
+      message: '✅ Webhook URL 已保存',
+    };
+  } catch (error) {
+    webhookTestResult.value = {
+      success: false,
+      message: `❌ 保存失败：${error.message}`,
+    };
+  } finally {
+    webhookSaving.value = false;
+  }
+};
 
 const copyUrlToClipboard = () => {
   navigator.clipboard
@@ -483,6 +573,86 @@ const copyUrlToClipboard = () => {
 }
 .toggle-btn.active .toggle-thumb {
   transform: translateX(20px);
+}
+
+.webhook-desc {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  margin: 0 0 8px;
+  line-height: 1.4;
+}
+
+.webhook-input {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1.5px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 0.82rem;
+  background: var(--card-background);
+  color: var(--text-primary);
+  -webkit-appearance: none;
+  box-sizing: border-box;
+}
+
+.webhook-input:focus {
+  outline: none;
+  border-color: var(--form-input-focus-border);
+  box-shadow: 0 0 0 3px var(--form-input-focus-shadow);
+}
+
+.webhook-input::placeholder {
+  color: var(--other-month-text);
+}
+
+.webhook-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.webhook-test-btn,
+.webhook-save-btn {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.webhook-test-btn {
+  background: var(--hover-color);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.webhook-test-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.webhook-save-btn {
+  background: var(--button-primary-bg);
+  color: white;
+}
+
+.webhook-save-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.webhook-result {
+  margin: 6px 0 0;
+  font-size: 0.72rem;
+  line-height: 1.4;
+}
+
+.webhook-result.success {
+  color: var(--success-color, #18a058);
+}
+
+.webhook-result.error {
+  color: var(--danger-color, #e74c3c);
 }
 
 /* ---- 抽屉动画 ---- */

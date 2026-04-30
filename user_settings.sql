@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS user_settings (
   theme_type TEXT DEFAULT 'default',
   view_mode TEXT DEFAULT 'today-priority',
   show_todo_list INTEGER DEFAULT 0,
+  webhook_url TEXT DEFAULT '',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

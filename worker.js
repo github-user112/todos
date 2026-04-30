@@ -4,11 +4,20 @@
 export default {
   async fetch(request, env, ctx) {
     try {
-      // 解析请求 URL
       const url = new URL(request.url);
       const path = url.pathname;
 
-      // 获取用户 ID
+      if (path === '/api/webhook/test' && request.method === 'POST') {
+        const userId = request.headers.get('X-User-ID');
+        if (!userId) {
+          return new Response(JSON.stringify({ error: '缺少用户 ID' }), {
+            status: 401,
+            headers: { 'Content-Type': 'application/json' },
+          });
+        }
+        return await handleTestWebhook(request, env, userId);
+      }
+
       const userId = request.headers.get('X-User-ID');
       if (!userId) {
         return new Response(JSON.stringify({ error: '缺少用户 ID' }), {
@@ -17,14 +26,11 @@ export default {
         });
       }
 
-      // 路由处理
-      // 用户设置
       if (path === '/api/user-settings' && request.method === 'GET') {
         return await handleGetUserSettings(request, env, userId);
       } else if (path === '/api/user-settings' && request.method === 'PUT') {
         return await handleUpdateUserSettings(request, env, userId);
       }
-      // 添加节假日路由
       if (path === '/api/holidays') {
         return handleGetHolidays(request, env, userId);
       }
@@ -60,6 +66,10 @@ export default {
       });
     }
   },
+
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(handleDailyWebhookPush(env));
+  },
 };
 
 // 获取待办事项列表
@@ -74,7 +84,7 @@ async function handleGetTodos(request, env, userId) {
       {
         status: 400,
         headers: { 'Content-Type': 'application/json' },
-      }
+      },
     );
   }
 
@@ -88,7 +98,7 @@ async function handleGetTodos(request, env, userId) {
         (repeat_type != 'none' AND date <= ? AND (end_date IS NULL OR end_date >= ?))
       ) AND (end_date IS NULL OR end_date >= ?)
       ORDER BY date, repeat_type, repeat_interval
-    `
+    `,
     )
       .bind(userId, startDate, endDate, endDate, startDate, startDate)
       .all();
@@ -98,7 +108,7 @@ async function handleGetTodos(request, env, userId) {
       `
       SELECT * FROM completed_instances 
       WHERE user_id = ? AND date BETWEEN ? AND ?
-    `
+    `,
     )
       .bind(userId, startDate, endDate)
       .all();
@@ -108,7 +118,7 @@ async function handleGetTodos(request, env, userId) {
       `
       SELECT * FROM deleted_instances 
       WHERE user_id = ? AND date BETWEEN ? AND ?
-    `
+    `,
     )
       .bind(userId, startDate, endDate)
       .all();
@@ -121,7 +131,7 @@ async function handleGetTodos(request, env, userId) {
       }),
       {
         headers: { 'Content-Type': 'application/json' },
-      }
+      },
     );
   } catch (error) {
     console.error('查询待办事项时出错:', error);
@@ -148,6 +158,8 @@ async function handleCreateTodo(request, env, userId) {
     const repeatInterval = data.repeatInterval || 1;
     const endDate = data.endDate || '2039-12-31';
     const skipHolidays = data.skipHolidays ? 1 : 0;
+    const reminder = data.reminder || 0;
+    const todoTime = data.todoTime || '09:00';
 
     // 验证间隔值
     const validationResult = validateRepeatInterval(repeatType, repeatInterval);
@@ -159,18 +171,28 @@ async function handleCreateTodo(request, env, userId) {
         {
           status: 400,
           headers: { 'Content-Type': 'application/json' },
-        }
+        },
       );
     }
 
     // 插入新的待办事项
     const result = await env.DB.prepare(
       `
-      INSERT INTO todos (text, date, repeat_type, repeat_interval, end_date, completed, skip_holidays, user_id)
-      VALUES (?, ?, ?, ?, ?, 0, ?, ?)
-    `
+      INSERT INTO todos (text, date, repeat_type, repeat_interval, end_date, completed, skip_holidays, reminder, todo_time, user_id)
+      VALUES (?, ?, ?, ?, ?, 0, ?, ?, ?, ?)
+    `,
     )
-      .bind(data.text, data.date, repeatType, repeatInterval, endDate, skipHolidays, userId)
+      .bind(
+        data.text,
+        data.date,
+        repeatType,
+        repeatInterval,
+        endDate,
+        skipHolidays,
+        reminder,
+        todoTime,
+        userId,
+      )
       .run();
 
     if (result.success) {
@@ -178,7 +200,7 @@ async function handleCreateTodo(request, env, userId) {
       const todo = await env.DB.prepare(
         `
         SELECT * FROM todos WHERE id = ?
-      `
+      `,
       )
         .bind(result.meta.last_row_id)
         .first();
@@ -188,12 +210,13 @@ async function handleCreateTodo(request, env, userId) {
           success: true,
           todo: {
             ...todo,
-            skip_holidays: !!todo.skip_holidays
+            skip_holidays: !!todo.skip_holidays,
+            reminder: todo.reminder || 0,
           },
         }),
         {
           headers: { 'Content-Type': 'application/json' },
-        }
+        },
       );
     } else {
       throw new Error('插入待办事项失败');
@@ -241,10 +264,10 @@ function validateRepeatInterval(repeatType, interval) {
         repeatType === 'daily'
           ? '每日'
           : repeatType === 'weekly'
-          ? '每周'
-          : repeatType === 'monthly'
-          ? '每月'
-          : '每年'
+            ? '每周'
+            : repeatType === 'monthly'
+              ? '每月'
+              : '每年'
       }间隔必须在${limit.min}-${limit.max}${limit.unit}之间`,
     };
   }
@@ -268,7 +291,7 @@ async function handleUpdateTodo(request, env, userId) {
     const todo = await env.DB.prepare(
       `
       SELECT * FROM todos WHERE id = ? AND user_id = ?
-    `
+    `,
     )
       .bind(data.id, userId)
       .first();
@@ -284,13 +307,17 @@ async function handleUpdateTodo(request, env, userId) {
     const completed =
       data.completed !== undefined ? (data.completed ? 1 : 0) : todo.completed;
     const endDate = data.endDate !== undefined ? data.endDate : todo.end_date;
+    const todoTime =
+      data.todoTime !== undefined ? data.todoTime : todo.todo_time;
+    const reminder =
+      data.reminder !== undefined ? data.reminder : todo.reminder;
 
     const result = await env.DB.prepare(
       `
-      UPDATE todos SET completed = ?, end_date = ? WHERE id = ?
-    `
+      UPDATE todos SET completed = ?, end_date = ?, todo_time = ?, reminder = ? WHERE id = ?
+    `,
     )
-      .bind(completed, endDate, data.id)
+      .bind(completed, endDate, todoTime, reminder, data.id)
       .run();
 
     return new Response(
@@ -299,7 +326,7 @@ async function handleUpdateTodo(request, env, userId) {
       }),
       {
         headers: { 'Content-Type': 'application/json' },
-      }
+      },
     );
   } catch (error) {
     console.error('更新待办事项时出错:', error);
@@ -327,7 +354,7 @@ async function handleDeleteTodo(request, env, userId) {
     const todo = await env.DB.prepare(
       `
       SELECT * FROM todos WHERE id = ? AND user_id = ?
-    `
+    `,
     )
       .bind(id, userId)
       .first();
@@ -343,7 +370,7 @@ async function handleDeleteTodo(request, env, userId) {
     const result = await env.DB.prepare(
       `
       DELETE FROM todos WHERE id = ?
-    `
+    `,
     )
       .bind(id)
       .run();
@@ -354,7 +381,7 @@ async function handleDeleteTodo(request, env, userId) {
       }),
       {
         headers: { 'Content-Type': 'application/json' },
-      }
+      },
     );
   } catch (error) {
     console.error('删除待办事项时出错:', error);
@@ -381,7 +408,7 @@ async function handleToggleCompletedInstance(request, env, userId) {
     const todo = await env.DB.prepare(
       `
       SELECT * FROM todos WHERE id = ? AND user_id = ?
-    `
+    `,
     )
       .bind(data.todoId, userId)
       .first();
@@ -400,7 +427,7 @@ async function handleToggleCompletedInstance(request, env, userId) {
         await env.DB.prepare(
           `
           UPDATE todos SET completed = 1 WHERE id = ?
-        `
+        `,
         )
           .bind(data.todoId)
           .run();
@@ -409,14 +436,14 @@ async function handleToggleCompletedInstance(request, env, userId) {
         await env.DB.prepare(
           `
           UPDATE todos SET completed = 0 WHERE id = ?
-        `
+        `,
         )
           .bind(data.todoId)
           .run();
         await env.DB.prepare(
           `
           DELETE FROM completed_instances WHERE todo_id = ?
-        `
+        `,
         )
           .bind(data.todoId)
           .run();
@@ -431,7 +458,7 @@ async function handleToggleCompletedInstance(request, env, userId) {
       `
       SELECT * FROM completed_instances 
       WHERE todo_id = ? AND date = ? AND user_id = ?
-    `
+    `,
     )
       .bind(data.todoId, data.date, userId)
       .first();
@@ -444,7 +471,7 @@ async function handleToggleCompletedInstance(request, env, userId) {
         `
         DELETE FROM completed_instances 
         WHERE todo_id = ? AND date = ? AND user_id = ?
-      `
+      `,
       )
         .bind(data.todoId, data.date, userId)
         .run();
@@ -454,7 +481,7 @@ async function handleToggleCompletedInstance(request, env, userId) {
         `
         INSERT INTO completed_instances (todo_id, date, user_id)
         VALUES (?, ?, ?)
-      `
+      `,
       )
         .bind(data.todoId, data.date, userId)
         .run();
@@ -468,7 +495,7 @@ async function handleToggleCompletedInstance(request, env, userId) {
       }),
       {
         headers: { 'Content-Type': 'application/json' },
-      }
+      },
     );
   } catch (error) {
     console.error('切换完成状态时出错:', error);
@@ -495,7 +522,7 @@ async function handleCreateDeletedInstance(request, env, userId) {
     const todo = await env.DB.prepare(
       `
       SELECT * FROM todos WHERE id = ? AND user_id = ?
-    `
+    `,
     )
       .bind(data.todoId, userId)
       .first();
@@ -512,7 +539,7 @@ async function handleCreateDeletedInstance(request, env, userId) {
       await env.DB.prepare(
         `
         DELETE FROM todos WHERE id = ?
-      `
+      `,
       )
         .bind(data.todoId)
         .run();
@@ -526,7 +553,7 @@ async function handleCreateDeletedInstance(request, env, userId) {
       `
       SELECT * FROM deleted_instances 
       WHERE todo_id = ? AND date = ? AND user_id = ?
-    `
+    `,
     )
       .bind(data.todoId, data.date, userId)
       .first();
@@ -537,7 +564,7 @@ async function handleCreateDeletedInstance(request, env, userId) {
         `
         INSERT INTO deleted_instances (todo_id, date, user_id)
         VALUES (?, ?, ?)
-      `
+      `,
       )
         .bind(data.todoId, data.date, userId)
         .run();
@@ -549,7 +576,7 @@ async function handleCreateDeletedInstance(request, env, userId) {
       }),
       {
         headers: { 'Content-Type': 'application/json' },
-      }
+      },
     );
   } catch (error) {
     console.error('创建删除记录时出错:', error);
@@ -564,28 +591,38 @@ async function handleCreateDeletedInstance(request, env, userId) {
 async function handleGetUserSettings(request, env, userId) {
   try {
     const settings = await env.DB.prepare(
-      `SELECT * FROM user_settings WHERE user_id = ?`
-    ).bind(userId).first();
+      `SELECT * FROM user_settings WHERE user_id = ?`,
+    )
+      .bind(userId)
+      .first();
 
     if (!settings) {
-      return new Response(JSON.stringify({
-        animation_type: 'slide-left',
-        theme_type: 'default',
-        view_mode: 'today-priority',
-        show_todo_list: 0,
-      }), {
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return new Response(
+        JSON.stringify({
+          animation_type: 'slide-left',
+          theme_type: 'default',
+          view_mode: 'today-priority',
+          show_todo_list: 0,
+          webhook_url: '',
+        }),
+        {
+          headers: { 'Content-Type': 'application/json' },
+        },
+      );
     }
 
-    return new Response(JSON.stringify({
-      animation_type: settings.animation_type,
-      theme_type: settings.theme_type,
-      view_mode: settings.view_mode,
-      show_todo_list: settings.show_todo_list,
-    }), {
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return new Response(
+      JSON.stringify({
+        animation_type: settings.animation_type,
+        theme_type: settings.theme_type,
+        view_mode: settings.view_mode,
+        show_todo_list: settings.show_todo_list,
+        webhook_url: settings.webhook_url || '',
+      }),
+      {
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
   } catch (error) {
     console.error('获取用户设置失败:', error);
     return new Response(JSON.stringify({ error: '获取用户设置失败' }), {
@@ -599,7 +636,13 @@ async function handleGetUserSettings(request, env, userId) {
 async function handleUpdateUserSettings(request, env, userId) {
   try {
     const data = await request.json();
-    const allowedFields = ['animation_type', 'theme_type', 'view_mode', 'show_todo_list'];
+    const allowedFields = [
+      'animation_type',
+      'theme_type',
+      'view_mode',
+      'show_todo_list',
+      'webhook_url',
+    ];
     const updates = [];
     const values = [];
 
@@ -621,8 +664,10 @@ async function handleUpdateUserSettings(request, env, userId) {
     values.push(userId);
 
     const result = await env.DB.prepare(
-      `UPDATE user_settings SET ${updates.join(', ')} WHERE user_id = ?`
-    ).bind(...values).run();
+      `UPDATE user_settings SET ${updates.join(', ')} WHERE user_id = ?`,
+    )
+      .bind(...values)
+      .run();
 
     if (result.meta.changes === 0) {
       const fields = ['user_id'];
@@ -638,8 +683,10 @@ async function handleUpdateUserSettings(request, env, userId) {
       }
 
       await env.DB.prepare(
-        `INSERT INTO user_settings (${fields.join(', ')}) VALUES (${placeholders.join(', ')})`
-      ).bind(...insertValues).run();
+        `INSERT INTO user_settings (${fields.join(', ')}) VALUES (${placeholders.join(', ')})`,
+      )
+        .bind(...insertValues)
+        .run();
     }
 
     return new Response(JSON.stringify({ success: true }), {
@@ -669,7 +716,7 @@ async function handleGetHolidays(request, env, userId) {
 
     // 从unpkg获取节假日数据
     const response = await fetch(
-      `https://unpkg.com/holiday-calendar@1.1.6/data/CN/${year}.min.json`
+      `https://unpkg.com/holiday-calendar@1.1.6/data/CN/${year}.min.json`,
     );
 
     if (!response.ok) {
@@ -689,5 +736,141 @@ async function handleGetHolidays(request, env, userId) {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
     });
+  }
+}
+
+async function handleTestWebhook(request, env, userId) {
+  try {
+    const settings = await env.DB.prepare(
+      `SELECT webhook_url FROM user_settings WHERE user_id = ?`,
+    )
+      .bind(userId)
+      .first();
+
+    const webhookUrl = settings?.webhook_url;
+    if (!webhookUrl) {
+      return new Response(JSON.stringify({ error: '请先设置 Webhook URL' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+    const todosResult = await env.DB.prepare(
+      `SELECT * FROM todos WHERE user_id = ? AND date = ? AND completed = 0`,
+    )
+      .bind(userId, todayStr)
+      .all();
+
+    const todos = todosResult.results || [];
+    const payload = buildWebhookPayload(todayStr, todos);
+
+    const response = await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        status: response.status,
+        todoCount: todos.length,
+      }),
+      { headers: { 'Content-Type': 'application/json' } },
+    );
+  } catch (error) {
+    console.error('测试 Webhook 失败:', error);
+    return new Response(
+      JSON.stringify({ error: '测试 Webhook 失败: ' + error.message }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } },
+    );
+  }
+}
+
+function buildWebhookPayload(dateStr, todos) {
+  const items = todos.map((todo) => ({
+    id: todo.id,
+    text: todo.text,
+    time: todo.todo_time || '09:00',
+    reminder: todo.reminder || 0,
+    repeat_type: todo.repeat_type,
+    skip_holidays: !!todo.skip_holidays,
+  }));
+
+  return {
+    date: dateStr,
+    count: items.length,
+    todos: items,
+  };
+}
+
+async function handleDailyWebhookPush(env) {
+  try {
+    const usersResult = await env.DB.prepare(
+      `SELECT user_id, webhook_url FROM user_settings WHERE webhook_url IS NOT NULL AND webhook_url != ''`,
+    ).all();
+
+    const users = usersResult.results || [];
+    if (users.length === 0) return;
+
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+
+    const results = await Promise.allSettled(
+      users.map(async (user) => {
+        try {
+          const todosResult = await env.DB.prepare(
+            `SELECT * FROM todos WHERE user_id = ? AND date <= ? AND (end_date IS NULL OR end_date >= ?) AND completed = 0`,
+          )
+            .bind(user.user_id, todayStr, todayStr)
+            .all();
+
+          const allTodos = todosResult.results || [];
+          const todayTodos = allTodos.filter((todo) => {
+            if (todo.date === todayStr) return true;
+            if (todo.repeat_type && todo.repeat_type !== 'none') {
+              return todo.date <= todayStr;
+            }
+            return false;
+          });
+
+          if (todayTodos.length === 0) return;
+
+          const completedResult = await env.DB.prepare(
+            `SELECT todo_id, date FROM completed_instances WHERE user_id = ? AND date = ?`,
+          )
+            .bind(user.user_id, todayStr)
+            .all();
+
+          const completedIds = new Set(
+            (completedResult.results || []).map(
+              (ci) => `${ci.todo_id}-${ci.date}`,
+            ),
+          );
+
+          const activeTodos = todayTodos.filter((todo) => {
+            return !completedIds.has(`${todo.id}-${todayStr}`);
+          });
+
+          if (activeTodos.length === 0) return;
+
+          const payload = buildWebhookPayload(todayStr, activeTodos);
+
+          await fetch(user.webhook_url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+        } catch (err) {
+          console.error(`Webhook 推送失败 [${user.user_id}]:`, err);
+        }
+      }),
+    );
+
+    console.log(`Webhook 推送完成: ${results.length} 个用户`);
+  } catch (error) {
+    console.error('每日 Webhook 推送失败:', error);
   }
 }

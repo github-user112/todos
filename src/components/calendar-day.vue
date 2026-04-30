@@ -60,6 +60,12 @@
       >
         <span class="todo-dot" :class="{ done: todo.isCompleted }"></span>
         <span class="todo-text">{{ todo.text }}</span>
+        <span
+          v-if="todo.reminder"
+          class="todo-reminder-icon"
+          :title="getReminderTooltip(todo)"
+          >🔔</span
+        >
       </div>
     </div>
   </div>
@@ -74,6 +80,7 @@ import {
   formatDate,
 } from '../utils/holidayAdjustment';
 import { shouldShowRepeatingTodo } from '../utils/repeatUtils';
+import { formatReminderDesc } from '../utils/reminderManager';
 
 const props = defineProps({
   day: { type: Object, required: true },
@@ -211,6 +218,12 @@ const filteredTodos = computed(() => {
 
   return result;
 });
+
+function getReminderTooltip(todo) {
+  const todoTime = todo.todo_time || todo.todoTime || '09:00';
+  const reminderDesc = formatReminderDesc(todo.reminder);
+  return `${todoTime} ${reminderDesc}提醒`;
+}
 
 function handleDayClick(e) {
   if (e.target.closest('.todo-item')) return;
@@ -447,6 +460,15 @@ function getHolidayName(holiday) {
   overflow: hidden;
   text-overflow: ellipsis;
   line-height: 1.3;
+  flex: 1;
+  min-width: 0;
+}
+
+.todo-reminder-icon {
+  font-size: 0.6em;
+  flex-shrink: 0;
+  margin-left: 2px;
+  opacity: 0.7;
 }
 
 .todo-item.completed {

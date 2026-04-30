@@ -8,6 +8,7 @@
       :viewMode="viewMode"
       :showTodoList="showTodoListDrawer"
       :showLunar="showLunar"
+      :webhookUrlProp="webhookUrl"
       @prevMonth="prevMonth"
       @nextMonth="nextMonth"
       @goToToday="goToToday"
@@ -65,7 +66,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch, onMounted, nextTick } from 'vue';
 import { useDialog, useMessage } from 'naive-ui';
 import CalendarHeader from './calendar-header.vue';
 import CalendarGrid from './calendar-grid.vue';
@@ -73,7 +74,11 @@ import AddTodoPopup from './add-todo-popup.vue';
 import TodoActionsMenu from './todo-actions-menu.vue';
 import TodoListDrawer from './TodoListDrawer.vue';
 import { formatDate, getWeekNumber } from '../utils/dateUtils';
-import { getLunarDateStr } from '../utils/lunarUtils';
+import {
+  getLunarDateStr,
+  ensureLunarLoaded,
+  isLunarLoaded,
+} from '../utils/lunarUtils';
 import { apiRequest } from '../utils/api';
 const dialog = useDialog();
 const message = useMessage();
@@ -106,6 +111,8 @@ const showTodoList = ref(
   localStorage.getItem('calendar_show_todo_list') === '1',
 );
 const showLunar = ref(localStorage.getItem('calendar_show_lunar') !== '0');
+const lunarReady = ref(isLunarLoaded());
+const webhookUrl = ref('');
 
 // 从 API 加载用户设置
 const loadUserSettings = async () => {
@@ -137,6 +144,9 @@ const loadUserSettings = async () => {
         'calendar_show_lunar',
         settings.show_lunar ? '1' : '0',
       );
+    }
+    if (settings.webhook_url !== undefined) {
+      webhookUrl.value = settings.webhook_url;
     }
   } catch (e) {
     console.warn('加载用户设置失败，使用本地缓存:', e);
@@ -226,6 +236,7 @@ const calendarWeekCount = computed(() => {
 const calendarDays = computed(() => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+  const _ = lunarReady.value;
 
   const weekCount = calendarWeekCount.value;
   let startDate;
@@ -382,6 +393,8 @@ const saveTodo = async (eventData) => {
       repeatInterval: eventData?.repeatInterval || 1,
       endDate: eventData?.endDate,
       skipHolidays: eventData?.skipHolidays || false,
+      reminder: eventData?.reminder || 0,
+      todoTime: eventData?.todoTime || '09:00',
     });
     closeAddTodoPopup();
   } catch (error) {
@@ -525,6 +538,10 @@ onMounted(() => {
   }
   applyTheme(themeType.value);
   loadUserSettings();
+
+  ensureLunarLoaded().then(() => {
+    lunarReady.value = true;
+  });
 });
 </script>
 

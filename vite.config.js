@@ -9,6 +9,17 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('lunar-javascript')) {
+            return 'lunar';
+          }
+        },
+      },
+    },
+  },
   server: {
     proxy: {
       '/api': {
@@ -18,7 +29,7 @@ export default defineConfig({
         configure: (proxy, options) => {
           proxy.on('proxyReq', (proxyReq, req, res) => {
             console.log(
-              `[Proxy] ${req.method} ${req.url} -> ${options.target}${req.url}`
+              `[Proxy] ${req.method} ${req.url} -> ${options.target}${req.url}`,
             );
           });
         },

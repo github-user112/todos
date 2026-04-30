@@ -1,4 +1,27 @@
-import { Solar } from 'lunar-javascript';
+let lunarModule = null;
+let lunarLoading = false;
+let lunarCallbacks = [];
+
+async function loadLunarModule() {
+  if (lunarModule) return lunarModule;
+  if (lunarLoading) {
+    return new Promise((resolve) => {
+      lunarCallbacks.push(resolve);
+    });
+  }
+
+  lunarLoading = true;
+  try {
+    const mod = await import('lunar-javascript');
+    lunarModule = mod;
+    lunarCallbacks.forEach((cb) => cb(mod));
+    lunarCallbacks = [];
+    return mod;
+  } catch (error) {
+    lunarLoading = false;
+    throw error;
+  }
+}
 
 const LUNAR_MONTH_NAMES = {
   1: '正月', 2: '二月', 3: '三月', 4: '四月',
@@ -6,7 +29,7 @@ const LUNAR_MONTH_NAMES = {
   9: '九月', 10: '十月', 11: '冬月', 12: '腊月',
 };
 
-export function getLunarDateStr(date) {
+function computeLunarDateStr(Solar, date) {
   const solar = Solar.fromYmd(
     date.getFullYear(),
     date.getMonth() + 1,
@@ -31,4 +54,21 @@ export function getLunarDateStr(date) {
   }
 
   return lunar.getDayInChinese();
+}
+
+export function getLunarDateStr(date) {
+  if (!lunarModule) return '';
+  try {
+    return computeLunarDateStr(lunarModule.Solar, date);
+  } catch {
+    return '';
+  }
+}
+
+export async function ensureLunarLoaded() {
+  await loadLunarModule();
+}
+
+export function isLunarLoaded() {
+  return !!lunarModule;
 }

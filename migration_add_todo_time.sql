@@ -1,0 +1,1 @@
+ALTER TABLE todos ADD COLUMN todo_time TEXT DEFAULT '09:00';

@@ -1,6 +1,30 @@
 <template>
   <div class="app-container">
     <LoadingComponent :show="loading" />
+
+    <TransitionGroup
+      name="reminder-toast"
+      tag="div"
+      class="reminder-toast-container"
+    >
+      <div
+        v-for="item in activeReminders"
+        :key="item.key"
+        class="reminder-toast"
+        @click="dismissReminder(item.key)"
+      >
+        <div class="reminder-toast-icon">🔔</div>
+        <div class="reminder-toast-content">
+          <div class="reminder-toast-title">
+            {{ item.timeDesc }} {{ item.todoTime }}
+          </div>
+          <div class="reminder-toast-text">{{ item.text }}</div>
+          <div class="reminder-toast-desc">{{ item.reminderDesc }}</div>
+        </div>
+        <button class="reminder-toast-close">✕</button>
+      </div>
+    </TransitionGroup>
+
     <n-dialog-provider
       ><n-message-provider>
         <calendar-container
@@ -27,24 +51,54 @@ import { formatDate } from './utils/dateUtils';
 import { generateHash } from './utils/hashUtils';
 import { NDialogProvider, NMessageProvider } from 'naive-ui';
 import { apiRequest } from './utils/api';
-import { loading, setLoading } from './utils/loading'; // 导入全局loading状态
+import { loading, setLoading } from './utils/loading';
+import {
+  initReminderManager,
+  destroyReminderManager,
+} from './utils/reminderManager';
 
-// 移除本地loading定义
-// const loading = ref(false);
 const isInitialized = ref(false);
 const userId = ref(null);
 const todos = ref([]);
 const completedInstances = ref([]);
 const deletedInstances = ref([]);
-
 const holidayData = ref({});
 
-// 初始化用户ID
+const activeReminders = ref([]);
+let reminderKeyCounter = 0;
+
+const handleInPageReminder = ({
+  todo,
+  dateStr,
+  timeDesc,
+  todoTime,
+  reminderDesc,
+}) => {
+  const key = `reminder-${++reminderKeyCounter}`;
+  activeReminders.value.push({
+    key,
+    text: todo.text,
+    timeDesc,
+    todoTime,
+    reminderDesc,
+    dateStr,
+  });
+
+  setTimeout(() => {
+    dismissReminder(key);
+  }, 15000);
+};
+
+const dismissReminder = (key) => {
+  const idx = activeReminders.value.findIndex((r) => r.key === key);
+  if (idx >= 0) {
+    activeReminders.value.splice(idx, 1);
+  }
+};
+
 const initializeUserId = () => {
-  // 从URL hash中获取用户ID
   let hash = window.location.hash.substring(1);
 
-  // 如果没有hash，生成一个新的
   if (!hash) {
     hash = generateHash();
     window.location.hash = hash;
@@ -55,8 +109,6 @@ const initializeUserId = () => {
   initCalendar();
 };
 
-// 初始化日历
-// 在App.vue的script setup部分添加
 const fetchHolidayData = async (currentYear) => {
   try {
     let result = {};
@@ -70,11 +122,9 @@ const fetchHolidayData = async (currentYear) => {
     }
     const cnDates = await Promise.all(ps);
 
-    // Save original data
     result.dates = cnDates.flat();
 
     if (result && result.dates) {
-      // 将数据转换为前端需要的格式
       const holidayMap = {};
       result.dates.forEach((item) => {
         holidayMap[item.date] = {
@@ -86,16 +136,13 @@ const fetchHolidayData = async (currentYear) => {
     }
   } catch (error) {
     console.error('获取节假日数据失败:', error);
-    // 失败时不抛出错误，继续执行
   }
 };
 provide('holidayData', holidayData);
-// 初始化日历
-// 在initCalendar方法中调用
+
 const initCalendar = async () => {
   try {
     const currentDate = new Date();
-    // 使用Promise.allSettled并行调用两个API，确保即使某个请求失败，其他请求也能继续执行
     setLoading(true);
     await Promise.allSettled([
       fetchHolidayData(currentDate.getFullYear()),
@@ -109,14 +156,12 @@ const initCalendar = async () => {
   }
 };
 
-// 获取日历数据
 const fetchCalendarData = async (currentDate) => {
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
 
-  // 计算当前月的第一天和最后一天
-  const firstDay = new Date(year, month - 1, 1); // 包括上个月
-  const lastDay = new Date(year, month + 2, 0); // 包括下个月
+  const firstDay = new Date(year, month - 1, 1);
+  const lastDay = new Date(year, month + 2, 0);
 
   const startDate = formatDate(firstDay);
   const endDate = formatDate(lastDay);
@@ -139,7 +184,6 @@ const fetchCalendarData = async (currentDate) => {
   }
 };
 
-// 添加待办事项
 const handleAddTodo = async (todoData) => {
   try {
     const result = await apiRequest(
@@ -152,6 +196,8 @@ const handleAddTodo = async (todoData) => {
         repeatInterval: todoData.repeatInterval || 1,
         endDate: todoData.endDate || '2039-12-31',
         skipHolidays: todoData.skipHolidays || false,
+        reminder: todoData.reminder || 0,
+        todoTime: todoData.todoTime || '09:00',
       },
       null,
       true,
@@ -168,7 +214,6 @@ const handleAddTodo = async (todoData) => {
   }
 };
 
-// 完成待办事项
 const handleCompleteTodo = async ({ todoId, date: todoDate, allInstances }) => {
   try {
     const todo = todos.value.find((t) => t.id == todoId);
@@ -179,7 +224,6 @@ const handleCompleteTodo = async ({ todoId, date: todoDate, allInstances }) => {
       (!todo.repeat_type || todo.repeat_type === 'none') &&
       todo.date === todoDate
     ) {
-      // 非重复事项，直接修改原始待办事项
       const result = await apiRequest(
         '/api/todos',
         'PUT',
@@ -197,7 +241,6 @@ const handleCompleteTodo = async ({ todoId, date: todoDate, allInstances }) => {
       }
     } else {
       if (allInstances) {
-        // 完成所有重复实例
         const result = await apiRequest(
           '/api/todos',
           'PUT',
@@ -215,7 +258,6 @@ const handleCompleteTodo = async ({ todoId, date: todoDate, allInstances }) => {
           return true;
         }
       } else {
-        // 完成单个重复实例
         const result = await apiRequest(
           '/api/completed-instances',
           'POST',
@@ -235,7 +277,6 @@ const handleCompleteTodo = async ({ todoId, date: todoDate, allInstances }) => {
               user_id: userId.value,
             });
           } else {
-            // 移除完成记录
             const index = completedInstances.value.findIndex(
               (instance) =>
                 instance.todo_id == todoId && instance.date === todoDate,
@@ -255,7 +296,6 @@ const handleCompleteTodo = async ({ todoId, date: todoDate, allInstances }) => {
   }
 };
 
-// 删除待办事项
 const handleDeleteTodo = async ({ todoId, date: todoDate, allInstances }) => {
   try {
     const todo = todos.value.find((t) => t.id == todoId);
@@ -265,7 +305,6 @@ const handleDeleteTodo = async ({ todoId, date: todoDate, allInstances }) => {
         (!todo.repeat_type || todo.repeat_type === 'none') &&
         todo.date === todoDate
       ) {
-        // 非重复事项，直接从数据库中删除
         const result = await apiRequest(
           `/api/todos?id=${todoId}`,
           'DELETE',
@@ -275,12 +314,10 @@ const handleDeleteTodo = async ({ todoId, date: todoDate, allInstances }) => {
         );
 
         if (result.success) {
-          // 从本地数组中移除
           todos.value = todos.value.filter((t) => t.id != todoId);
         }
       } else {
         if (allInstances) {
-          // 非重复事项，直接从数据库中删除
           const result = await apiRequest(
             `/api/todos?id=${todoId}`,
             'DELETE',
@@ -290,11 +327,9 @@ const handleDeleteTodo = async ({ todoId, date: todoDate, allInstances }) => {
           );
 
           if (result.success) {
-            // 从本地数组中移除
             todos.value = todos.value.filter((t) => t.id != todoId);
           }
         } else {
-          // 重复事项，记录特定实例的删除状态
           const result = await apiRequest(
             '/api/deleted-instances',
             'POST',
@@ -308,7 +343,6 @@ const handleDeleteTodo = async ({ todoId, date: todoDate, allInstances }) => {
           );
 
           if (result.success) {
-            // 添加到本地删除实例数组
             deletedInstances.value.push({
               todo_id: parseInt(todoId),
               date: todoDate,
@@ -326,7 +360,6 @@ const handleDeleteTodo = async ({ todoId, date: todoDate, allInstances }) => {
   }
 };
 
-// 监听hash变化
 window.addEventListener('hashchange', () => {
   const newHash = window.location.hash.substring(1);
   if (newHash && newHash !== userId.value) {
@@ -335,7 +368,6 @@ window.addEventListener('hashchange', () => {
   }
 });
 
-// 处理pageshow事件，页面显示时刷新数据
 const handlePageShow = (event) => {
   if (document.visibilityState === 'visible') {
     const currentDate = new Date();
@@ -343,15 +375,21 @@ const handlePageShow = (event) => {
   }
 };
 
-// 页面加载时初始化用户ID
 onMounted(() => {
   initializeUserId();
   window.addEventListener('visibilitychange', handlePageShow);
+  initReminderManager(
+    todos,
+    holidayData,
+    completedInstances,
+    deletedInstances,
+    handleInPageReminder,
+  );
 });
 
-// 组件卸载时清理事件监听
 onUnmounted(() => {
   window.removeEventListener('visibilitychange', handlePageShow);
+  destroyReminderManager();
 });
 </script>
 
@@ -365,5 +403,148 @@ onUnmounted(() => {
   height: 100dvh;
   width: 100%;
   overflow: hidden;
+}
+
+.reminder-toast-container {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+  max-width: 380px;
+  width: calc(100% - 32px);
+}
+
+.reminder-toast {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--card-background);
+  border: 1px solid var(--primary-color);
+  border-radius: 12px;
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.15),
+    0 0 0 1px var(--primary-color);
+  pointer-events: auto;
+  cursor: pointer;
+  animation: reminder-toast-in 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reminder-toast-icon {
+  font-size: 1.3rem;
+  flex-shrink: 0;
+  line-height: 1;
+  margin-top: 1px;
+}
+
+.reminder-toast-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.reminder-toast-title {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--primary-color);
+  margin-bottom: 2px;
+}
+
+.reminder-toast-text {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.reminder-toast-desc {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.reminder-toast-close {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.reminder-toast-close:hover {
+  background: var(--hover-color);
+}
+
+.reminder-toast-enter-active {
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reminder-toast-leave-active {
+  transition: all 0.25s ease;
+}
+
+.reminder-toast-enter-from {
+  opacity: 0;
+  transform: translateX(40px) scale(0.95);
+}
+
+.reminder-toast-leave-to {
+  opacity: 0;
+  transform: translateX(40px) scale(0.95);
+}
+
+@keyframes reminder-toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(40px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@media (max-width: 768px) {
+  .reminder-toast-container {
+    top: auto;
+    bottom: 16px;
+    right: 16px;
+    left: 16px;
+    max-width: none;
+    width: auto;
+  }
+
+  .reminder-toast {
+    animation-name: reminder-toast-in-mobile;
+  }
+
+  @keyframes reminder-toast-in-mobile {
+    from {
+      opacity: 0;
+      transform: translateY(20px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  .reminder-toast-enter-from {
+    transform: translateY(20px) scale(0.95);
+  }
+
+  .reminder-toast-leave-to {
+    transform: translateY(20px) scale(0.95);
+  }
 }
 </style>

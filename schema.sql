@@ -8,6 +8,8 @@ CREATE TABLE IF NOT EXISTS todos (
   end_date TEXT,
   completed INTEGER DEFAULT 0,
   skip_holidays INTEGER DEFAULT 0,
+  reminder INTEGER DEFAULT 0,
+  todo_time TEXT DEFAULT '09:00',
   user_id TEXT NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
