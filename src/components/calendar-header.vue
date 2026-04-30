@@ -165,12 +165,20 @@
                 <p class="webhook-desc">
                   每天早上 8:00 将当日待办推送到指定 URL
                 </p>
+                <p class="webhook-formats">
+                  支持：企业微信 / 钉钉 / 通用 Webhook（自动识别）
+                </p>
                 <input
                   type="url"
                   class="webhook-input"
                   v-model="webhookUrl"
-                  placeholder="https://example.com/webhook"
+                  placeholder="https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=..."
                 />
+                <div v-if="webhookUrl" class="webhook-type-badge">
+                  <span :class="['type-tag', webhookType]">{{
+                    webhookTypeLabel
+                  }}</span>
+                </div>
                 <div class="webhook-actions">
                   <button
                     class="webhook-test-btn"
@@ -211,7 +219,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { apiRequest } from '../utils/api';
 defineProps({
   currentYear: { type: Number, required: true },
@@ -241,6 +249,25 @@ const webhookUrl = ref('');
 const webhookTesting = ref(false);
 const webhookSaving = ref(false);
 const webhookTestResult = ref(null);
+
+const webhookType = computed(() => {
+  const url = webhookUrl.value || '';
+  if (url.includes('qyapi.weixin.qq.com')) return 'wecom';
+  if (url.includes('oapi.dingtalk.com')) return 'dingtalk';
+  if (url.includes('hooks.slack.com')) return 'slack';
+  if (url) return 'generic';
+  return '';
+});
+
+const webhookTypeLabel = computed(() => {
+  const labels = {
+    wecom: '🏢 企业微信',
+    dingtalk: '📎 钉钉',
+    slack: '💬 Slack',
+    generic: '🌐 通用 Webhook',
+  };
+  return labels[webhookType.value] || '';
+});
 
 const viewModeOptions = [
   { value: 'today-priority', label: '📅 今日优先' },
@@ -578,8 +605,47 @@ const copyUrlToClipboard = () => {
 .webhook-desc {
   font-size: 0.72rem;
   color: var(--text-secondary);
+  margin: 0 0 4px;
+  line-height: 1.4;
+}
+
+.webhook-formats {
+  font-size: 0.68rem;
+  color: var(--other-month-text);
   margin: 0 0 8px;
   line-height: 1.4;
+}
+
+.webhook-type-badge {
+  margin-top: 6px;
+}
+
+.type-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.68rem;
+  font-weight: 600;
+}
+
+.type-tag.wecom {
+  background: rgba(7, 193, 96, 0.12);
+  color: #07c160;
+}
+
+.type-tag.dingtalk {
+  background: rgba(0, 166, 255, 0.12);
+  color: #00a6ff;
+}
+
+.type-tag.slack {
+  background: rgba(74, 21, 75, 0.12);
+  color: #4a154b;
+}
+
+.type-tag.generic {
+  background: var(--hover-color);
+  color: var(--text-secondary);
 }
 
 .webhook-input {

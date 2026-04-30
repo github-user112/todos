@@ -88,38 +88,45 @@
 
           <div class="reminder-section">
             <label class="section-label">🔔 提醒</label>
-            <div class="time-row">
+            <div class="time-row" @click="showReminderOptions = true">
               <span class="time-label">待办时间</span>
-              <input type="time" v-model="todoTime" class="time-input" />
+              <input
+                type="time"
+                v-model="todoTime"
+                class="time-input"
+                @focus="showReminderOptions = true"
+              />
             </div>
-            <div class="reminder-chips">
-              <button
-                v-for="opt in reminderOptions"
-                :key="opt.value"
-                :class="['repeat-chip', { active: reminder === opt.value }]"
-                @click="selectReminder(opt.value)"
-              >
-                {{ opt.label }}
-              </button>
-            </div>
-            <div v-if="reminder > 0" class="reminder-detail">
-              <p class="reminder-hint">
-                将在 {{ computedReminderTime }} 发送提醒通知
-              </p>
-              <p
-                v-if="notificationPermission === 'denied'"
-                class="reminder-warning"
-              >
-                ⚠️ 浏览器通知已被禁止，请在浏览器设置中允许通知
-              </p>
-              <p
-                v-else-if="notificationPermission !== 'granted'"
-                class="reminder-action"
-                @click="requestNotifyPermission"
-              >
-                👆 点击授权浏览器通知
-              </p>
-            </div>
+            <template v-if="showReminderOptions">
+              <div class="reminder-chips">
+                <button
+                  v-for="opt in reminderOptions"
+                  :key="opt.value"
+                  :class="['repeat-chip', { active: reminder === opt.value }]"
+                  @click="selectReminder(opt.value)"
+                >
+                  {{ opt.label }}
+                </button>
+              </div>
+              <div v-if="reminder > 0" class="reminder-detail">
+                <p class="reminder-hint">
+                  将在 {{ computedReminderTime }} 发送提醒通知
+                </p>
+                <p
+                  v-if="notificationPermission === 'denied'"
+                  class="reminder-warning"
+                >
+                  ⚠️ 浏览器通知已被禁止，请在浏览器设置中允许通知
+                </p>
+                <p
+                  v-else-if="notificationPermission !== 'granted'"
+                  class="reminder-action"
+                  @click="requestNotifyPermission"
+                >
+                  👆 点击授权浏览器通知
+                </p>
+              </div>
+            </template>
           </div>
         </div>
 
@@ -174,6 +181,7 @@ const endDate = ref('');
 const skipHolidays = ref(false);
 const reminder = ref(0);
 const todoTime = ref('09:00');
+const showReminderOptions = ref(false);
 const intervals = ref({ daily: 1, weekly: 1, monthly: 1, yearly: 1 });
 const notificationPermission = ref(
   'Notification' in window ? Notification.permission : 'denied',
@@ -231,6 +239,7 @@ const resetForm = () => {
   showPreview.value = false;
   reminder.value = 0;
   todoTime.value = '09:00';
+  showReminderOptions.value = false;
 };
 
 const handleSave = () => {

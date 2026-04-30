@@ -5,10 +5,16 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev-api": "wrangler dev worker.js --port 8787",
+    "dev-api": "wrangler dev --port 8787",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node test/repeatFunctionTest.js"
+    "test": "node test/repeatFunctionTest.js",
+    "db:local": "powershell -File deploy.ps1 db:local",
+    "db:remote": "powershell -File deploy.ps1 db:remote",
+    "migrate:local": "powershell -File deploy.ps1 migrate:local",
+    "migrate:remote": "powershell -File deploy.ps1 migrate:remote",
+    "deploy": "powershell -File deploy.ps1 deploy",
+    "deploy:full": "powershell -File deploy.ps1 deploy:full"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.6",
