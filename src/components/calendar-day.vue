@@ -3,18 +3,23 @@
     :class="[
       'calendar-day',
       { 'other-month': day.isOtherMonth },
-      { 'current-day': day.isToday && (!selectedDate || selectedDate === day.dateStr) },
+      {
+        'current-day':
+          day.isToday && (!selectedDate || selectedDate === day.dateStr),
+      },
       { 'selected-day': selectedDate === day.dateStr },
       { 'weekend-day': isWeekend(day.date) && !day.holiday },
       {
         'holiday-rest-day':
           day.holiday === '休' ||
-          (typeof day.holiday === 'object' && day.holiday.type === 'public_holiday'),
+          (typeof day.holiday === 'object' &&
+            day.holiday.type === 'public_holiday'),
       },
       {
         'holiday-work-day':
           day.holiday === '班' ||
-          (typeof day.holiday === 'object' && day.holiday.type === 'transfer_workday'),
+          (typeof day.holiday === 'object' &&
+            day.holiday.type === 'transfer_workday'),
       },
     ]"
     :data-date="day.dateStr"
@@ -25,23 +30,32 @@
     <div class="day-header">
       <span class="day-number">{{ day.dayNumber }}</span>
       <div class="day-badges">
-        <span v-if="day.holiday" class="holiday-badge" :class="getHolidayBadgeClass(day.holiday)">
+        <span
+          v-if="day.holiday"
+          class="holiday-badge"
+          :class="getHolidayBadgeClass(day.holiday)"
+        >
           {{ getHolidayBadgeText(day.holiday) }}
         </span>
-        <span v-if="day.todos.length > 0" class="todo-count-badge">{{ day.todos.length }}</span>
+        <span v-if="filteredTodos.length > 0" class="todo-count-badge">{{
+          filteredTodos.length
+        }}</span>
       </div>
     </div>
 
     <!-- 农历/节日名 -->
-    <div v-if="getHolidayName(day.holiday) || day.lunarDate" class="holiday-name">
+    <div
+      v-if="getHolidayName(day.holiday) || day.lunarDate"
+      class="holiday-name"
+    >
       {{ getHolidayName(day.holiday) || day.lunarDate }}
     </div>
 
     <!-- 待办列表 -->
     <div class="todo-list">
       <div
-        v-for="todo in day.todos"
-        :key="`${todo.id}-${day.dateStr}`"
+        v-for="todo in filteredTodos"
+        :key="`${todo.id}-${todo.originalDate}`"
         :class="['todo-item', { completed: todo.isCompleted }]"
         :data-id="todo.id"
         :data-date="day.dateStr"
@@ -55,12 +69,145 @@
 </template>
 
 <script setup>
+import { computed } from 'vue';
+import {
+  isHoliday,
+  isWorkday,
+  findLastWorkday,
+  formatDate,
+} from '../utils/holidayAdjustment';
+import { shouldShowRepeatingTodo } from '../utils/repeatUtils';
+
 const props = defineProps({
   day: { type: Object, required: true },
   selectedDate: { type: String, default: '' },
+  todos: { type: Array, required: true },
+  holidayData: { type: Object, required: true },
+  completedInstances: { type: Array, required: true },
+  deletedInstances: { type: Array, required: true },
 });
 
-const emit = defineEmits(['dblclick', 'openTodoActions', 'openAddPopup', 'selectDate']);
+const emit = defineEmits([
+  'dblclick',
+  'openTodoActions',
+  'openAddPopup',
+  'selectDate',
+]);
+
+const isInstanceCompleted = (todoId, dateStr) => {
+  return props.completedInstances.some(
+    (ci) => ci.todo_id === todoId && ci.date === dateStr,
+  );
+};
+
+const isInstanceDeleted = (todoId, dateStr) => {
+  return props.deletedInstances.some(
+    (di) => di.todo_id === todoId && di.date === dateStr,
+  );
+};
+
+const filteredTodos = computed(() => {
+  const dateStr = props.day.dateStr;
+  const holidayData = props.holidayData;
+  const hasHolidayData = holidayData && Object.keys(holidayData).length > 0;
+  const result = [];
+
+  props.todos.forEach((todo) => {
+    if (isInstanceDeleted(todo.id, dateStr)) return;
+
+    const skipHolidays = todo.skip_holidays ?? todo.skipHolidays;
+
+    if (!todo.repeat_type || todo.repeat_type === 'none') {
+      let displayDate = todo.date;
+      let adjusted = false;
+
+      if (skipHolidays && hasHolidayData && isHoliday(todo.date, holidayData)) {
+        displayDate = findLastWorkday(todo.date, holidayData);
+        adjusted = true;
+      }
+
+      if (dateStr === displayDate) {
+        const isCompleted =
+          todo.completed || isInstanceCompleted(todo.id, dateStr);
+        result.push({
+          ...todo,
+          isCompleted,
+          isHolidayAdjusted: adjusted,
+          originalDate: todo.date,
+        });
+      }
+      return;
+    }
+
+    const todoDate = new Date(todo.date);
+    const currentDate = new Date(dateStr);
+    const interval = todo.repeat_interval || 1;
+    const endDate = todo.end_date ? new Date(todo.end_date) : null;
+
+    const matchesRepeat = shouldShowRepeatingTodo(
+      todoDate,
+      currentDate,
+      todo.repeat_type,
+      interval,
+      endDate,
+    );
+
+    if (matchesRepeat) {
+      const currentDateIsHoliday =
+        skipHolidays && hasHolidayData && isHoliday(dateStr, holidayData);
+
+      if (!currentDateIsHoliday) {
+        const isCompleted = isInstanceCompleted(todo.id, dateStr);
+        result.push({
+          ...todo,
+          isCompleted,
+          isHolidayAdjusted: false,
+          originalDate: dateStr,
+        });
+      }
+    }
+
+    if (skipHolidays && hasHolidayData && isWorkday(dateStr, holidayData)) {
+      for (let i = 1; i <= 14; i++) {
+        const checkDate = new Date(dateStr);
+        checkDate.setDate(checkDate.getDate() + i);
+        const checkDateStr = formatDate(checkDate);
+
+        if (
+          isWorkday(checkDateStr, holidayData) &&
+          !isHoliday(checkDateStr, holidayData)
+        ) {
+          break;
+        }
+
+        if (isHoliday(checkDateStr, holidayData)) {
+          if (findLastWorkday(checkDateStr, holidayData) === dateStr) {
+            const checkDateObj = new Date(checkDate);
+            if (
+              shouldShowRepeatingTodo(
+                todoDate,
+                checkDateObj,
+                todo.repeat_type,
+                interval,
+                endDate,
+              )
+            ) {
+              const isCompleted = isInstanceCompleted(todo.id, dateStr);
+              result.push({
+                ...todo,
+                isCompleted,
+                isHolidayAdjusted: true,
+                originalDate: checkDateStr,
+              });
+            }
+          }
+        }
+      }
+    }
+  });
+
+  return result;
+});
 
 function handleDayClick(e) {
   if (e.target.closest('.todo-item')) return;
@@ -76,14 +223,30 @@ function isWeekend(date) {
 }
 
 function getHolidayBadgeClass(holiday) {
-  if (holiday === '休' || (typeof holiday === 'object' && holiday.type === 'public_holiday')) return 'rest-badge';
-  if (holiday === '班' || (typeof holiday === 'object' && holiday.type === 'transfer_workday')) return 'work-badge';
+  if (
+    holiday === '休' ||
+    (typeof holiday === 'object' && holiday.type === 'public_holiday')
+  )
+    return 'rest-badge';
+  if (
+    holiday === '班' ||
+    (typeof holiday === 'object' && holiday.type === 'transfer_workday')
+  )
+    return 'work-badge';
   return '';
 }
 
 function getHolidayBadgeText(holiday) {
-  if (holiday === '休' || (typeof holiday === 'object' && holiday.type === 'public_holiday')) return '休';
-  if (holiday === '班' || (typeof holiday === 'object' && holiday.type === 'transfer_workday')) return '班';
+  if (
+    holiday === '休' ||
+    (typeof holiday === 'object' && holiday.type === 'public_holiday')
+  )
+    return '休';
+  if (
+    holiday === '班' ||
+    (typeof holiday === 'object' && holiday.type === 'transfer_workday')
+  )
+    return '班';
   return '';
 }
 
@@ -104,7 +267,10 @@ function getHolidayName(holiday) {
   min-height: 0;
   position: relative;
   box-shadow: var(--shadow-sm);
-  transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.2s ease,
+    border-color 0.2s ease;
   cursor: default;
   overflow: hidden;
   -webkit-tap-highlight-color: transparent;
@@ -117,13 +283,11 @@ function getHolidayName(holiday) {
   z-index: 5;
 }
 
-/* ---- 周末 ---- */
 .weekend-day {
   background: var(--calendar-day-weekend-bg);
   border-color: var(--calendar-day-weekend-border);
 }
 
-/* ---- 节假日 ---- */
 .holiday-rest-day {
   background: var(--calendar-day-holiday-rest-bg);
   border-color: var(--calendar-day-holiday-rest-border);
@@ -137,7 +301,6 @@ function getHolidayName(holiday) {
   border-color: var(--calendar-day-holiday-work-border);
 }
 
-/* ---- 非本月 ---- */
 .other-month {
   opacity: var(--calendar-day-other-month-opacity);
 }
@@ -146,7 +309,6 @@ function getHolidayName(holiday) {
   font-size: 0.85em;
 }
 
-/* ---- 选中 ---- */
 .selected-day {
   background: var(--primary-light);
   border: 2px solid var(--primary-color);
@@ -157,11 +319,12 @@ function getHolidayName(holiday) {
   font-weight: 700;
 }
 
-/* ---- 今天 ---- */
 .current-day {
   background: var(--calendar-day-current-bg);
   border: 2px solid var(--calendar-day-current-border);
-  box-shadow: 0 0 0 3px var(--form-input-focus-shadow), var(--shadow-sm);
+  box-shadow:
+    0 0 0 3px var(--form-input-focus-shadow),
+    var(--shadow-sm);
 }
 .current-day .day-number {
   color: var(--primary-color);
@@ -169,7 +332,6 @@ function getHolidayName(holiday) {
   font-size: 1.15em;
 }
 
-/* ---- 日期头部 ---- */
 .day-header {
   display: flex;
   justify-content: space-between;
@@ -191,7 +353,6 @@ function getHolidayName(holiday) {
   gap: 3px;
 }
 
-/* ---- 假期徽章 ---- */
 .holiday-badge {
   font-size: 0.6rem;
   font-weight: 700;
@@ -208,7 +369,6 @@ function getHolidayName(holiday) {
   color: var(--badge-work-text);
 }
 
-/* ---- 待办数量徽章 ---- */
 .todo-count-badge {
   font-size: 0.55rem;
   font-weight: 700;
@@ -219,7 +379,6 @@ function getHolidayName(holiday) {
   color: var(--primary-color);
 }
 
-/* ---- 农历/节日 ---- */
 .holiday-name {
   font-size: 0.6rem;
   color: var(--text-secondary);
@@ -234,7 +393,6 @@ function getHolidayName(holiday) {
   font-weight: 600;
 }
 
-/* ---- 待办列表 ---- */
 .todo-list {
   flex: 1;
   overflow-y: auto;
@@ -290,7 +448,6 @@ function getHolidayName(holiday) {
   color: var(--todo-item-completed-text);
 }
 
-/* ========== 移动端 ========== */
 @media (max-width: 768px) {
   .calendar-day {
     padding: 3px 3px 2px;

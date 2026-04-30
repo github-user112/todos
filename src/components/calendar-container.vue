@@ -23,6 +23,10 @@
       :animationType="animationType"
       :weekCount="calendarWeekCount"
       :selectedDate="selectedDate"
+      :todos="todos"
+      :holidayData="holidayData"
+      :completedInstances="completedInstances"
+      :deletedInstances="deletedInstances"
       @openAddTodoPopup="openAddTodoPopup"
       @openTodoActions="openTodoActions"
       @selectDate="handleSelectDate"
@@ -66,7 +70,6 @@ import AddTodoPopup from './add-todo-popup.vue';
 import TodoActionsMenu from './todo-actions-menu.vue';
 import TodoListDrawer from './TodoListDrawer.vue';
 import { formatDate, getWeekNumber } from '../utils/dateUtils';
-import { shouldShowRepeatingTodo } from '../utils/repeatUtils';
 import { apiRequest } from '../utils/api';
 const dialog = useDialog();
 const message = useMessage();
@@ -89,10 +92,16 @@ const emit = defineEmits([
 ]);
 
 // ---- 设置（从 API 加载，fallback localStorage） ----
-const animationType = ref(localStorage.getItem('calendar_animation_type') || 'slide-left');
+const animationType = ref(
+  localStorage.getItem('calendar_animation_type') || 'slide-left',
+);
 const themeType = ref(localStorage.getItem('calendar_theme_type') || 'default');
-const viewMode = ref(localStorage.getItem('calendar_view_mode') || 'today-priority');
-const showTodoList = ref(localStorage.getItem('calendar_show_todo_list') === '1');
+const viewMode = ref(
+  localStorage.getItem('calendar_view_mode') || 'today-priority',
+);
+const showTodoList = ref(
+  localStorage.getItem('calendar_show_todo_list') === '1',
+);
 
 // 从 API 加载用户设置
 const loadUserSettings = async () => {
@@ -112,7 +121,10 @@ const loadUserSettings = async () => {
     }
     if (settings.show_todo_list !== undefined) {
       showTodoList.value = !!settings.show_todo_list;
-      localStorage.setItem('calendar_show_todo_list', settings.show_todo_list ? '1' : '0');
+      localStorage.setItem(
+        'calendar_show_todo_list',
+        settings.show_todo_list ? '1' : '0',
+      );
       showTodoListDrawer.value = !!settings.show_todo_list;
     }
   } catch (e) {
@@ -138,7 +150,9 @@ const saveUserSettings = async (field, value) => {
   const localValue = field === 'showTodoList' ? (value ? '1' : '0') : value;
   localStorage.setItem(localStorageMap[field], localValue);
   try {
-    await apiRequest('/api/user-settings', 'PUT', { [fieldMap[field]]: apiValue });
+    await apiRequest('/api/user-settings', 'PUT', {
+      [fieldMap[field]]: apiValue,
+    });
   } catch (e) {
     console.warn('保存用户设置到 API 失败:', e);
   }
@@ -186,7 +200,7 @@ const calendarWeekCount = computed(() => {
   const lastDow = lastDay.getDay() || 7;
 
   // 总格子数 = 月初前面空位 + 本月天数 + 月末后面空位
-  const totalCells = (firstDow - 1) + lastDay.getDate() + (7 - lastDow);
+  const totalCells = firstDow - 1 + lastDay.getDate() + (7 - lastDow);
   return Math.ceil(totalCells / 7);
 });
 
@@ -198,7 +212,6 @@ const calendarDays = computed(() => {
   let startDate;
 
   if (viewMode.value === 'today-priority') {
-    // 今日优先：基于当前查看日期所在周，固定 5 周
     const viewDate = new Date(currentDate.value);
     const viewDayOfWeek = viewDate.getDay();
     const offsetToMonday = viewDayOfWeek === 0 ? 6 : viewDayOfWeek - 1;
@@ -208,9 +221,8 @@ const calendarDays = computed(() => {
     startDate = new Date(viewMonday);
     startDate.setDate(startDate.getDate() - 7);
   } else {
-    // 完整月视图：从本月 1 号所在周的周一开始
     const firstOfMonth = new Date(currentYear.value, currentMonth.value, 1);
-    const dow = firstOfMonth.getDay() || 7; // 周日=7
+    const dow = firstOfMonth.getDay() || 7;
     startDate = new Date(firstOfMonth);
     startDate.setDate(startDate.getDate() - (dow - 1));
     startDate.setHours(0, 0, 0, 0);
@@ -222,7 +234,9 @@ const calendarDays = computed(() => {
     const date = new Date(startDate);
     date.setDate(date.getDate() + i);
 
-    const isCurrentMonth = date.getMonth() === currentMonth.value && date.getFullYear() === currentYear.value;
+    const isCurrentMonth =
+      date.getMonth() === currentMonth.value &&
+      date.getFullYear() === currentYear.value;
     const dateStr = formatDate(date);
     const isToday =
       date.getDate() === today.getDate() &&
@@ -237,7 +251,6 @@ const calendarDays = computed(() => {
       dateStr,
       lunarDate: getLunarDate(date),
       holiday: props.holidayData[dateStr] || '',
-      todos: getTodosForDate(date, dateStr),
     });
   }
   return result;
@@ -261,38 +274,6 @@ function getLunarDate(date) {
   return props.lunarData[formatDate(date)] || '';
 }
 
-function getTodosForDate(date, dateStr) {
-  const result = [];
-  props.todos.forEach((todo) => {
-    if (isInstanceDeleted(todo.id, dateStr)) return;
-
-    if (todo.date === dateStr) {
-      const isCompleted = todo.completed || isInstanceCompleted(todo.id, dateStr);
-      result.push({ ...todo, isCompleted });
-      return;
-    }
-
-    if (!todo.repeat_type || todo.repeat_type === 'none') return;
-
-    const todoDate = new Date(todo.date);
-    const currentDate = new Date(dateStr);
-    const interval = todo.repeat_interval || 1;
-
-    if (shouldShowRepeatingTodo(todoDate, currentDate, todo.repeat_type, interval, todo.end_date ? new Date(todo.end_date) : null)) {
-      const isCompleted = isInstanceCompleted(todo.id, dateStr);
-      result.push({ ...todo, isCompleted });
-    }
-  });
-  return result;
-}
-
-function isInstanceCompleted(todoId, dateStr) {
-  return props.completedInstances.some((i) => i.todo_id === todoId && i.date === dateStr);
-}
-function isInstanceDeleted(todoId, dateStr) {
-  return props.deletedInstances.some((i) => i.todo_id === todoId && i.date === dateStr);
-}
-
 // ---- 导航 ----
 const prevMonth = () => {
   document.documentElement.style.setProperty('--direction', '-1');
@@ -306,9 +287,9 @@ const nextMonth = () => {
   d.setMonth(d.getMonth() + 1);
   currentDate.value = d;
 };
-const goToToday = () => { 
-  currentDate.value = new Date(); 
-  selectedDate.value = formatDate(new Date()); 
+const goToToday = () => {
+  currentDate.value = new Date();
+  selectedDate.value = formatDate(new Date());
 };
 
 watch(currentDate, (newDate, oldValue) => {
@@ -336,10 +317,15 @@ const changeViewMode = (v) => {
 const applyTheme = (theme) => {
   const root = document.documentElement;
   root.classList.remove(
-    'classic-theme', 'orange-theme', 'green-theme',
-    'rose-theme', 'lavender-theme', 'mint-theme',
-    'amber-theme', 'primrose-theme',
-    'dark-mode'
+    'classic-theme',
+    'orange-theme',
+    'green-theme',
+    'rose-theme',
+    'lavender-theme',
+    'mint-theme',
+    'amber-theme',
+    'primrose-theme',
+    'dark-mode',
   );
   const map = {
     default: '',
@@ -363,7 +349,9 @@ const openAddTodoPopup = (date) => {
   todoText.value = '';
   todoRepeat.value = 'none';
 };
-const closeAddTodoPopup = () => { showAddTodoPopup.value = false; };
+const closeAddTodoPopup = () => {
+  showAddTodoPopup.value = false;
+};
 
 const saveTodo = async (eventData) => {
   if (!todoText.value.trim()) return;
@@ -374,6 +362,7 @@ const saveTodo = async (eventData) => {
       repeatType: eventData?.repeatType || todoRepeat.value,
       repeatInterval: eventData?.repeatInterval || 1,
       endDate: eventData?.endDate,
+      skipHolidays: eventData?.skipHolidays || false,
     });
     closeAddTodoPopup();
   } catch (error) {
@@ -425,12 +414,20 @@ const deleteTodo = async () => {
       positiveText: '删除所有重复事件',
       negativeText: '仅删除当前事件',
       onPositiveClick: async () => {
-        await emit('delete-todo', { todoId: selectedTodo.value, date: selectedTodoDate.value, allInstances: true });
+        await emit('delete-todo', {
+          todoId: selectedTodo.value,
+          date: selectedTodoDate.value,
+          allInstances: true,
+        });
         message.success('已删除所有重复事件');
         showTodoActions.value = false;
       },
       onNegativeClick: async () => {
-        await emit('delete-todo', { todoId: selectedTodo.value, date: selectedTodoDate.value, allInstances: false });
+        await emit('delete-todo', {
+          todoId: selectedTodo.value,
+          date: selectedTodoDate.value,
+          allInstances: false,
+        });
         message.success('已删除当前事件');
         showTodoActions.value = false;
       },
@@ -438,7 +435,11 @@ const deleteTodo = async () => {
     return;
   }
 
-  await emit('delete-todo', { todoId: selectedTodo.value, date: selectedTodoDate.value, allInstances: false });
+  await emit('delete-todo', {
+    todoId: selectedTodo.value,
+    date: selectedTodoDate.value,
+    allInstances: false,
+  });
   showTodoActions.value = false;
 };
 
@@ -468,7 +469,10 @@ const handleListDelete = async ({ todoId, date, allInstances }) => {
 
 // ---- 点击外部关闭 ----
 const closeActionsOnOutsideClick = (event) => {
-  if (!event.target.closest('.todo-item') && !event.target.closest('.todo-actions')) {
+  if (
+    !event.target.closest('.todo-item') &&
+    !event.target.closest('.todo-actions')
+  ) {
     showTodoActions.value = false;
   }
 };
@@ -495,7 +499,9 @@ onMounted(() => {
   document.addEventListener('click', closeActionsOnOutsideClick);
   const calendarEl = document.querySelector('.calendar-grid');
   if (calendarEl) {
-    calendarEl.addEventListener('touchstart', handleTouchStart, { passive: true });
+    calendarEl.addEventListener('touchstart', handleTouchStart, {
+      passive: true,
+    });
     calendarEl.addEventListener('touchend', handleTouchEnd, { passive: true });
   }
   applyTheme(themeType.value);
@@ -513,10 +519,13 @@ onMounted(() => {
   margin: 0;
   box-sizing: border-box;
   background: var(--background-color);
-  font-family: 'Inter', 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+  font-family:
+    'Inter', 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
   color: var(--text-primary);
   overflow: hidden;
-  transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1), margin-right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition:
+    width 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    margin-right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @media (min-width: 769px) {

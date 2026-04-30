@@ -26,6 +26,10 @@
         :key="`${day.dateStr}-${day.isOtherMonth}`"
         :day="day"
         :selectedDate="selectedDate"
+        :todos="todos"
+        :holidayData="holidayData"
+        :completedInstances="completedInstances"
+        :deletedInstances="deletedInstances"
         :style="{
           gridRow: weekIndex + 2,
           gridColumn: dayIndex + (isMobile ? 1 : 2),
@@ -50,6 +54,10 @@ const props = defineProps({
   animationType: { type: String, required: true },
   weekCount: { type: Number, default: 5 },
   selectedDate: { type: String, default: '' },
+  todos: { type: Array, required: true },
+  holidayData: { type: Object, required: true },
+  completedInstances: { type: Array, required: true },
+  deletedInstances: { type: Array, required: true },
 });
 
 defineEmits(['openAddTodoPopup', 'openTodoActions', 'selectDate']);

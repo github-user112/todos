@@ -55,9 +55,7 @@ const initializeUserId = () => {
   }
 
   userId.value = hash;
-  console.log('用户ID:', userId.value);
 
-  // 初始化日历
   initCalendar();
 };
 
@@ -95,8 +93,6 @@ const fetchHolidayData = async (currentYear) => {
     // 失败时不抛出错误，继续执行
   }
 };
-console.log(holidayData);
-console.log(holidayData.value);
 provide('holidayData', holidayData);
 // 初始化日历
 // 在initCalendar方法中调用
@@ -119,7 +115,6 @@ const initCalendar = async () => {
 
 // 获取日历数据
 const fetchCalendarData = async (currentDate) => {
-  console.log(currentDate);
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
 
@@ -150,7 +145,6 @@ const fetchCalendarData = async (currentDate) => {
 
 // 添加待办事项
 const handleAddTodo = async (todoData) => {
-  console.log(todoData);
   try {
     const result = await apiRequest(
       '/api/todos',
@@ -161,6 +155,7 @@ const handleAddTodo = async (todoData) => {
         repeatType: todoData.repeatType,
         repeatInterval: todoData.repeatInterval || 1,
         endDate: todoData.endDate || '2039-12-31',
+        skipHolidays: todoData.skipHolidays || false,
       },
       null,
       true,
@@ -270,8 +265,6 @@ const handleDeleteTodo = async ({ todoId, date: todoDate, allInstances }) => {
     const todo = todos.value.find((t) => t.id == todoId);
 
     if (todo) {
-      console.log(todo);
-      console.log(todoDate);
       if (
         (!todo.repeat_type || todo.repeat_type === 'none') &&
         todo.date === todoDate
@@ -348,9 +341,7 @@ window.addEventListener('hashchange', () => {
 
 // 处理pageshow事件，页面显示时刷新数据
 const handlePageShow = (event) => {
-  console.log('pageshow事件触发，event.persisted:', event.persisted);
   if (document.visibilityState === 'visible') {
-    console.log('页面从bfcache缓存加载，刷新待办数据');
     const currentDate = new Date();
     fetchCalendarData(currentDate);
   }

@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS todos (
   repeat_interval INTEGER DEFAULT 1,
   end_date TEXT,
   completed INTEGER DEFAULT 0,
+  skip_holidays INTEGER DEFAULT 0,
   user_id TEXT NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

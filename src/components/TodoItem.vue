@@ -9,10 +9,9 @@ const props = defineProps({
 const emit = defineEmits(['toggle', 'delete']);
 
 const handleToggle = () => {
-  if (props.todo.repeat === 'none') {
+  if (props.todo.repeat_type === 'none') {
     emit('toggle');
   } else {
-    // 对于重复事件，只标记当前实例为完成
     emit('toggle', props.todo.id);
   }
 };
@@ -25,20 +24,29 @@ const handleDelete = () => {
 </script>
 
 <template>
-  <div class="todo-item" :class="{ completed: todo.completed }">
-    <span @click="handleToggle">{{ todo.title }}</span>
+  <div class="todo-item" :class="{ completed: todo.completed || todo.isCompleted }">
+    <div class="todo-content">
+      <span @click="handleToggle">{{ todo.text || todo.title }}</span>
+      <div class="todo-badges">
+        <span v-if="todo.isHolidayAdjusted" class="holiday-badge adjusted">
+          ⛔ 已调至工作日
+        </span>
+        <span v-if="todo.repeat_type !== 'none'" class="repeat-badge">
+          {{
+            todo.repeat_type === 'daily'
+              ? '每天'
+              : todo.repeat_type === 'weekly'
+              ? '每周'
+              : todo.repeat_type === 'monthly'
+              ? '每月'
+              : todo.repeat_type === 'yearly'
+              ? '每年'
+              : ''
+          }}
+        </span>
+      </div>
+    </div>
     <button class="delete-btn" @click="handleDelete">删除</button>
-    <span v-if="todo.repeat !== 'none'" class="repeat-badge">
-      {{
-        todo.repeat === 'daily'
-          ? '每天'
-          : todo.repeat === 'weekly'
-          ? '每周'
-          : todo.repeat === 'monthly'
-          ? '每月'
-          : ''
-      }}
-    </span>
   </div>
 </template>
 
@@ -56,6 +64,39 @@ const handleDelete = () => {
   min-height: 36px;
 }
 
+.todo-content {
+  flex-grow: 1;
+  cursor: pointer;
+}
+
+.todo-content span {
+  display: block;
+}
+
+.todo-badges {
+  display: flex;
+  gap: 4px;
+  margin-top: 2px;
+  flex-wrap: wrap;
+}
+
+.holiday-badge {
+  padding: 1px 6px;
+  font-size: 11px;
+  border-radius: 2px;
+  font-weight: 500;
+}
+
+.holiday-badge.adjusted {
+  background-color: #faad14;
+  color: white;
+}
+
+.holiday-badge.reminder {
+  background-color: #ff4d4f;
+  color: white;
+}
+
 .delete-btn {
   opacity: 0;
   transition: opacity 0.15s;
@@ -71,28 +112,10 @@ const handleDelete = () => {
   opacity: 0.7;
 }
 
-.todo-item span {
-  flex-grow: 1;
-  cursor: pointer;
-}
-
-button {
-  margin-left: 8px;
-  padding: 4px 10px;
-  font-size: 12px;
-  background-color: #ff4d4f;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  min-height: 28px;
-  min-width: 36px;
-}
-
 .repeat-badge {
-  margin-left: 8px;
-  padding: 2px 6px;
-  font-size: 12px;
+  margin-left: 0;
+  padding: 1px 6px;
+  font-size: 11px;
   background-color: #1890ff;
   color: white;
   border-radius: 2px;

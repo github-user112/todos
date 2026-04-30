@@ -52,11 +52,21 @@
           </div>
 
           <div v-if="todoRepeat !== 'none'" class="interval-row">
-            <label class="interval-prefix" for="end-date">结束</label>
-            <input type="date" id="end-date" v-model="endDate" class="interval-input date-input" />
-            <span class="interval-hint">可选</span>
-          </div>
+          <label class="interval-prefix" for="end-date">结束</label>
+          <input type="date" id="end-date" v-model="endDate" class="interval-input date-input" />
+          <span class="interval-hint">可选</span>
         </div>
+
+        <div class="holiday-section">
+          <label class="section-label">⛔ 避开节假日</label>
+          <label class="switch-label">
+            <input type="checkbox" v-model="skipHolidays" class="holiday-switch" />
+            <span class="switch-slider"></span>
+            <span class="switch-text">{{ skipHolidays ? '已开启' : '未开启' }}</span>
+          </label>
+          <p v-if="skipHolidays" class="holiday-hint">节假日将自动调整至前一工作日，并提前一天提醒</p>
+        </div>
+      </div>
 
         <div v-if="todoRepeat !== 'none'" class="preview-section">
           <button type="button" @click="showPreview = !showPreview" class="preview-toggle">
@@ -83,7 +93,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue';
+import { ref, computed, onMounted, nextTick, watch } from 'vue';
 import RepeatPreview from './RepeatPreview.vue';
 
 const props = defineProps({
@@ -97,7 +107,32 @@ const emit = defineEmits(['update:todoText', 'update:todoRepeat', 'save', 'close
 const inputRef = ref(null);
 const showPreview = ref(false);
 const endDate = ref('');
+const skipHolidays = ref(false);
 const intervals = ref({ daily: 1, weekly: 1, monthly: 1, yearly: 1 });
+
+// 重置表单状态
+const resetForm = () => {
+  skipHolidays.value = false;
+  endDate.value = '';
+  showPreview.value = false;
+};
+
+const handleSave = () => {
+  if (!props.todoText?.trim()) return;
+  if (props.todoRepeat !== 'none') validateInterval(props.todoRepeat);
+  emit('save', {
+    repeatType: props.todoRepeat,
+    repeatInterval: currentInterval.value,
+    endDate: endDate.value || undefined,
+    skipHolidays: skipHolidays.value,
+  });
+  resetForm();
+};
+
+// 监听 selectedDate 变化（每次打开弹窗时会设置新日期）
+watch(() => props.selectedDate, () => {
+  resetForm();
+});
 
 const INTERVAL_LIMITS = {
   daily: { min: 1, max: 365, unit: '天' },
@@ -129,22 +164,73 @@ const validateInterval = (type) => {
   if (intervals.value[type] > limit.max) intervals.value[type] = limit.max;
 };
 
-const handleSave = () => {
-  if (!props.todoText?.trim()) return;
-  if (props.todoRepeat !== 'none') validateInterval(props.todoRepeat);
-  emit('save', {
-    repeatType: props.todoRepeat,
-    repeatInterval: currentInterval.value,
-    endDate: endDate.value || undefined,
-  });
-};
-
 onMounted(() => {
   nextTick(() => inputRef.value?.focus());
 });
 </script>
 
 <style scoped>
+/* ---- 节假日开关样式 ---- */
+.holiday-section {
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  background: var(--hover-color);
+  border-radius: 10px;
+}
+
+.switch-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.holiday-switch {
+  display: none;
+}
+
+.switch-slider {
+  position: relative;
+  width: 40px;
+  height: 22px;
+  background: var(--border-color);
+  border-radius: 11px;
+  transition: background 0.3s;
+  flex-shrink: 0;
+}
+
+.switch-slider::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  background: white;
+  border-radius: 50%;
+  transition: transform 0.3s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.holiday-switch:checked + .switch-slider {
+  background: var(--primary-color, #18a058);
+}
+
+.holiday-switch:checked + .switch-slider::before {
+  transform: translateX(18px);
+}
+
+.switch-text {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.holiday-hint {
+  margin: 6px 0 0;
+  font-size: 0.72rem;
+  color: var(--other-month-text);
+}
 .add-todo-popup {
   position: fixed;
   inset: 0;

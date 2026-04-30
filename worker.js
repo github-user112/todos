@@ -147,6 +147,7 @@ async function handleCreateTodo(request, env, userId) {
     const repeatType = data.repeatType || 'none';
     const repeatInterval = data.repeatInterval || 1;
     const endDate = data.endDate || '2039-12-31';
+    const skipHolidays = data.skipHolidays ? 1 : 0;
 
     // 验证间隔值
     const validationResult = validateRepeatInterval(repeatType, repeatInterval);
@@ -165,11 +166,11 @@ async function handleCreateTodo(request, env, userId) {
     // 插入新的待办事项
     const result = await env.DB.prepare(
       `
-      INSERT INTO todos (text, date, repeat_type, repeat_interval, end_date, completed, user_id)
-      VALUES (?, ?, ?, ?, ?, 0, ?)
+      INSERT INTO todos (text, date, repeat_type, repeat_interval, end_date, completed, skip_holidays, user_id)
+      VALUES (?, ?, ?, ?, ?, 0, ?, ?)
     `
     )
-      .bind(data.text, data.date, repeatType, repeatInterval, endDate, userId)
+      .bind(data.text, data.date, repeatType, repeatInterval, endDate, skipHolidays, userId)
       .run();
 
     if (result.success) {
@@ -185,7 +186,10 @@ async function handleCreateTodo(request, env, userId) {
       return new Response(
         JSON.stringify({
           success: true,
-          todo,
+          todo: {
+            ...todo,
+            skip_holidays: !!todo.skip_holidays
+          },
         }),
         {
           headers: { 'Content-Type': 'application/json' },
