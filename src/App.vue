@@ -38,6 +38,8 @@
           @add-todo="handleAddTodo"
           @complete-todo="handleCompleteTodo"
           @delete-todo="handleDeleteTodo"
+          @moveTodoDate="handleMoveTodoDate"
+          @reorderTodos="handleReorderTodos"
       /></n-message-provider>
     </n-dialog-provider>
   </div>
@@ -356,6 +358,47 @@ const handleDeleteTodo = async ({ todoId, date: todoDate, allInstances }) => {
     return false;
   } catch (error) {
     console.error('删除待办事项失败:', error);
+    return false;
+  }
+};
+
+const handleMoveTodoDate = async ({ todoId, newDate }) => {
+  try {
+    const result = await apiRequest('/api/todos', 'PUT', {
+      id: todoId,
+      date: newDate,
+    });
+    if (result.success) {
+      const todo = todos.value.find((t) => t.id == todoId);
+      if (todo) {
+        todo.date = newDate;
+      }
+      return true;
+    }
+    return false;
+  } catch (error) {
+    console.error('移动待办日期失败:', error);
+    return false;
+  }
+};
+
+const handleReorderTodos = async ({ sourceId, targetId }) => {
+  try {
+    const sourceTodo = todos.value.find((t) => t.id == sourceId);
+    const targetTodo = todos.value.find((t) => t.id == targetId);
+    if (!sourceTodo || !targetTodo) return false;
+
+    const sourceOrder = targetTodo.sort_order ?? targetTodo.sortOrder ?? 0;
+    const result = await apiRequest('/api/todos', 'PUT', {
+      id: sourceId,
+      sortOrder: sourceOrder - 1,
+    });
+    if (result.success) {
+      sourceTodo.sort_order = sourceOrder - 1;
+    }
+    return result.success;
+  } catch (error) {
+    console.error('排序待办失败:', error);
     return false;
   }
 };

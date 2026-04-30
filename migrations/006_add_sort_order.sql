@@ -1,0 +1,1 @@
+ALTER TABLE todos ADD COLUMN sort_order INTEGER DEFAULT 0;

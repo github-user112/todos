@@ -34,6 +34,7 @@
       @openAddTodoPopup="openAddTodoPopup"
       @openTodoActions="openTodoActions"
       @selectDate="handleSelectDate"
+      @todoDrop="handleTodoDrop"
     />
 
     <AddTodoPopup
@@ -97,6 +98,8 @@ const emit = defineEmits([
   'add-todo',
   'complete-todo',
   'delete-todo',
+  'moveTodoDate',
+  'reorderTodos',
 ]);
 
 // ---- 设置（从 API 加载，fallback localStorage） ----
@@ -357,6 +360,7 @@ const applyTheme = (theme) => {
     'primrose-theme',
     'dark-mode',
   );
+
   const map = {
     default: '',
     classic: 'classic-theme',
@@ -369,7 +373,19 @@ const applyTheme = (theme) => {
     primrose: 'primrose-theme',
     dark: 'dark-mode',
   };
-  if (map[theme]) root.classList.add(map[theme]);
+
+  if (theme === 'auto') {
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (prefersDark) root.classList.add('dark-mode');
+  } else if (map[theme]) {
+    root.classList.add(map[theme]);
+  }
+};
+
+const handleColorSchemeChange = () => {
+  if (themeType.value === 'auto') {
+    applyTheme('auto');
+  }
 };
 
 // ---- Todo 弹窗 ----
@@ -484,6 +500,14 @@ const handleSelectDate = (dateStr) => {
   saveUserSettings('showTodoList', true);
 };
 
+const handleTodoDrop = async ({ type, source, targetTodoId, targetDate }) => {
+  if (type === 'moveDate') {
+    emit('moveTodoDate', { todoId: source.id, newDate: targetDate });
+  } else if (type === 'reorder') {
+    emit('reorderTodos', { sourceId: source.id, targetId: targetTodoId });
+  }
+};
+
 // ---- 待办列表开关 ----
 const toggleTodoList = () => {
   showTodoListDrawer.value = !showTodoListDrawer.value;
@@ -542,6 +566,9 @@ onMounted(() => {
   ensureLunarLoaded().then(() => {
     lunarReady.value = true;
   });
+
+  const colorSchemeMedia = window.matchMedia('(prefers-color-scheme: dark)');
+  colorSchemeMedia.addEventListener('change', handleColorSchemeChange);
 });
 </script>
 

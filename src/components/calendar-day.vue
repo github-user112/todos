@@ -25,6 +25,9 @@
     :data-date="day.dateStr"
     @click="handleDayClick"
     @dblclick="$emit('dblclick')"
+    @dragover.prevent="onDayDragOver"
+    @dragleave="onDayDragLeave"
+    @drop="onDayDrop"
   >
     <!-- 日期头部 -->
     <div class="day-header">
@@ -53,9 +56,15 @@
       <div
         v-for="todo in filteredTodos"
         :key="`${todo.id}-${todo.originalDate}`"
-        :class="['todo-item', { completed: todo.isCompleted }]"
+        :class="['todo-item', { completed: todo.isCompleted, 'drag-over': dragOverTodoId === `${todo.id}-${todo.originalDate}` }]"
         :data-id="todo.id"
         :data-date="day.dateStr"
+        :data-original-date="todo.originalDate"
+        draggable="true"
+        @dragstart="onDragStart($event, todo)"
+        @dragover.prevent="onDragOver($event, todo)"
+        @dragleave="onDragLeave"
+        @drop.stop="onDrop($event, todo)"
         @click.stop="$emit('openTodoActions', todo.id, $event)"
       >
         <span class="todo-dot" :class="{ done: todo.isCompleted }"></span>
@@ -72,7 +81,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import {
   isHoliday,
   isWorkday,
@@ -97,6 +106,8 @@ const emit = defineEmits([
   'openTodoActions',
   'openAddPopup',
   'selectDate',
+  'todoDragStart',
+  'todoDrop',
 ]);
 
 const displayLabel = computed(() => {
@@ -223,6 +234,51 @@ function getReminderTooltip(todo) {
   const todoTime = todo.todo_time || todo.todoTime || '09:00';
   const reminderDesc = formatReminderDesc(todo.reminder);
   return `${todoTime} ${reminderDesc}提醒`;
+}
+
+const dragOverTodoId = ref('');
+
+function onDragStart(e, todo) {
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('application/json', JSON.stringify({
+    id: todo.id,
+    originalDate: todo.originalDate,
+    sourceDate: props.day.dateStr,
+  }));
+  emit('todoDragStart', todo);
+}
+
+function onDragOver(e, todo) {
+  e.dataTransfer.dropEffect = 'move';
+  dragOverTodoId.value = `${todo.id}-${todo.originalDate}`;
+}
+
+function onDragLeave() {
+  dragOverTodoId.value = '';
+}
+
+function onDrop(e, targetTodo) {
+  dragOverTodoId.value = '';
+  try {
+    const data = JSON.parse(e.dataTransfer.getData('application/json'));
+    if (data.id === targetTodo.id) return;
+    emit('todoDrop', { type: 'reorder', source: data, targetTodoId: targetTodo.id, targetDate: props.day.dateStr });
+  } catch {}
+}
+
+function onDayDragOver(e) {
+  e.dataTransfer.dropEffect = 'move';
+}
+
+function onDayDragLeave() {}
+
+function onDayDrop(e) {
+  if (e.target.closest('.todo-item')) return;
+  try {
+    const data = JSON.parse(e.dataTransfer.getData('application/json'));
+    if (data.sourceDate === props.day.dateStr) return;
+    emit('todoDrop', { type: 'moveDate', source: data, targetDate: props.day.dateStr });
+  } catch {}
 }
 
 function handleDayClick(e) {
@@ -441,6 +497,19 @@ function getHolidayName(holiday) {
 }
 .todo-item:active {
   background: var(--todo-item-hover-bg);
+}
+
+.todo-item.drag-over {
+  border-top: 2px solid var(--primary-color);
+}
+
+.todo-item[draggable="true"] {
+  cursor: grab;
+}
+
+.todo-item[draggable="true"]:active {
+  cursor: grabbing;
+  opacity: 0.6;
 }
 
 .todo-dot {

@@ -48,6 +48,7 @@
         "
         @openAddPopup="(dateStr) => $emit('openAddTodoPopup', dateStr)"
         @selectDate="(dateStr) => $emit('selectDate', dateStr)"
+        @todoDrop="(data) => $emit('todoDrop', data)"
       />
     </template>
   </div>
@@ -71,7 +72,7 @@ const props = defineProps({
   showLunar: { type: Boolean, default: true },
 });
 
-defineEmits(['openAddTodoPopup', 'openTodoActions', 'selectDate']);
+defineEmits(['openAddTodoPopup', 'openTodoActions', 'selectDate', 'todoDrop']);
 
 const isMobile = ref(window.innerWidth <= 768);
 const onResize = () => {

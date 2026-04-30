@@ -1,8 +1,27 @@
-import { handleGetTodos, handleCreateTodo, handleUpdateTodo, handleDeleteTodo } from './handlers/todos.js';
-import { handleToggleCompletedInstance, handleCreateDeletedInstance } from './handlers/instances.js';
-import { handleGetUserSettings, handleUpdateUserSettings } from './handlers/settings.js';
+import {
+  handleGetTodos,
+  handleCreateTodo,
+  handleUpdateTodo,
+  handleDeleteTodo,
+} from './handlers/todos.js';
+import {
+  handleToggleCompletedInstance,
+  handleCreateDeletedInstance,
+} from './handlers/instances.js';
+import {
+  handleGetUserSettings,
+  handleUpdateUserSettings,
+} from './handlers/settings.js';
 import { handleGetHolidays } from './handlers/holidays.js';
-import { handleTestWebhook, handleDailyWebhookPush } from './handlers/webhook.js';
+import {
+  handleTestWebhook,
+  handleDailyWebhookPush,
+} from './handlers/webhook.js';
+import {
+  handleReorderTodos,
+  handleExportData,
+  handleImportData,
+} from './handlers/data.js';
 
 function jsonResponse(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -17,12 +36,6 @@ export default {
       const url = new URL(request.url);
       const path = url.pathname;
       const method = request.method;
-
-      if (path === '/api/webhook/test' && method === 'POST') {
-        const userId = request.headers.get('X-User-ID');
-        if (!userId) return jsonResponse({ error: '缺少用户 ID' }, 401);
-        return await handleTestWebhook(request, env, userId);
-      }
 
       const userId = request.headers.get('X-User-ID');
       if (!userId) return jsonResponse({ error: '缺少用户 ID' }, 401);
@@ -41,10 +54,18 @@ export default {
         return await handleUpdateTodo(request, env, userId);
       } else if (path === '/api/todos' && method === 'DELETE') {
         return await handleDeleteTodo(request, env, userId);
+      } else if (path === '/api/todos/reorder' && method === 'PUT') {
+        return await handleReorderTodos(request, env, userId);
       } else if (path === '/api/completed-instances' && method === 'POST') {
         return await handleToggleCompletedInstance(request, env, userId);
       } else if (path === '/api/deleted-instances' && method === 'POST') {
         return await handleCreateDeletedInstance(request, env, userId);
+      } else if (path === '/api/webhook/test' && method === 'POST') {
+        return await handleTestWebhook(request, env, userId);
+      } else if (path === '/api/data/export' && method === 'GET') {
+        return await handleExportData(request, env, userId);
+      } else if (path === '/api/data/import' && method === 'POST') {
+        return await handleImportData(request, env, userId);
       } else {
         return jsonResponse({ error: '无效的 API 路径' }, 404);
       }

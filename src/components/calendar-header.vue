@@ -161,6 +161,19 @@
                 </div>
               </div>
               <div class="setting-group">
+                <label class="setting-label">💾 数据管理</label>
+                <div class="data-actions">
+                  <button class="data-btn" @click="exportJSON">📤 导出 JSON</button>
+                  <button class="data-btn" @click="exportCSV">📤 导出 CSV</button>
+                  <button class="data-btn import-btn" @click="triggerImport">📥 导入数据</button>
+                  <input ref="importInput" type="file" accept=".json" style="display:none" @change="handleImport" />
+                </div>
+                <p v-if="dataMessage" :class="['webhook-result', dataMessage.success ? 'success' : 'error']">
+                  {{ dataMessage.text }}
+                </p>
+              </div>
+
+              <div class="setting-group">
                 <label class="setting-label">🔗 Webhook 推送</label>
                 <p class="webhook-desc">
                   每天早上 8:00 将当日待办推送到指定 URL
@@ -249,6 +262,8 @@ const webhookUrl = ref('');
 const webhookTesting = ref(false);
 const webhookSaving = ref(false);
 const webhookTestResult = ref(null);
+const dataMessage = ref(null);
+const importInput = ref(null);
 
 const webhookType = computed(() => {
   const url = webhookUrl.value || '';
@@ -284,6 +299,8 @@ const themeOptions = [
   { value: 'mint', label: '🌊 薄荷青' },
   { value: 'amber', label: '🟠 琥珀橙' },
   { value: 'primrose', label: '🌼 樱草黄' },
+  { value: 'dark', label: '🌙 深色' },
+  { value: 'auto', label: '🔄 跟随系统' },
 ];
 
 const testWebhook = async () => {
@@ -330,6 +347,77 @@ const saveWebhook = async () => {
     };
   } finally {
     webhookSaving.value = false;
+  }
+};
+
+const exportJSON = async () => {
+  try {
+    const data = await apiRequest('/api/data/export', 'GET');
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `todos-backup-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    dataMessage.value = { success: true, text: `✅ 已导出 ${data.todos?.length || 0} 条待办` };
+  } catch (error) {
+    dataMessage.value = { success: false, text: `❌ 导出失败：${error.message}` };
+  }
+};
+
+const exportCSV = async () => {
+  try {
+    const data = await apiRequest('/api/data/export', 'GET');
+    const todos = data.todos || [];
+    const header = 'ID,内容,日期,重复类型,重复间隔,结束日期,已完成,避开节假日,提醒(分钟),待办时间,排序';
+    const rows = todos.map((t) =>
+      [t.id, `"${(t.text || '').replace(/"/g, '""')}"`, t.date, t.repeat_type, t.repeat_interval, t.end_date, t.completed ? '是' : '否', t.skip_holidays ? '是' : '否', t.reminder, t.todo_time, t.sort_order].join(',')
+    );
+    const csv = '\uFEFF' + header + '\n' + rows.join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `todos-backup-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    dataMessage.value = { success: true, text: `✅ 已导出 ${todos.length} 条待办` };
+  } catch (error) {
+    dataMessage.value = { success: false, text: `❌ 导出失败：${error.message}` };
+  }
+};
+
+const triggerImport = () => {
+  importInput.value?.click();
+};
+
+const handleImport = async (e) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  try {
+    const text = await file.text();
+    const data = JSON.parse(text);
+
+    if (!data.todos || !Array.isArray(data.todos)) {
+      dataMessage.value = { success: false, text: '❌ 无效的备份文件格式' };
+      return;
+    }
+
+    const result = await apiRequest('/api/data/import', 'POST', data);
+    if (result.success) {
+      dataMessage.value = {
+        success: true,
+        text: `✅ 导入成功：${result.imported.todos} 条待办`,
+      };
+    } else {
+      dataMessage.value = { success: false, text: `❌ 导入失败：${result.error}` };
+    }
+  } catch (error) {
+    dataMessage.value = { success: false, text: `❌ 导入失败：${error.message}` };
+  } finally {
+    e.target.value = '';
   }
 };
 
@@ -719,6 +807,34 @@ const copyUrlToClipboard = () => {
 
 .webhook-result.error {
   color: var(--danger-color, #e74c3c);
+}
+
+.data-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.data-btn {
+  padding: 7px 12px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background: var(--hover-color);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.data-btn:active {
+  transform: scale(0.96);
+}
+
+.data-btn.import-btn {
+  background: var(--button-primary-bg);
+  color: white;
+  border-color: transparent;
 }
 
 /* ---- 抽屉动画 ---- */

@@ -16,7 +16,7 @@ async function handleGetTodos(request, env, userId) {
          (date BETWEEN ? AND ?) OR
          (repeat_type != 'none' AND date <= ? AND (end_date IS NULL OR end_date >= ?))
        ) AND (end_date IS NULL OR end_date >= ?)
-       ORDER BY date, repeat_type, repeat_interval`,
+       ORDER BY date, sort_order, repeat_type, repeat_interval`,
     )
       .bind(userId, startDate, endDate, endDate, startDate, startDate)
       .all();
@@ -105,11 +105,13 @@ async function handleUpdateTodo(request, env, userId) {
     const endDate = data.endDate !== undefined ? data.endDate : todo.end_date;
     const todoTime = data.todoTime !== undefined ? data.todoTime : todo.todo_time;
     const reminder = data.reminder !== undefined ? data.reminder : todo.reminder;
+    const date = data.date !== undefined ? data.date : todo.date;
+    const sortOrder = data.sortOrder !== undefined ? data.sortOrder : todo.sort_order;
 
     const result = await env.DB.prepare(
-      `UPDATE todos SET completed = ?, end_date = ?, todo_time = ?, reminder = ? WHERE id = ?`,
+      `UPDATE todos SET completed = ?, end_date = ?, todo_time = ?, reminder = ?, date = ?, sort_order = ? WHERE id = ?`,
     )
-      .bind(completed, endDate, todoTime, reminder, data.id)
+      .bind(completed, endDate, todoTime, reminder, date, sortOrder, data.id)
       .run();
 
     return jsonResponse({ success: result.success });

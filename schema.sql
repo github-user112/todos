@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS todos (
   skip_holidays INTEGER DEFAULT 0,
   reminder INTEGER DEFAULT 0,
   todo_time TEXT DEFAULT '09:00',
+  sort_order INTEGER DEFAULT 0,
   user_id TEXT NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
