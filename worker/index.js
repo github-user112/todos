@@ -1,27 +1,9 @@
-import {
-  handleGetTodos,
-  handleCreateTodo,
-  handleUpdateTodo,
-  handleDeleteTodo,
-} from './handlers/todos.js';
-import {
-  handleToggleCompletedInstance,
-  handleCreateDeletedInstance,
-} from './handlers/instances.js';
-import {
-  handleGetUserSettings,
-  handleUpdateUserSettings,
-} from './handlers/settings.js';
+import { handleGetTodos, handleCreateTodo, handleUpdateTodo, handleDeleteTodo } from './handlers/todos.js';
+import { handleToggleCompletedInstance, handleCreateDeletedInstance } from './handlers/instances.js';
+import { handleGetUserSettings, handleUpdateUserSettings } from './handlers/settings.js';
 import { handleGetHolidays } from './handlers/holidays.js';
-import {
-  handleTestWebhook,
-  handleDailyWebhookPush,
-} from './handlers/webhook.js';
-import {
-  handleReorderTodos,
-  handleExportData,
-  handleImportData,
-} from './handlers/data.js';
+import { handleTestWebhook, handleDailyWebhookPush } from './handlers/webhook.js';
+import { handleReorderTodos, handleExportData, handleImportData } from './handlers/data.js';
 
 function jsonResponse(data, status = 200) {
   return new Response(JSON.stringify(data), {

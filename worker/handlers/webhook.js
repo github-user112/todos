@@ -7,6 +7,34 @@ function detectWebhookType(url) {
   return 'generic';
 }
 
+function matchesDate(todo, dateStr) {
+  const todoDate = new Date(todo.date + 'T00:00:00');
+  const targetDate = new Date(dateStr + 'T00:00:00');
+  const interval = todo.repeat_interval || 1;
+  const endDate = todo.end_date ? new Date(todo.end_date + 'T00:00:00') : null;
+
+  if (targetDate < todoDate) return false;
+  if (endDate && targetDate > endDate) return false;
+
+  const type = todo.repeat_type;
+  if (type === 'daily') {
+    const diffDays = Math.round((targetDate - todoDate) / (86400000));
+    return diffDays % interval === 0;
+  } else if (type === 'weekly') {
+    const diffDays = Math.round((targetDate - todoDate) / (86400000));
+    const diffWeeks = Math.floor(diffDays / 7);
+    return diffDays % 7 === 0 && diffWeeks % interval === 0;
+  } else if (type === 'monthly') {
+    const monthDiff = (targetDate.getFullYear() - todoDate.getFullYear()) * 12 + (targetDate.getMonth() - todoDate.getMonth());
+    return targetDate.getDate() === todoDate.getDate() && monthDiff % interval === 0;
+  } else if (type === 'yearly') {
+    const yearDiff = targetDate.getFullYear() - todoDate.getFullYear();
+    return targetDate.getMonth() === todoDate.getMonth() && targetDate.getDate() === todoDate.getDate() && yearDiff % interval === 0;
+  }
+
+  return false;
+}
+
 function buildWecomMarkdownPayload(dateStr, todos) {
   const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
   const date = new Date(dateStr + 'T00:00:00');
@@ -105,13 +133,22 @@ async function handleTestWebhook(request, env, userId) {
 
     const today = new Date();
     const todayStr = today.toISOString().split('T')[0];
-    const todosResult = await env.DB.prepare(
-      `SELECT * FROM todos WHERE user_id = ? AND date = ? AND completed = 0`,
+
+    const nonRepeatingResult = await env.DB.prepare(
+      `SELECT * FROM todos WHERE user_id = ? AND date = ? AND (repeat_type = 'none' OR repeat_type IS NULL) AND completed = 0`,
     )
       .bind(userId, todayStr)
       .all();
 
-    const todos = todosResult.results || [];
+    const repeatingResult = await env.DB.prepare(
+      `SELECT * FROM todos WHERE user_id = ? AND repeat_type != 'none' AND date <= ? AND (end_date IS NULL OR end_date >= ?) AND completed = 0`,
+    )
+      .bind(userId, todayStr, todayStr)
+      .all();
+
+    const nonRepeatingTodos = nonRepeatingResult.results || [];
+    const repeatingTodos = (repeatingResult.results || []).filter((todo) => matchesDate(todo, todayStr));
+    const todos = [...nonRepeatingTodos, ...repeatingTodos];
     const { headers, body } = buildWebhookRequest(webhookUrl, todayStr, todos);
 
     const response = await fetch(webhookUrl, { method: 'POST', headers, body });
@@ -156,20 +193,24 @@ async function handleDailyWebhookPush(env) {
     const results = await Promise.allSettled(
       users.map(async (user) => {
         try {
-          const todosResult = await env.DB.prepare(
-            `SELECT * FROM todos WHERE user_id = ? AND date <= ? AND (end_date IS NULL OR end_date >= ?) AND completed = 0`,
+          const nonRepeatingResult = await env.DB.prepare(
+            `SELECT * FROM todos WHERE user_id = ? AND date = ? AND (repeat_type = 'none' OR repeat_type IS NULL) AND completed = 0`,
+          )
+            .bind(user.user_id, todayStr)
+            .all();
+
+          const repeatingResult = await env.DB.prepare(
+            `SELECT * FROM todos WHERE user_id = ? AND repeat_type != 'none' AND date <= ? AND (end_date IS NULL OR end_date >= ?) AND completed = 0`,
           )
             .bind(user.user_id, todayStr, todayStr)
             .all();
 
-          const allTodos = todosResult.results || [];
-          const todayTodos = allTodos.filter((todo) => {
-            if (todo.date === todayStr) return true;
-            if (todo.repeat_type && todo.repeat_type !== 'none') {
-              return todo.date <= todayStr;
-            }
-            return false;
+          const nonRepeatingTodos = nonRepeatingResult.results || [];
+          const repeatingTodos = (repeatingResult.results || []).filter((todo) => {
+            return matchesDate(todo, todayStr);
           });
+
+          const todayTodos = [...nonRepeatingTodos, ...repeatingTodos];
 
           if (todayTodos.length === 0) return;
 
