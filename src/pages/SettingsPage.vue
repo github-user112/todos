@@ -14,7 +14,9 @@
       <div v-else class="settings-content">
         <div class="setting-section">
           <h2>📢 周末提醒配置</h2>
-          <p class="section-desc">在本周最后 N 个工作日时，推送待办提醒到企业微信/钉钉</p>
+          <p class="section-desc">
+            在本周最后 N 个工作日时，推送待办提醒到企业微信/钉钉
+          </p>
 
           <div class="form-group">
             <label class="toggle-row">
@@ -45,7 +47,9 @@
               v-model="settings.webhook_url"
               placeholder="https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=..."
             />
-            <span v-if="webhookType" :class="['type-tag', webhookType]">{{ webhookTypeLabel }}</span>
+            <span v-if="webhookType" :class="['type-tag', webhookType]">{{
+              webhookTypeLabel
+            }}</span>
           </div>
 
           <div class="form-group">
@@ -58,8 +62,7 @@
             ></textarea>
             <div class="template-hints">
               <p>可用变量：</p>
-              <code>{date}</code> 日期、
-              <code>{weekday}</code> 星期、
+              <code>{date}</code> 日期、 <code>{weekday}</code> 星期、
               <code>{week_num}</code> 第N个工作日、
               <code>{total_workdays}</code> 总工作日数
               <br />
@@ -85,7 +88,10 @@
             </button>
           </div>
 
-          <p v-if="message" :class="['result-message', message.success ? 'success' : 'error']">
+          <p
+            v-if="message"
+            :class="['result-message', message.success ? 'success' : 'error']"
+          >
             {{ message.text }}
           </p>
         </div>
@@ -93,7 +99,11 @@
         <div class="setting-section preview-section">
           <h2>📋 模板预览</h2>
           <div class="preview-box">
-            <div v-if="settings.template" class="markdown-preview" v-html="renderedPreview"></div>
+            <div
+              v-if="settings.template"
+              class="markdown-preview"
+              v-html="renderedPreview"
+            ></div>
             <p v-else class="preview-placeholder">填写模板后在此预览效果</p>
           </div>
         </div>
@@ -104,6 +114,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import {
   getWeeklySummarySettings,
   updateWeeklySummarySettings,
@@ -111,11 +122,10 @@ import {
   checkAdminAccess,
 } from '../utils/settingsApi';
 import { getUserId } from '../utils/api';
-
+const router = useRouter();
 const props = defineProps({
   userId: { type: String, required: true },
 });
-
 const settings = ref({
   enabled: false,
   days: 1,
@@ -185,7 +195,7 @@ const renderedPreview = computed(() => {
 
 const loadSettings = async () => {
   try {
-    const data = await getWeeklySummarySettings(props.userId);
+    const data = await getWeeklySummarySettings(getUserId());
     if (data && !data.error) {
       settings.value = {
         enabled: !!data.enabled,
@@ -206,7 +216,9 @@ const testSettings = async () => {
     await updateWeeklySummarySettings(settings.value, props.userId);
     const result = await testWeeklySummary(props.userId);
     if (result.success) {
-      const dayLabel = result.isLastNWorkday ? '✅ 今天是本周最后N个工作日' : 'ℹ️ 今天不是本周最后N个工作日';
+      const dayLabel = result.isLastNWorkday
+        ? '✅ 今天是本周最后N个工作日'
+        : 'ℹ️ 今天不是本周最后N个工作日';
       message.value = {
         success: true,
         text: `${dayLabel}，推送了 ${result.todoCount} 条待办`,
@@ -231,7 +243,7 @@ const saveSettings = async () => {
   saving.value = true;
   message.value = null;
   try {
-    await updateWeeklySummarySettings(settings.value, props.userId);
+    await updateWeeklySummarySettings(settings.value, getUserId());
     message.value = {
       success: true,
       text: '✅ 设置已保存',
@@ -247,11 +259,7 @@ const saveSettings = async () => {
 };
 
 const goBack = () => {
-  const uid = getUserId();
-  const url = new URL(window.location);
-  url.hash = '';
-  if (uid) url.searchParams.set('uid', uid);
-  window.location.href = url.toString();
+  router.push({ name: 'calendar' });
 };
 
 onMounted(async () => {
