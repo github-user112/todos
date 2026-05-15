@@ -27,10 +27,7 @@ function getDefaultSettings() {
 
 📅 日期：{date}
 🗓️ 星期：{weekday}
-📊 本周第 {week_num} 个工作日（共 {total_workdays} 天）
-
-📋 今日待办（{todo_count} 项）：
-{todo_list}`,
+📊 本周第 {week_num} 个工作日（共 {total_workdays} 天）`,
   };
 }
 
@@ -40,23 +37,18 @@ async function getWeeklySummarySettings(userId, env) {
 }
 
 async function saveWeeklySummarySettings(userId, env, settings) {
-  await env.SETTINGS.put(
-    `weekly_summary:${userId}`,
-    JSON.stringify(settings),
-  );
+  await env.SETTINGS.put(`weekly_summary:${userId}`, JSON.stringify(settings));
 }
 
-function renderTemplate(template, { dateStr, weekday, weekNum, totalWorkdays, todos }) {
-  const todoLines = todos
-    .map((t, i) => `${i + 1}. [${t.todo_time || '09:00'}] ${t.text}`)
-    .join('\n');
+function renderTemplate(
+  template,
+  { dateStr, weekday, weekNum, totalWorkdays },
+) {
   return template
     .replace('{date}', dateStr)
     .replace('{weekday}', weekday)
     .replace('{week_num}', `第${weekNum}个`)
-    .replace('{total_workdays}', String(totalWorkdays))
-    .replace('{todo_count}', String(todos.length))
-    .replace('{todo_list}', todoLines || '（无待办）');
+    .replace('{total_workdays}', String(totalWorkdays));
 }
 
 async function fetchHolidayData(year) {
@@ -102,42 +94,6 @@ function getWeekWorkdays(todayStr, holidayMap) {
     }
   }
   return workdays;
-}
-
-function matchesDate(todo, dateStr) {
-  const todoDate = new Date(todo.date + 'T00:00:00');
-  const targetDate = new Date(dateStr + 'T00:00:00');
-  const interval = todo.repeat_interval || 1;
-  const endDate = todo.end_date ? new Date(todo.end_date + 'T00:00:00') : null;
-
-  if (targetDate < todoDate) return false;
-  if (endDate && targetDate > endDate) return false;
-
-  const type = todo.repeat_type;
-  if (type === 'daily') {
-    const diffDays = Math.round((targetDate - todoDate) / 86400000);
-    return diffDays % interval === 0;
-  } else if (type === 'weekly') {
-    const diffDays = Math.round((targetDate - todoDate) / 86400000);
-    const diffWeeks = Math.floor(diffDays / 7);
-    return diffDays % 7 === 0 && diffWeeks % interval === 0;
-  } else if (type === 'monthly') {
-    const monthDiff =
-      (targetDate.getFullYear() - todoDate.getFullYear()) * 12 +
-      (targetDate.getMonth() - todoDate.getMonth());
-    return (
-      targetDate.getDate() === todoDate.getDate() && monthDiff % interval === 0
-    );
-  } else if (type === 'yearly') {
-    const yearDiff = targetDate.getFullYear() - todoDate.getFullYear();
-    return (
-      targetDate.getMonth() === todoDate.getMonth() &&
-      targetDate.getDate() === todoDate.getDate() &&
-      yearDiff % interval === 0
-    );
-  }
-
-  return false;
 }
 
 async function handleCheckAdminAccess(request, env, userId) {
@@ -197,34 +153,20 @@ async function handleTestWeeklySummary(request, env, userId) {
     const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
     const weekday = weekDays[today.getDay()];
     const workdays = getWeekWorkdays(todayStr, holidayMap);
+
+    if (workdays.length === 0) {
+      return jsonResponse({ error: '本周无工作日，不推送' }, 400);
+    }
+
     const weekNum = workdays.indexOf(todayStr) + 1;
     const lastN = workdays.slice(-settings.days);
     const isLast = lastN.includes(todayStr);
-
-    const nonRepeatingResult = await env.DB.prepare(
-      `SELECT * FROM todos WHERE user_id = ? AND date = ? AND (repeat_type = 'none' OR repeat_type IS NULL) AND completed = 0`,
-    )
-      .bind(userId, todayStr)
-      .all();
-
-    const repeatingResult = await env.DB.prepare(
-      `SELECT * FROM todos WHERE user_id = ? AND repeat_type != 'none' AND date <= ? AND (end_date IS NULL OR end_date >= ?) AND completed = 0`,
-    )
-      .bind(userId, todayStr, todayStr)
-      .all();
-
-    const nonRepeatingTodos = nonRepeatingResult.results || [];
-    const repeatingTodos = (repeatingResult.results || []).filter((todo) =>
-      matchesDate(todo, todayStr),
-    );
-    const todos = [...nonRepeatingTodos, ...repeatingTodos];
 
     const rendered = renderTemplate(settings.template, {
       dateStr: todayStr,
       weekday,
       weekNum,
       totalWorkdays: workdays.length,
-      todos,
     });
 
     const payload = { msgtype: 'markdown', markdown: { content: rendered } };
@@ -251,7 +193,6 @@ async function handleTestWeeklySummary(request, env, userId) {
       isLastNWorkday: isLast,
       weekWorkdays: workdays,
       lastNDays: lastN,
-      todoCount: todos.length,
     });
   } catch (error) {
     console.error('测试周报失败:', error);
@@ -274,6 +215,12 @@ async function handleWeeklySummaryPush(env) {
     const weekday = weekDays[now.getDay()];
     const workdays = getWeekWorkdays(todayStr, holidayMap);
 
+    if (workdays.length === 0) return;
+
+    const lastN = workdays.slice(-1);
+    const isPushDay = lastN.includes(todayStr);
+    if (!isPushDay) return;
+
     await Promise.allSettled(
       keys.map(async (key) => {
         try {
@@ -283,50 +230,12 @@ async function handleWeeklySummaryPush(env) {
 
           if (!settings.enabled || !settings.webhook_url) return;
 
-          const lastN = workdays.slice(-settings.days);
-          if (!lastN.includes(todayStr)) return;
-
-          const nonRepeatingResult = await env.DB.prepare(
-            `SELECT * FROM todos WHERE user_id = ? AND date = ? AND (repeat_type = 'none' OR repeat_type IS NULL) AND completed = 0`,
-          )
-            .bind(userId, todayStr)
-            .all();
-
-          const repeatingResult = await env.DB.prepare(
-            `SELECT * FROM todos WHERE user_id = ? AND repeat_type != 'none' AND date <= ? AND (end_date IS NULL OR end_date >= ?) AND completed = 0`,
-          )
-            .bind(userId, todayStr, todayStr)
-            .all();
-
-          const nonRepeatingTodos = nonRepeatingResult.results || [];
-          const repeatingTodos = (repeatingResult.results || []).filter((todo) =>
-            matchesDate(todo, todayStr),
-          );
-          const todos = [...nonRepeatingTodos, ...repeatingTodos];
-
-          const completedResult = await env.DB.prepare(
-            `SELECT todo_id, date FROM completed_instances WHERE user_id = ? AND date = ?`,
-          )
-            .bind(userId, todayStr)
-            .all();
-
-          const completedIds = new Set(
-            (completedResult.results || []).map((ci) => `${ci.todo_id}-${ci.date}`),
-          );
-
-          const activeTodos = todos.filter(
-            (todo) => !completedIds.has(`${todo.id}-${todayStr}`),
-          );
-
-          if (activeTodos.length === 0) return;
-
           const weekNum = workdays.indexOf(todayStr) + 1;
           const rendered = renderTemplate(settings.template, {
             dateStr: todayStr,
             weekday,
             weekNum,
             totalWorkdays: workdays.length,
-            todos: activeTodos,
           });
 
           const payload = {
