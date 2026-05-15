@@ -73,7 +73,7 @@
           <line x1="12" y1="2" x2="12" y2="15" />
         </svg>
       </button>
-      <button class="icon-btn" @click="showDrawer = true" title="设置">
+      <button class="icon-btn" @click="openDrawer" title="设置">
         <svg
           width="18"
           height="18"
@@ -218,6 +218,8 @@
                   {{ webhookTestResult.message }}
                 </p>
               </div>
+
+
             </div>
             <div class="drawer-footer">
               <a href="mailto:gonesc@foxmail.com" class="contact-link"
@@ -264,6 +266,10 @@ const webhookSaving = ref(false);
 const webhookTestResult = ref(null);
 const dataMessage = ref(null);
 const importInput = ref(null);
+
+const openDrawer = () => {
+  showDrawer.value = true;
+};
 
 const webhookType = computed(() => {
   const url = webhookUrl.value || '';

@@ -1,9 +1,34 @@
-import { handleGetTodos, handleCreateTodo, handleUpdateTodo, handleDeleteTodo } from './handlers/todos.js';
-import { handleToggleCompletedInstance, handleCreateDeletedInstance } from './handlers/instances.js';
-import { handleGetUserSettings, handleUpdateUserSettings } from './handlers/settings.js';
+import {
+  handleGetTodos,
+  handleCreateTodo,
+  handleUpdateTodo,
+  handleDeleteTodo,
+} from './handlers/todos.js';
+import {
+  handleToggleCompletedInstance,
+  handleCreateDeletedInstance,
+} from './handlers/instances.js';
+import {
+  handleGetUserSettings,
+  handleUpdateUserSettings,
+} from './handlers/settings.js';
 import { handleGetHolidays } from './handlers/holidays.js';
-import { handleTestWebhook, handleDailyWebhookPush } from './handlers/webhook.js';
-import { handleReorderTodos, handleExportData, handleImportData } from './handlers/data.js';
+import {
+  handleTestWebhook,
+  handleDailyWebhookPush,
+} from './handlers/webhook.js';
+import {
+  handleReorderTodos,
+  handleExportData,
+  handleImportData,
+} from './handlers/data.js';
+import {
+  handleWeeklySummaryPush,
+  handleTestWeeklySummary,
+  handleGetWeeklySummarySettings,
+  handleUpdateWeeklySummarySettings,
+  handleCheckAdminAccess,
+} from './handlers/weekly-summary.js';
 
 function jsonResponse(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -48,6 +73,17 @@ export default {
         return await handleExportData(request, env, userId);
       } else if (path === '/api/data/import' && method === 'POST') {
         return await handleImportData(request, env, userId);
+      } else if (
+        path === '/api/weekly-summary/check-access' &&
+        method === 'GET'
+      ) {
+        return await handleCheckAdminAccess(request, env, userId);
+      } else if (path === '/api/weekly-summary/settings' && method === 'GET') {
+        return await handleGetWeeklySummarySettings(request, env, userId);
+      } else if (path === '/api/weekly-summary/settings' && method === 'PUT') {
+        return await handleUpdateWeeklySummarySettings(request, env, userId);
+      } else if (path === '/api/weekly-summary/test' && method === 'POST') {
+        return await handleTestWeeklySummary(request, env, userId);
       } else {
         return jsonResponse({ error: '无效的 API 路径' }, 404);
       }
@@ -58,6 +94,12 @@ export default {
   },
 
   async scheduled(event, env, ctx) {
-    ctx.waitUntil(handleDailyWebhookPush(env));
+    const cron = event.cron;
+    if (cron === '0 0 * * *') {
+      ctx.waitUntil(handleDailyWebhookPush(env));
+    }
+    if (cron === '0 1 * * *') {
+      ctx.waitUntil(handleWeeklySummaryPush(env));
+    }
   },
 };

@@ -3,9 +3,16 @@ main = "worker/index.js"
 compatibility_date = "2023-10-30"
 
 [triggers]
-crons = ["0 0 * * *"]
+crons = ["0 0 * * *", "0 1 * * *"]
 
 [[d1_databases]]
 binding = "DB"
 database_name = "calendar_db"
 database_id = "6dd2ed1b-2c5d-4dcf-9a78-b8b14e828516"
+
+# KV namespace for user settings (weekly summary, etc.)
+# Create with: wrangler kv:namespace create SETTINGS
+# Then replace the placeholder id below
+[[kv_namespaces]]
+binding = "SETTINGS"
+id = "7f8ee434656749c7a92b86eeaec61646"

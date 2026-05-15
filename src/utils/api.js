@@ -1,15 +1,20 @@
 import { setLoading } from './loading';
 
+export const getUserId = () => {
+  const params = new URLSearchParams(window.location.search);
+  return params.get('uid') || '';
+};
+
 export const apiRequest = async (
   endpoint,
   method = 'GET',
   data = null,
   customHeaders = {},
-  showLoading = false
+  showLoading = false,
 ) => {
   const headers = {
     'Content-Type': 'application/json',
-    'X-User-ID': window.location.hash.substring(1),
+    'X-User-ID': getUserId(),
     ...customHeaders,
   };
 
@@ -23,7 +28,6 @@ export const apiRequest = async (
   }
 
   if (showLoading) {
-    // 请求开始，显示加载
     setLoading(true);
   }
 
@@ -41,7 +45,6 @@ export const apiRequest = async (
     throw error;
   } finally {
     if (showLoading) {
-      // 请求结束，隐藏加载
       setLoading(false);
     }
   }

@@ -25,7 +25,10 @@
       </div>
     </TransitionGroup>
 
+    <SettingsPage v-if="isSettingsPage" :userId="userId" />
+
     <n-dialog-provider
+      v-else
       ><n-message-provider>
         <calendar-container
           :todos="todos"
@@ -49,10 +52,11 @@
 import { ref, onMounted, onUnmounted, provide } from 'vue';
 import CalendarContainer from './components/calendar-container.vue';
 import LoadingComponent from './components/LoadingComponent.vue';
+import SettingsPage from './pages/SettingsPage.vue';
 import { formatDate } from './utils/dateUtils';
 import { generateHash } from './utils/hashUtils';
 import { NDialogProvider, NMessageProvider } from 'naive-ui';
-import { apiRequest } from './utils/api';
+import { apiRequest, getUserId } from './utils/api';
 import { loading, setLoading } from './utils/loading';
 import {
   initReminderManager,
@@ -68,6 +72,8 @@ const holidayData = ref({});
 
 const activeReminders = ref([]);
 let reminderKeyCounter = 0;
+
+const isSettingsPage = ref(window.location.hash === '#/settings');
 
 const handleInPageReminder = ({
   todo,
@@ -99,14 +105,16 @@ const dismissReminder = (key) => {
 };
 
 const initializeUserId = () => {
-  let hash = window.location.hash.substring(1);
+  let uid = getUserId();
 
-  if (!hash) {
-    hash = generateHash();
-    window.location.hash = hash;
+  if (!uid) {
+    uid = generateHash();
+    const url = new URL(window.location);
+    url.searchParams.set('uid', uid);
+    window.history.replaceState({}, '', url);
   }
 
-  userId.value = hash;
+  userId.value = uid;
 
   initCalendar();
 };
@@ -405,9 +413,10 @@ const handleReorderTodos = async ({ sourceId, targetId }) => {
 
 window.addEventListener('hashchange', () => {
   const newHash = window.location.hash.substring(1);
-  if (newHash && newHash !== userId.value) {
-    userId.value = newHash;
-    initCalendar();
+  if (newHash === '/settings') {
+    isSettingsPage.value = true;
+  } else {
+    isSettingsPage.value = false;
   }
 });
 
