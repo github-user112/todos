@@ -98,7 +98,7 @@ export default {
     if (cron === '0 0 * * *') {
       ctx.waitUntil(handleDailyWebhookPush(env));
     }
-    if (cron === '0 4 * * *') {
+    if (cron === '0 1 * * *') {
       ctx.waitUntil(handleWeeklySummaryPush(env));
     }
   },
