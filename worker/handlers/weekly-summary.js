@@ -1,9 +1,32 @@
 import { jsonResponse } from '../utils.js';
+import HolidayCalendar from 'holiday-calendar';
 
+// Pre-import bundled JSON data files
+import cnIndex from 'holiday-calendar/data/index.json';
+import cn2024 from 'holiday-calendar/data/CN/2024.min.json';
 import cn2025 from 'holiday-calendar/data/CN/2025.min.json';
 import cn2026 from 'holiday-calendar/data/CN/2026.min.json';
 
-const HOLIDAY_DATA = { 2025: cn2025, 2026: cn2026 };
+// Custom data loader: uses bundled files first, falls back to CDN
+const DATA_MAP = {
+  'index.json': cnIndex,
+  'CN/2024.json': cn2024, 'CN/2024.min.json': cn2024,
+  'CN/2025.json': cn2025, 'CN/2025.min.json': cn2025,
+  'CN/2026.json': cn2026, 'CN/2026.min.json': cn2026,
+};
+
+// Instantiate HolidayCalendar with custom dataLoader
+const calendar = new HolidayCalendar({
+  dataLoader: async (path) => {
+    const local = DATA_MAP[path];
+    if (local) return local;
+    // Fallback: fetch from CDN for years not bundled yet
+    const url = `https://unpkg.com/holiday-calendar/data/${path}`;
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error(`Failed to load ${path}`);
+    return resp.json();
+  },
+});
 
 const DEFAULT_ADMIN_UIDS = ['758tvu59bxixb0p811rj2g1743577326022'];
 
@@ -56,30 +79,7 @@ function renderTemplate(
     .replace('{total_workdays}', String(totalWorkdays));
 }
 
-function fetchHolidayData(year) {
-  const years = [year, year - 1];
-  const map = {};
-  for (const y of years) {
-    const data = HOLIDAY_DATA[y];
-    if (data && data.dates) {
-      data.dates.forEach((item) => {
-        map[item.date] = item.type;
-      });
-    }
-  }
-  return map;
-}
-
-function isWorkday(dateStr, holidayMap) {
-  const type = holidayMap[dateStr];
-  if (type === 'public_holiday') return false;
-  if (type === 'transfer_workday') return true;
-  const d = new Date(dateStr + 'T00:00:00');
-  const dow = d.getDay();
-  return dow !== 0 && dow !== 6;
-}
-
-function getWeekWorkdays(todayStr, holidayMap) {
+async function getWeekWorkdays(todayStr) {
   const today = new Date(todayStr + 'T00:00:00');
   const dow = today.getDay();
   const mondayOffset = dow === 0 ? -6 : 1 - dow;
@@ -89,7 +89,7 @@ function getWeekWorkdays(todayStr, holidayMap) {
     const d = new Date(today);
     d.setDate(today.getDate() + mondayOffset + i);
     const dateStr = d.toISOString().split('T')[0];
-    if (isWorkday(dateStr, holidayMap)) {
+    if (await calendar.isWorkday('CN', dateStr)) {
       workdays.push(dateStr);
     }
   }
@@ -147,12 +147,10 @@ async function handleTestWeeklySummary(request, env, userId) {
 
     const today = new Date();
     const todayStr = today.toISOString().split('T')[0];
-    const year = today.getFullYear();
-    const holidayMap = await fetchHolidayData(year);
 
     const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
     const weekday = weekDays[today.getDay()];
-    const workdays = getWeekWorkdays(todayStr, holidayMap);
+    const workdays = await getWeekWorkdays(todayStr);
 
     if (workdays.length === 0) {
       return jsonResponse({ error: '本周无工作日，不推送' }, 400);
@@ -208,12 +206,10 @@ async function handleWeeklySummaryPush(env) {
 
     const now = new Date();
     const todayStr = now.toISOString().split('T')[0];
-    const year = now.getFullYear();
-    const holidayMap = await fetchHolidayData(year);
 
     const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
     const weekday = weekDays[now.getDay()];
-    const workdays = getWeekWorkdays(todayStr, holidayMap);
+    const workdays = await getWeekWorkdays(todayStr);
 
     if (workdays.length === 0) return;
 
