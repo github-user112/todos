@@ -8,7 +8,7 @@ async function handleGetHolidays(request, env, userId) {
     if (!year) return jsonResponse({ error: '缺少年份参数' }, 400);
 
     const response = await fetch(
-      `https://unpkg.com/holiday-calendar@1.1.6/data/CN/${year}.min.json`,
+      `https://unpkg.com/holiday-calendar@1.3.3/data/CN/${year}.min.json`,
     );
 
     if (!response.ok) {

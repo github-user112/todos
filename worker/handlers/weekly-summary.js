@@ -52,22 +52,23 @@ function renderTemplate(
 }
 
 async function fetchHolidayData(year) {
-  try {
-    const response = await fetch(
-      `https://unpkg.com/holiday-calendar@1.1.6/data/CN/${year}.min.json`,
-    );
-    if (!response.ok) return {};
-    const data = await response.json();
-    const map = {};
-    if (data && data.dates) {
-      data.dates.forEach((item) => {
-        map[item.date] = item.type;
-      });
-    }
-    return map;
-  } catch {
-    return {};
+  const years = [year, year - 1];
+  const map = {};
+  for (const y of years) {
+    try {
+      const response = await fetch(
+        `https://unpkg.com/holiday-calendar@1.3.3/data/CN/${y}.min.json`,
+      );
+      if (!response.ok) continue;
+      const data = await response.json();
+      if (data && data.dates) {
+        data.dates.forEach((item) => {
+          map[item.date] = item.type;
+        });
+      }
+    } catch {}
   }
+  return map;
 }
 
 function isWorkday(dateStr, holidayMap) {
