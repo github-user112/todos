@@ -1,32 +1,7 @@
 import { jsonResponse } from '../utils.js';
 import HolidayCalendar from 'holiday-calendar';
 
-// Pre-import bundled JSON data files
-import cnIndex from 'holiday-calendar/data/index.json';
-import cn2024 from 'holiday-calendar/data/CN/2024.min.json';
-import cn2025 from 'holiday-calendar/data/CN/2025.min.json';
-import cn2026 from 'holiday-calendar/data/CN/2026.min.json';
-
-// Custom data loader: uses bundled files first, falls back to CDN
-const DATA_MAP = {
-  'index.json': cnIndex,
-  'CN/2024.json': cn2024, 'CN/2024.min.json': cn2024,
-  'CN/2025.json': cn2025, 'CN/2025.min.json': cn2025,
-  'CN/2026.json': cn2026, 'CN/2026.min.json': cn2026,
-};
-
-// Instantiate HolidayCalendar with custom dataLoader
-const calendar = new HolidayCalendar({
-  dataLoader: async (path) => {
-    const local = DATA_MAP[path];
-    if (local) return local;
-    // Fallback: fetch from CDN for years not bundled yet
-    const url = `https://unpkg.com/holiday-calendar/data/${path}`;
-    const resp = await fetch(url);
-    if (!resp.ok) throw new Error(`Failed to load ${path}`);
-    return resp.json();
-  },
-});
+const calendar = new HolidayCalendar();
 
 const DEFAULT_ADMIN_UIDS = ['758tvu59bxixb0p811rj2g1743577326022'];
 
