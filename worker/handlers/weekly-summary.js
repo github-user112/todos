@@ -1,5 +1,10 @@
 import { jsonResponse } from '../utils.js';
 
+import cn2025 from 'holiday-calendar/data/CN/2025.min.json';
+import cn2026 from 'holiday-calendar/data/CN/2026.min.json';
+
+const HOLIDAY_DATA = { 2025: cn2025, 2026: cn2026 };
+
 const DEFAULT_ADMIN_UIDS = ['758tvu59bxixb0p811rj2g1743577326022'];
 
 async function getAdminUids(env) {
@@ -51,22 +56,16 @@ function renderTemplate(
     .replace('{total_workdays}', String(totalWorkdays));
 }
 
-async function fetchHolidayData(year) {
+function fetchHolidayData(year) {
   const years = [year, year - 1];
   const map = {};
   for (const y of years) {
-    try {
-      const response = await fetch(
-        `https://unpkg.com/holiday-calendar@1.3.3/data/CN/${y}.min.json`,
-      );
-      if (!response.ok) continue;
-      const data = await response.json();
-      if (data && data.dates) {
-        data.dates.forEach((item) => {
-          map[item.date] = item.type;
-        });
-      }
-    } catch {}
+    const data = HOLIDAY_DATA[y];
+    if (data && data.dates) {
+      data.dates.forEach((item) => {
+        map[item.date] = item.type;
+      });
+    }
   }
   return map;
 }
