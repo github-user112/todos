@@ -4,7 +4,18 @@ import { fileURLToPath } from 'url';
 
 export default defineConfig({
   define: {
-    __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
+    __BUILD_TIME__: JSON.stringify(
+      new Date().toLocaleString('zh-CN', {
+        timeZone: 'Asia/Shanghai',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false,
+      }),
+    ),
     __BUILD_VERSION__: JSON.stringify(
       process.env.CI_COMMIT_SHORT_SHA ||
         process.env.GITHUB_SHA?.slice(0, 7) ||
