@@ -214,11 +214,16 @@
 </template>
 
 <script setup>
-import { computed, ref, watch, nextTick, onMounted, onUnmounted } from 'vue';
+import { computed, ref, watch, nextTick, inject, onMounted, onUnmounted } from 'vue';
 import { useDialog, useMessage } from 'naive-ui';
 import { formatDate } from '../utils/dateUtils';
 import { shouldShowRepeatingTodo } from '../utils/repeatUtils';
 import { formatReminderDesc } from '../utils/reminderManager';
+import {
+  isHoliday,
+  isWorkday,
+  findLastWorkday,
+} from '../utils/holidayAdjustment';
 
 const props = defineProps({
   show: { type: Boolean, required: true },
@@ -248,6 +253,12 @@ const pastOffset = ref(0);
 const futureOffset = ref(PAGE_SIZE);
 const loading = ref(false);
 
+const holidayData = inject('holidayData', ref({}));
+const hasHolidayData = computed(
+  () =>
+    holidayData.value && Object.keys(holidayData.value).length > 0,
+);
+
 const todayKey = computed(() => formatDate(new Date()));
 const baseDate = computed(() => props.selectedDate || todayKey.value);
 
@@ -269,6 +280,7 @@ function generateTodosInRange(startDate, endDate) {
   props.todos.forEach((todo) => {
     if (todo.completed) return;
     const todoDate = parseLocalDate(todo.date);
+    const skipHolidays = todo.skip_holidays ?? todo.skipHolidays;
     for (
       let d = new Date(rangeStart);
       d <= rangeEnd;
@@ -279,8 +291,25 @@ function generateTodosInRange(startDate, endDate) {
       if (seen.has(key)) continue;
       if (isInstanceDeleted(todo.id, dateStr)) continue;
       let match = false;
-      if (todo.date === dateStr) {
-        match = true;
+      let adjusted = false;
+      let originalDate = null;
+      if (!todo.repeat_type || todo.repeat_type === 'none') {
+        if (todo.date === dateStr) {
+          if (
+            skipHolidays &&
+            hasHolidayData.value &&
+            isHoliday(todo.date, holidayData.value)
+          ) {
+            const adj = findLastWorkday(todo.date, holidayData.value);
+            if (adj === dateStr) {
+              match = true;
+              adjusted = true;
+              originalDate = todo.date;
+            }
+          } else {
+            match = true;
+          }
+        }
       } else if (todo.repeat_type && todo.repeat_type !== 'none') {
         const interval = todo.repeat_interval || 1;
         match = shouldShowRepeatingTodo(
@@ -290,6 +319,14 @@ function generateTodosInRange(startDate, endDate) {
           interval,
           todo.end_date ? parseLocalDate(todo.end_date) : null,
         );
+        if (
+          match &&
+          skipHolidays &&
+          hasHolidayData.value &&
+          isHoliday(dateStr, holidayData.value)
+        ) {
+          match = false;
+        }
       }
       if (match) {
         seen.add(key);
@@ -297,7 +334,60 @@ function generateTodosInRange(startDate, endDate) {
           ...todo,
           date: dateStr,
           isCompleted: isInstanceCompleted(todo.id, dateStr),
+          isHolidayAdjusted: adjusted,
+          originalDate,
         });
+      }
+      if (
+        todo.repeat_type &&
+        todo.repeat_type !== 'none' &&
+        skipHolidays &&
+        hasHolidayData.value &&
+        match === false &&
+        isWorkday(dateStr, holidayData.value)
+      ) {
+        for (let i = 1; i <= 14; i++) {
+          const checkDate = new Date(d);
+          checkDate.setDate(checkDate.getDate() + i);
+          const checkDateStr = formatDate(checkDate);
+          if (
+            isWorkday(checkDateStr, holidayData.value) &&
+            !isHoliday(checkDateStr, holidayData.value)
+          ) {
+            break;
+          }
+          if (isHoliday(checkDateStr, holidayData.value)) {
+            if (
+              findLastWorkday(checkDateStr, holidayData.value) === dateStr
+            ) {
+              const checkDateObj = new Date(checkDate);
+              const interval = todo.repeat_interval || 1;
+              if (
+                shouldShowRepeatingTodo(
+                  todoDate,
+                  checkDateObj,
+                  todo.repeat_type,
+                  interval,
+                  todo.end_date
+                    ? parseLocalDate(todo.end_date)
+                    : null,
+                )
+              ) {
+                const absKey = `${todo.id}-${dateStr}`;
+                if (!seen.has(absKey)) {
+                  seen.add(absKey);
+                  result.push({
+                    ...todo,
+                    date: dateStr,
+                    isCompleted: isInstanceCompleted(todo.id, dateStr),
+                    isHolidayAdjusted: true,
+                    originalDate: checkDateStr,
+                  });
+                }
+              }
+            }
+          }
+        }
       }
     }
   });
