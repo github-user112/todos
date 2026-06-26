@@ -177,7 +177,4 @@ if (typeof window !== 'undefined') {
   window.repeatTestRunner = { runTests };
 }
 
-// 自动运行测试（仅在直接执行时）
-if (typeof require !== 'undefined' && require.main === module) {
-  runTests();
-}
+runTests();

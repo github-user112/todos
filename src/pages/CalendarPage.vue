@@ -36,37 +36,7 @@ const completedInstances = ref([]);
 const deletedInstances = ref([]);
 const holidayData = ref({});
 
-const activeReminders = ref([]);
-let reminderKeyCounter = 0;
-
-const handleInPageReminder = ({
-  todo,
-  dateStr,
-  timeDesc,
-  todoTime,
-  reminderDesc,
-}) => {
-  const key = `reminder-${++reminderKeyCounter}`;
-  activeReminders.value.push({
-    key,
-    text: todo.text,
-    timeDesc,
-    todoTime,
-    reminderDesc,
-    dateStr,
-  });
-
-  setTimeout(() => {
-    dismissReminder(key);
-  }, 15000);
-};
-
-const dismissReminder = (key) => {
-  const idx = activeReminders.value.findIndex((r) => r.key === key);
-  if (idx >= 0) {
-    activeReminders.value.splice(idx, 1);
-  }
-};
+import { addReminder } from '../utils/reminderState';
 
 const fetchHolidayData = async (currentYear) => {
   try {
@@ -374,7 +344,7 @@ onMounted(() => {
     holidayData,
     completedInstances,
     deletedInstances,
-    handleInPageReminder,
+    addReminder,
   );
 });
 

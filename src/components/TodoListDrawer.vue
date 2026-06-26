@@ -262,6 +262,17 @@ const hasHolidayData = computed(
 const todayKey = computed(() => formatDate(new Date()));
 const baseDate = computed(() => props.selectedDate || todayKey.value);
 
+let cachedRange = ''
+let cachedResult = null
+function getCachedTodosInRange(start, end) {
+  const key = `${start}|${end}|${JSON.stringify(props.todos)}|${JSON.stringify(props.completedInstances)}|${JSON.stringify(props.deletedInstances)}`
+  if (key !== cachedRange) {
+    cachedRange = key
+    cachedResult = generateTodosInRange(start, end)
+  }
+  return cachedResult
+}
+
 const todayStr = computed(() => {
   const d = new Date();
   return `${d.getMonth() + 1}月${d.getDate()}日`;
@@ -404,13 +415,13 @@ const visibleRange = computed(() => {
 });
 
 const allInRange = computed(() =>
-  generateTodosInRange(visibleRange.value.start, visibleRange.value.end),
+  getCachedTodosInRange(visibleRange.value.start, visibleRange.value.end),
 );
 const hasMorePast = computed(() => pastOffset.value < 365);
 const hasMoreFuture = computed(() => futureOffset.value < 365);
 const totalCount = computed(
   () =>
-    generateTodosInRange(
+    getCachedTodosInRange(
       formatDate(new Date(Date.now() - 365 * 86400000)),
       formatDate(new Date(Date.now() + 365 * 86400000)),
     ).length,

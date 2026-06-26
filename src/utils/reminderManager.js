@@ -297,6 +297,20 @@ function cleanupOldNotified() {
   saveNotifiedSet(new Set(filtered));
 }
 
+function onVisibilityChange() {
+  if (document.visibilityState === 'visible') {
+    if (!checkTimer) {
+      checkReminders()
+      checkTimer = setInterval(checkReminders, CHECK_INTERVAL)
+    }
+  } else {
+    if (checkTimer) {
+      clearInterval(checkTimer)
+      checkTimer = null
+    }
+  }
+}
+
 export function initReminderManager(
   todos,
   holidayData,
@@ -316,6 +330,7 @@ export function initReminderManager(
   checkTimer = setInterval(checkReminders, CHECK_INTERVAL);
 
   cleanupTimer = setInterval(cleanupOldNotified, 24 * 60 * 60 * 1000);
+  document.addEventListener('visibilitychange', onVisibilityChange);
 }
 
 export function destroyReminderManager() {
@@ -327,6 +342,7 @@ export function destroyReminderManager() {
     clearInterval(cleanupTimer);
     cleanupTimer = null;
   }
+  document.removeEventListener('visibilitychange', onVisibilityChange);
   onInPageReminder = null;
 }
 
