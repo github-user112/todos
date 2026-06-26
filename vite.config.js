@@ -3,6 +3,14 @@ import vue from '@vitejs/plugin-vue';
 import { fileURLToPath } from 'url';
 
 export default defineConfig({
+  define: {
+    __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
+    __BUILD_VERSION__: JSON.stringify(
+      process.env.CI_COMMIT_SHORT_SHA ||
+        process.env.GITHUB_SHA?.slice(0, 7) ||
+        'dev',
+    ),
+  },
   plugins: [vue()],
   resolve: {
     alias: {
