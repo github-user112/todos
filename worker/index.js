@@ -37,56 +37,42 @@ function jsonResponse(data, status = 200) {
   });
 }
 
+const routes = {
+  'GET /api/user-settings': handleGetUserSettings,
+  'PUT /api/user-settings': handleUpdateUserSettings,
+  'GET /api/holidays': handleGetHolidays,
+  'GET /api/todos': handleGetTodos,
+  'POST /api/todos': handleCreateTodo,
+  'PUT /api/todos': handleUpdateTodo,
+  'DELETE /api/todos': handleDeleteTodo,
+  'PUT /api/todos/reorder': handleReorderTodos,
+  'POST /api/completed-instances': handleToggleCompletedInstance,
+  'POST /api/deleted-instances': handleCreateDeletedInstance,
+  'POST /api/webhook/test': handleTestWebhook,
+  'GET /api/data/export': handleExportData,
+  'POST /api/data/import': handleImportData,
+  'GET /api/weekly-summary/check-access': handleCheckAdminAccess,
+  'GET /api/weekly-summary/settings': handleGetWeeklySummarySettings,
+  'PUT /api/weekly-summary/settings': handleUpdateWeeklySummarySettings,
+  'POST /api/weekly-summary/test': handleTestWeeklySummary,
+};
+
 export default {
   async fetch(request, env, ctx) {
     try {
       const url = new URL(request.url);
-      const path = url.pathname;
       const method = request.method;
+      const path = url.pathname;
 
       const userId = request.headers.get('X-User-ID');
       if (!userId) return jsonResponse({ error: '缺少用户 ID' }, 401);
 
-      if (path === '/api/user-settings' && method === 'GET') {
-        return await handleGetUserSettings(request, env, userId);
-      } else if (path === '/api/user-settings' && method === 'PUT') {
-        return await handleUpdateUserSettings(request, env, userId);
-      } else if (path === '/api/holidays') {
-        return handleGetHolidays(request, env, userId);
-      } else if (path === '/api/todos' && method === 'GET') {
-        return await handleGetTodos(request, env, userId);
-      } else if (path === '/api/todos' && method === 'POST') {
-        return await handleCreateTodo(request, env, userId);
-      } else if (path === '/api/todos' && method === 'PUT') {
-        return await handleUpdateTodo(request, env, userId);
-      } else if (path === '/api/todos' && method === 'DELETE') {
-        return await handleDeleteTodo(request, env, userId);
-      } else if (path === '/api/todos/reorder' && method === 'PUT') {
-        return await handleReorderTodos(request, env, userId);
-      } else if (path === '/api/completed-instances' && method === 'POST') {
-        return await handleToggleCompletedInstance(request, env, userId);
-      } else if (path === '/api/deleted-instances' && method === 'POST') {
-        return await handleCreateDeletedInstance(request, env, userId);
-      } else if (path === '/api/webhook/test' && method === 'POST') {
-        return await handleTestWebhook(request, env, userId);
-      } else if (path === '/api/data/export' && method === 'GET') {
-        return await handleExportData(request, env, userId);
-      } else if (path === '/api/data/import' && method === 'POST') {
-        return await handleImportData(request, env, userId);
-      } else if (
-        path === '/api/weekly-summary/check-access' &&
-        method === 'GET'
-      ) {
-        return await handleCheckAdminAccess(request, env, userId);
-      } else if (path === '/api/weekly-summary/settings' && method === 'GET') {
-        return await handleGetWeeklySummarySettings(request, env, userId);
-      } else if (path === '/api/weekly-summary/settings' && method === 'PUT') {
-        return await handleUpdateWeeklySummarySettings(request, env, userId);
-      } else if (path === '/api/weekly-summary/test' && method === 'POST') {
-        return await handleTestWeeklySummary(request, env, userId);
-      } else {
-        return jsonResponse({ error: '无效的 API 路径' }, 404);
+      const handler = routes[`${method} ${path}`];
+      if (handler) {
+        return await handler(request, env, userId);
       }
+
+      return jsonResponse({ error: '无效的 API 路径' }, 404);
     } catch (error) {
       console.error('处理请求时出错:', error);
       return jsonResponse({ error: '服务器内部错误' }, 500);
