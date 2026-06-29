@@ -363,6 +363,7 @@ const applyTheme = (theme) => {
     'mint-theme',
     'amber-theme',
     'primrose-theme',
+    'glass-theme',
     'dark-mode',
   );
 
@@ -376,6 +377,7 @@ const applyTheme = (theme) => {
     mint: 'mint-theme',
     amber: 'amber-theme',
     primrose: 'primrose-theme',
+    glass: 'glass-theme',
     dark: 'dark-mode',
   };
 

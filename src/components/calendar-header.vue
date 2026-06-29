@@ -315,6 +315,7 @@ const themeOptions = [
   { value: 'amber', label: '🟠 琥珀橙' },
   { value: 'primrose', label: '🌼 樱草黄' },
   { value: 'dark', label: '🌙 深色' },
+  { value: 'glass', label: '🪟 液态玻璃' },
   { value: 'auto', label: '🔄 跟随系统' },
 ];
 
