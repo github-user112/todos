@@ -22,7 +22,7 @@
       <CalendarGrid
         :key="`${currentYear}-${currentMonth}`"
         :weekdays="weekdays"
-        :calendarDays="calendarDays"
+        :calendarDays="calendarRows"
         :weekNumbers="weekNumbers"
         :animationType="animationType"
         :weekCount="calendarWeekCount"
@@ -222,32 +222,15 @@ let touchStartX = 0;
 let touchStartY = 0;
 
 // ---- 日历计算 ----
-const calendarWeekCount = computed(() => {
-  if (viewMode.value === 'today-priority') return 5;
-
-  // 完整月视图：计算当月实际有几周
-  const year = currentYear.value;
-  const month = currentMonth.value;
-  const firstDay = new Date(year, month, 1);
-  const lastDay = new Date(year, month + 1, 0);
-
-  // 本月第一天是周几（周一=1 ... 周日=0→7）
-  const firstDow = firstDay.getDay() || 7;
-  // 本月最后一天是周几
-  const lastDow = lastDay.getDay() || 7;
-
-  // 总格子数 = 月初前面空位 + 本月天数 + 月末后面空位
-  const totalCells = firstDow - 1 + lastDay.getDate() + (7 - lastDow);
-  return Math.ceil(totalCells / 7);
-});
+const calendarWeekCount = computed(() => calendarRows.value.length);
 
 const calendarDays = computed(() => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const _ = lunarReady.value;
 
-  const weekCount = calendarWeekCount.value;
   let startDate;
+  let totalDays;
 
   if (viewMode.value === 'today-priority') {
     const viewDate = new Date(currentDate.value);
@@ -258,16 +241,19 @@ const calendarDays = computed(() => {
     viewMonday.setHours(0, 0, 0, 0);
     startDate = new Date(viewMonday);
     startDate.setDate(startDate.getDate() - 7);
+    totalDays = 35;
   } else {
     const firstOfMonth = new Date(currentYear.value, currentMonth.value, 1);
     const dow = firstOfMonth.getDay() || 7;
     startDate = new Date(firstOfMonth);
     startDate.setDate(startDate.getDate() - (dow - 1));
     startDate.setHours(0, 0, 0, 0);
+    const lastDay = new Date(currentYear.value, currentMonth.value + 1, 0);
+    const lastDow = lastDay.getDay() || 7;
+    totalDays = dow - 1 + lastDay.getDate() + (7 - lastDow);
   }
 
   const result = [];
-  const totalDays = weekCount * 7;
   for (let i = 0; i < totalDays; i++) {
     const date = new Date(startDate);
     date.setDate(date.getDate() + i);
@@ -275,11 +261,6 @@ const calendarDays = computed(() => {
     const isCurrentMonth =
       date.getMonth() === currentMonth.value &&
       date.getFullYear() === currentYear.value;
-    if (!isCurrentMonth) {
-      result.push(null);
-      continue;
-    }
-
     const dateStr = formatDate(date);
     const isToday =
       date.getDate() === today.getDate() &&
@@ -288,7 +269,7 @@ const calendarDays = computed(() => {
 
     result.push({
       dayNumber: date.getDate(),
-      isOtherMonth: false,
+      isOtherMonth: !isCurrentMonth,
       isToday,
       date,
       dateStr,
@@ -299,17 +280,47 @@ const calendarDays = computed(() => {
   return result;
 });
 
+const calendarRows = computed(() => {
+  const flat = calendarDays.value;
+  const rows = [];
+
+  if (viewMode.value === 'full-month') {
+    for (let i = 0; i < flat.length; i += 7) {
+      rows.push(flat.slice(i, i + 7).map(d => d.isOtherMonth ? null : d));
+    }
+  } else {
+    let cur = [];
+    let prevMonth = null;
+    for (const day of flat) {
+      const m = day.date.getMonth();
+      if (prevMonth !== null && m !== prevMonth && cur.length > 0) {
+        while (cur.length < 7) cur.push(null);
+        rows.push(cur);
+        cur = [];
+      }
+      prevMonth = m;
+      cur.push(day);
+    }
+    while (cur.length < 7) cur.push(null);
+    if (cur.length > 0) rows.push(cur);
+  }
+
+  return rows;
+});
+
 const weekNumbers = computed(() => {
-  const weekCount = calendarWeekCount.value;
   const weeks = [];
-  for (let i = 0; i < weekCount; i++) {
-    const firstNonNull = calendarDays.value.slice(i * 7, i * 7 + 7).find(d => d);
+  let prev = null;
+  for (const row of calendarRows.value) {
+    const firstNonNull = row.find(d => d);
     if (!firstNonNull) { weeks.push(null); continue; }
     const dayOfWeek = firstNonNull.date.getDay();
     const offsetToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
     const monday = new Date(firstNonNull.date);
     monday.setDate(firstNonNull.date.getDate() - offsetToMonday);
-    weeks.push(getWeekNumber(monday));
+    const wn = getWeekNumber(monday);
+    weeks.push(wn === prev ? null : wn);
+    prev = wn;
   }
   return weeks;
 });

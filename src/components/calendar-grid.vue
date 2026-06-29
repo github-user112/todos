@@ -1,5 +1,5 @@
 <template>
-  <div class="calendar-grid" :style="{ '--week-count': weekCount }">
+  <div class="calendar-grid" :style="{ '--week-count': calendarDays.length }">
     <!-- 左上角空格 -->
     <div class="empty-corner"></div>
 
@@ -14,7 +14,7 @@
 
     <!-- 周数 -->
     <template
-      v-for="(week, weekIndex) in weekCount"
+      v-for="(row, weekIndex) in calendarDays"
       :key="`week-number-${weekIndex}`"
     >
       <div class="week-number" :style="{ gridRow: weekIndex + 2 }">
@@ -23,8 +23,8 @@
     </template>
 
     <!-- 日历天 -->
-    <template v-for="(week, weekIndex) in weekCount" :key="`week-${weekIndex}`">
-      <template v-for="(day, dayIndex) in calendarDays.slice(weekIndex * 7, (weekIndex + 1) * 7)" :key="dayIndex">
+    <template v-for="(row, weekIndex) in calendarDays" :key="`week-${weekIndex}`">
+      <template v-for="(day, dayIndex) in row" :key="dayIndex">
         <CalendarDay
           v-if="day"
           :day="day"
