@@ -95,8 +95,8 @@ onUnmounted(() => window.removeEventListener('resize', onResize));
   min-height: 0;
   padding: 0 2px;
   position: relative;
-  backdrop-filter: blur(var(--glass-grid-blur, 0px));
-  -webkit-backdrop-filter: blur(var(--glass-grid-blur, 0px));
+  backdrop-filter: var(--glass-grid-backdrop, none);
+  -webkit-backdrop-filter: var(--glass-grid-backdrop, none);
   border-radius: 8px;
 }
 
