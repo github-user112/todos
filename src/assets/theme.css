@@ -420,94 +420,98 @@
 }
 
 /* ==================
-   液态玻璃主题
+   液态玻璃主题 — 亮色版
    ================== */
 .glass-theme {
-  --primary-color: #a78bfa;
-  --primary-light: rgba(167, 139, 250, 0.2);
-  --primary-dark: #7c3aed;
+  --primary-color: #8b5cf6;
+  --primary-light: rgba(139, 92, 246, 0.15);
+  --primary-dark: #6d28d9;
 
-  --success-color: #34d399;
-  --danger-color: #fb7185;
-  --info-color: #60a5fa;
-  --warning-color: #fbbf24;
+  --success-color: #10b981;
+  --danger-color: #f43f5e;
+  --info-color: #3b82f6;
+  --warning-color: #f59e0b;
 
-  --background-color: rgba(255, 255, 255, 0.04);
-  --card-background: rgba(255, 255, 255, 0.08);
-  --text-primary: rgba(255, 255, 255, 0.93);
-  --text-secondary: rgba(255, 255, 255, 0.55);
-  --border-color: rgba(255, 255, 255, 0.1);
-  --hover-color: rgba(255, 255, 255, 0.06);
-  --calendar-day-other-month-opacity: 0.35;
+  --background-color: rgba(255, 255, 255, 0.25);
+  --card-background: rgba(255, 255, 255, 0.3);
+  --text-primary: #1e1b4b;
+  --text-secondary: rgba(30, 27, 75, 0.55);
+  --border-color: rgba(255, 255, 255, 0.35);
+  --hover-color: rgba(255, 255, 255, 0.18);
+  --calendar-day-other-month-opacity: 0.4;
 
-  --current-month-bg: rgba(255, 255, 255, 0.04);
-  --current-month-border: rgba(255, 255, 255, 0.08);
+  --current-month-bg: rgba(255, 255, 255, 0.15);
+  --current-month-border: rgba(255, 255, 255, 0.2);
   --other-month-bg: transparent;
   --other-month-border: transparent;
-  --other-month-text: rgba(255, 255, 255, 0.25);
+  --other-month-text: rgba(30, 27, 75, 0.25);
 
-  --button-primary-bg: rgba(167, 139, 250, 0.3);
-  --button-primary-hover-bg: rgba(167, 139, 250, 0.45);
-  --button-secondary-bg: rgba(255, 255, 255, 0.06);
-  --button-secondary-hover-bg: rgba(255, 255, 255, 0.12);
-  --button-success-bg: rgba(52, 211, 153, 0.25);
-  --button-success-hover-bg: rgba(52, 211, 153, 0.4);
-  --button-danger-bg: rgba(251, 113, 133, 0.25);
-  --button-danger-hover-bg: rgba(251, 113, 133, 0.4);
+  --button-primary-bg: rgba(139, 92, 246, 0.25);
+  --button-primary-hover-bg: rgba(139, 92, 246, 0.4);
+  --button-secondary-bg: rgba(255, 255, 255, 0.15);
+  --button-secondary-hover-bg: rgba(255, 255, 255, 0.25);
+  --button-success-bg: rgba(16, 185, 129, 0.2);
+  --button-success-hover-bg: rgba(16, 185, 129, 0.35);
+  --button-danger-bg: rgba(244, 63, 94, 0.2);
+  --button-danger-hover-bg: rgba(244, 63, 94, 0.35);
 
-  --calendar-day-bg: rgba(255, 255, 255, 0.03);
-  --calendar-day-border: rgba(255, 255, 255, 0.06);
-  --calendar-day-hover-bg: rgba(255, 255, 255, 0.08);
-  --calendar-day-current-bg: rgba(167, 139, 250, 0.18);
-  --calendar-day-current-border: rgba(167, 139, 250, 0.5);
-  --calendar-day-weekend-bg: rgba(251, 191, 36, 0.08);
-  --calendar-day-weekend-border: rgba(251, 191, 36, 0.18);
-  --calendar-day-holiday-rest-bg: rgba(251, 113, 133, 0.12);
-  --calendar-day-holiday-rest-border: rgba(251, 113, 133, 0.25);
-  --calendar-day-holiday-work-bg: rgba(96, 165, 250, 0.12);
-  --calendar-day-holiday-work-border: rgba(96, 165, 250, 0.25);
+  --calendar-day-bg: rgba(255, 255, 255, 0.35);
+  --calendar-day-border: rgba(255, 255, 255, 0.4);
+  --calendar-day-hover-bg: rgba(255, 255, 255, 0.55);
+  --calendar-day-current-bg: rgba(139, 92, 246, 0.2);
+  --calendar-day-current-border: rgba(139, 92, 246, 0.5);
+  --calendar-day-weekend-bg: rgba(251, 191, 36, 0.12);
+  --calendar-day-weekend-border: rgba(251, 191, 36, 0.25);
+  --calendar-day-holiday-rest-bg: rgba(244, 63, 94, 0.1);
+  --calendar-day-holiday-rest-border: rgba(244, 63, 94, 0.2);
+  --calendar-day-holiday-work-bg: rgba(59, 130, 246, 0.1);
+  --calendar-day-holiday-work-border: rgba(59, 130, 246, 0.2);
 
-  --todo-item-bg: rgba(255, 255, 255, 0.04);
-  --todo-item-border-left: rgba(167, 139, 250, 0.55);
-  --todo-item-hover-bg: rgba(255, 255, 255, 0.08);
-  --todo-item-completed-bg: rgba(52, 211, 153, 0.08);
-  --todo-item-completed-border-left: rgba(52, 211, 153, 0.5);
-  --todo-item-completed-text: rgba(255, 255, 255, 0.3);
+  --todo-item-bg: rgba(255, 255, 255, 0.3);
+  --todo-item-border-left: rgba(139, 92, 246, 0.5);
+  --todo-item-hover-bg: rgba(255, 255, 255, 0.45);
+  --todo-item-completed-bg: rgba(16, 185, 129, 0.1);
+  --todo-item-completed-border-left: rgba(16, 185, 129, 0.4);
+  --todo-item-completed-text: rgba(30, 27, 75, 0.35);
 
-  --preview-bg: rgba(167, 139, 250, 0.12);
-  --preview-border: rgba(167, 139, 250, 0.25);
-  --preview-text: rgba(255, 255, 255, 0.9);
-  --preview-hover-bg: rgba(167, 139, 250, 0.2);
-  --preview-hover-border: rgba(167, 139, 250, 0.35);
+  --preview-bg: rgba(139, 92, 246, 0.1);
+  --preview-border: rgba(139, 92, 246, 0.2);
+  --preview-text: #4c1d95;
+  --preview-hover-bg: rgba(139, 92, 246, 0.18);
+  --preview-hover-border: rgba(139, 92, 246, 0.3);
 
-  --badge-rest-bg: rgba(251, 113, 133, 0.35);
+  --badge-rest-bg: #f43f5e;
   --badge-rest-text: #fff;
-  --badge-work-bg: rgba(96, 165, 250, 0.35);
+  --badge-work-bg: #3b82f6;
   --badge-work-text: #fff;
 
-  --loading-overlay-bg: rgba(15, 12, 41, 0.65);
-  --loading-spinner-border: rgba(255, 255, 255, 0.08);
-  --loading-spinner-border-top: rgba(167, 139, 250, 0.7);
-  --loading-text: rgba(255, 255, 255, 0.9);
+  --loading-overlay-bg: rgba(255, 255, 255, 0.6);
+  --loading-spinner-border: rgba(255, 255, 255, 0.3);
+  --loading-spinner-border-top: #8b5cf6;
+  --loading-text: #1e1b4b;
 
-  --form-input-border: rgba(255, 255, 255, 0.12);
-  --form-input-focus-border: rgba(167, 139, 250, 0.5);
-  --form-input-focus-shadow: 0 0 0 3px rgba(167, 139, 250, 0.15);
+  --form-input-border: rgba(255, 255, 255, 0.3);
+  --form-input-focus-border: rgba(139, 92, 246, 0.5);
+  --form-input-focus-shadow: 0 0 0 3px rgba(139, 92, 246, 0.12);
 
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.35);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.45);
-  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.55);
-  --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.65);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.12);
+
+  --glass-grid-blur: 18px;
+  --glass-day-blur: 6px;
 }
 
+/* 渐变背景 — 亮色系 */
 html.glass-theme {
-  background: #0f0c29;
+  background: #fdf2f8;
 }
 
 html.glass-theme body {
-  background: linear-gradient(135deg, #0f0c29, #302b63, #24243e, #2d1b69, #0f0c29);
-  background-size: 400% 400%;
-  animation: glass-bg-shift 12s ease infinite;
+  background: linear-gradient(135deg, #fdf2f8, #ede9fe, #e0f2fe, #fce7f3, #fdf2f8);
+  background-size: 300% 300%;
+  animation: glass-bg-shift 10s ease infinite;
 }
 
 @keyframes glass-bg-shift {
@@ -518,31 +522,53 @@ html.glass-theme body {
   100% { background-position: 0% 50%; }
 }
 
-.glass-theme .calendar-container {
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+/* 噪声纹理 — 叠加在 body 上，被 blur 后产生玻璃散射感 */
+html.glass-theme body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10000;
+  opacity: 0.04;
+  mix-blend-mode: soft-light;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-size: 256px 256px;
 }
 
+/* 日期格玻璃高光 */
+.glass-theme .calendar-day {
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.35), var(--shadow-sm) !important;
+}
+
+/* 星期标题玻璃风格 */
+.glass-theme .calendar-weekday {
+  backdrop-filter: blur(var(--glass-grid-blur, 0px));
+  -webkit-backdrop-filter: blur(var(--glass-grid-blur, 0px));
+  background: rgba(255,255,255,0.2) !important;
+}
+
+/* 设置面板内层样式 */
 .glass-theme .theme-chip {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: rgba(30, 27, 75, 0.7);
 }
 .glass-theme .theme-chip.active {
-  background: rgba(167, 139, 250, 0.3);
-  border-color: rgba(167, 139, 250, 0.5);
-  color: #fff;
+  background: rgba(139, 92, 246, 0.25);
+  border-color: rgba(139, 92, 246, 0.45);
+  color: #4c1d95;
 }
 
 .glass-theme .setting-select {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #1e1b4b;
 }
 
+/* 移动端适配 */
 @media (max-width: 768px) {
   html.glass-theme body {
-    background: linear-gradient(180deg, #0f0c29, #302b63, #24243e);
+    background: linear-gradient(180deg, #fdf2f8, #ede9fe, #e0f2fe);
     background-size: 100% 200%;
     animation: glass-bg-shift-mobile 8s ease infinite;
   }

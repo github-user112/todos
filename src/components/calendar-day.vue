@@ -339,6 +339,8 @@ function getHolidayName(holiday) {
   min-height: 0;
   position: relative;
   box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(var(--glass-day-blur, 0px));
+  -webkit-backdrop-filter: blur(var(--glass-day-blur, 0px));
   transition:
     box-shadow 0.2s ease,
     transform 0.2s ease,
