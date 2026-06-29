@@ -1,5 +1,36 @@
 import { jsonResponse } from '../utils.js';
 
+let holidayCache = {};
+let holidayCacheYear = null;
+
+async function ensureHolidayData(year) {
+  if (holidayCacheYear === year && Object.keys(holidayCache).length) return
+  try {
+    const res = await fetch(`https://unpkg.com/holiday-calendar@1.3.3/data/CN/${year}.min.json`)
+    if (res.ok) {
+      const data = await res.json()
+      const map = {}
+      ;(data.dates || []).forEach(item => { map[item.date] = { name: item.name_cn, type: item.type } })
+      holidayCache = map
+      holidayCacheYear = year
+    }
+  } catch {}
+}
+
+function isHolidayDate(dateStr) {
+  const info = holidayCache[dateStr]
+  if (!info) {
+    const d = new Date(dateStr + 'T00:00:00')
+    return d.getDay() === 0 || d.getDay() === 6
+  }
+  return info.type === 'public_holiday' || info.type === 'holiday' || info.type === 'rest'
+}
+
+function shouldSkipTodoOnDate(todo, dateStr) {
+  if (!todo.skip_holidays) return false
+  return isHolidayDate(dateStr)
+}
+
 function detectWebhookType(url) {
   if (url.includes('qyapi.weixin.qq.com')) return 'wecom';
   if (url.includes('oapi.dingtalk.com')) return 'dingtalk';
@@ -134,6 +165,8 @@ async function handleTestWebhook(request, env, userId) {
     const today = new Date();
     const todayStr = today.toISOString().split('T')[0];
 
+    await ensureHolidayData(today.getFullYear());
+
     const nonRepeatingResult = await env.DB.prepare(
       `SELECT * FROM todos WHERE user_id = ? AND date = ? AND (repeat_type = 'none' OR repeat_type IS NULL) AND completed = 0`,
     )
@@ -146,8 +179,12 @@ async function handleTestWebhook(request, env, userId) {
       .bind(userId, todayStr, todayStr)
       .all();
 
-    const nonRepeatingTodos = nonRepeatingResult.results || [];
-    const repeatingTodos = (repeatingResult.results || []).filter((todo) => matchesDate(todo, todayStr));
+    let nonRepeatingTodos = nonRepeatingResult.results || [];
+    let repeatingTodos = (repeatingResult.results || []).filter((todo) => matchesDate(todo, todayStr));
+
+    nonRepeatingTodos = nonRepeatingTodos.filter(todo => !shouldSkipTodoOnDate(todo, todayStr));
+    repeatingTodos = repeatingTodos.filter(todo => !shouldSkipTodoOnDate(todo, todayStr));
+
     const todos = [...nonRepeatingTodos, ...repeatingTodos];
     const { headers, body } = buildWebhookRequest(webhookUrl, todayStr, todos);
 
@@ -190,6 +227,8 @@ async function handleDailyWebhookPush(env) {
     const today = new Date();
     const todayStr = today.toISOString().split('T')[0];
 
+    await ensureHolidayData(today.getFullYear());
+
     const results = await Promise.allSettled(
       users.map(async (user) => {
         try {
@@ -205,10 +244,13 @@ async function handleDailyWebhookPush(env) {
             .bind(user.user_id, todayStr, todayStr)
             .all();
 
-          const nonRepeatingTodos = nonRepeatingResult.results || [];
-          const repeatingTodos = (repeatingResult.results || []).filter((todo) => {
+          let nonRepeatingTodos = nonRepeatingResult.results || [];
+          let repeatingTodos = (repeatingResult.results || []).filter((todo) => {
             return matchesDate(todo, todayStr);
           });
+
+          nonRepeatingTodos = nonRepeatingTodos.filter(todo => !shouldSkipTodoOnDate(todo, todayStr));
+          repeatingTodos = repeatingTodos.filter(todo => !shouldSkipTodoOnDate(todo, todayStr));
 
           const todayTodos = [...nonRepeatingTodos, ...repeatingTodos];
 
