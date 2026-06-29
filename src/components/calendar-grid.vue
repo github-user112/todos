@@ -22,37 +22,43 @@
       </div>
     </template>
 
-    <!-- 日历天 -->
-    <template v-for="(week, weekIndex) in weekCount" :key="`week-${weekIndex}`">
-      <CalendarDay
-        v-for="(day, dayIndex) in calendarDays.slice(
-          weekIndex * 7,
-          (weekIndex + 1) * 7,
-        )"
-        :key="`${day.dateStr}-${day.isOtherMonth}`"
-        :day="day"
-        :selectedDate="selectedDate"
-        :todos="todos"
-        :holidayData="holidayData"
-        :completedInstances="completedInstances"
-        :deletedInstances="deletedInstances"
-        :showLunar="showLunar"
-        :class="{ 'stagger-day': animationType === 'stagger', 'month-boundary': isMonthBoundary(weekIndex, dayIndex) }"
-        :style="{
-          '--i': weekIndex * 7 + dayIndex,
-          gridRow: weekIndex + 2,
-          gridColumn: dayIndex + (isMobile ? 1 : 2),
-          animationDelay: animationType === 'stagger' ? `${(weekIndex * 7 + dayIndex) * 20}ms` : undefined,
-        }"
-        @dblclick="$emit('openAddTodoPopup', day.dateStr)"
-        @openTodoActions="
-          (todoId, event) =>
-            $emit('openTodoActions', todoId, day.dateStr, event)
-        "
-        @openAddPopup="(dateStr) => $emit('openAddTodoPopup', dateStr)"
-        @selectDate="(dateStr) => $emit('selectDate', dateStr)"
-        @todoDrop="(data) => $emit('todoDrop', data)"
-      />
+    <!-- 日历天（每行按月份断开，空位用 null 占位） -->
+    <template v-for="(row, weekIndex) in calendarDays" :key="`week-${weekIndex}`">
+      <template v-for="(day, dayIndex) in row" :key="day ? `${day.dateStr}-${day.isOtherMonth}` : `empty-${dayIndex}`">
+        <CalendarDay
+          v-if="day"
+          :day="day"
+          :selectedDate="selectedDate"
+          :todos="todos"
+          :holidayData="holidayData"
+          :completedInstances="completedInstances"
+          :deletedInstances="deletedInstances"
+          :showLunar="showLunar"
+          :class="{ 'stagger-day': animationType === 'stagger' }"
+          :style="{
+            '--i': weekIndex * 7 + dayIndex,
+            gridRow: weekIndex + 2,
+            gridColumn: dayIndex + (isMobile ? 1 : 2),
+            animationDelay: animationType === 'stagger' ? `${(weekIndex * 7 + dayIndex) * 20}ms` : undefined,
+          }"
+          @dblclick="$emit('openAddTodoPopup', day.dateStr)"
+          @openTodoActions="
+            (todoId, event) =>
+              $emit('openTodoActions', todoId, day.dateStr, event)
+          "
+          @openAddPopup="(dateStr) => $emit('openAddTodoPopup', dateStr)"
+          @selectDate="(dateStr) => $emit('selectDate', dateStr)"
+          @todoDrop="(data) => $emit('todoDrop', data)"
+        />
+        <div
+          v-else
+          class="calendar-day empty-day"
+          :style="{
+            gridRow: weekIndex + 2,
+            gridColumn: dayIndex + (isMobile ? 1 : 2),
+          }"
+        />
+      </template>
     </template>
   </div>
 </template>
@@ -84,12 +90,7 @@ const onResize = () => {
 onMounted(() => window.addEventListener('resize', onResize));
 onUnmounted(() => window.removeEventListener('resize', onResize));
 
-const isMonthBoundary = (weekIndex, dayIndex) => {
-  if (dayIndex === 0) return false;
-  const prev = props.calendarDays[weekIndex * 7 + dayIndex - 1];
-  const curr = props.calendarDays[weekIndex * 7 + dayIndex];
-  return prev && curr && prev.date && curr.date && prev.date.getMonth() !== curr.date.getMonth();
-};
+
 </script>
 
 <style scoped>
@@ -149,10 +150,9 @@ const isMonthBoundary = (weekIndex, dayIndex) => {
   user-select: none;
 }
 
-/* 月份分隔线（同一行内跨月时显示） */
-.month-boundary {
-  border-left: 3px solid var(--primary-color) !important;
-  margin-left: -1px;
+.empty-day {
+  visibility: hidden;
+  pointer-events: none;
 }
 
 /* ========== 移动端 ========== */
