@@ -222,13 +222,32 @@ let touchStartX = 0;
 let touchStartY = 0;
 
 // ---- 日历计算 ----
+const calendarWeekCount = computed(() => {
+  if (viewMode.value === 'today-priority') return 5;
+
+  // 完整月视图：计算当月实际有几周
+  const year = currentYear.value;
+  const month = currentMonth.value;
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+
+  // 本月第一天是周几（周一=1 ... 周日=0→7）
+  const firstDow = firstDay.getDay() || 7;
+  // 本月最后一天是周几
+  const lastDow = lastDay.getDay() || 7;
+
+  // 总格子数 = 月初前面空位 + 本月天数 + 月末后面空位
+  const totalCells = firstDow - 1 + lastDay.getDate() + (7 - lastDow);
+  return Math.ceil(totalCells / 7);
+});
+
 const calendarDays = computed(() => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const _ = lunarReady.value;
 
+  const weekCount = calendarWeekCount.value;
   let startDate;
-  let totalDays;
 
   if (viewMode.value === 'today-priority') {
     const viewDate = new Date(currentDate.value);
@@ -239,20 +258,16 @@ const calendarDays = computed(() => {
     viewMonday.setHours(0, 0, 0, 0);
     startDate = new Date(viewMonday);
     startDate.setDate(startDate.getDate() - 7);
-    totalDays = 35;
   } else {
     const firstOfMonth = new Date(currentYear.value, currentMonth.value, 1);
     const dow = firstOfMonth.getDay() || 7;
     startDate = new Date(firstOfMonth);
     startDate.setDate(startDate.getDate() - (dow - 1));
     startDate.setHours(0, 0, 0, 0);
-    const lastDay = new Date(currentYear.value, currentMonth.value + 1, 0);
-    const lastDow = lastDay.getDay() || 7;
-    totalDays = dow - 1 + lastDay.getDate() + (7 - lastDow);
   }
 
-  // 先铺平成一天数组，再按月份切分成行
-  const flat = [];
+  const result = [];
+  const totalDays = weekCount * 7;
   for (let i = 0; i < totalDays; i++) {
     const date = new Date(startDate);
     date.setDate(date.getDate() + i);
@@ -266,7 +281,7 @@ const calendarDays = computed(() => {
       date.getMonth() === today.getMonth() &&
       date.getFullYear() === today.getFullYear();
 
-    flat.push({
+    result.push({
       dayNumber: date.getDate(),
       isOtherMonth: !isCurrentMonth,
       isToday,
@@ -276,42 +291,19 @@ const calendarDays = computed(() => {
       holiday: props.holidayData[dateStr] || '',
     });
   }
-
-  // 在月份边界处断行
-  const rows = [];
-  let cur = [];
-  let prevMonth = null;
-  for (const day of flat) {
-    const m = day.date.getMonth();
-    if (prevMonth !== null && m !== prevMonth && cur.length > 0) {
-      while (cur.length < 7) cur.push(null);
-      rows.push(cur);
-      cur = [];
-    }
-    prevMonth = m;
-    cur.push(day);
-  }
-  while (cur.length < 7) cur.push(null);
-  rows.push(cur);
-
-  return rows;
+  return result;
 });
 
-const calendarWeekCount = computed(() => calendarDays.value.length);
-
 const weekNumbers = computed(() => {
+  const weekCount = calendarWeekCount.value;
   const weeks = [];
-  let prev = null;
-  for (let i = 0; i < calendarDays.value.length; i++) {
-    const firstDay = calendarDays.value[i][0];
-    if (!firstDay) continue;
-    const dayOfWeek = firstDay.date.getDay();
+  for (let i = 0; i < weekCount; i++) {
+    const firstDayOfWeek = new Date(calendarDays.value[i * 7].date);
+    const dayOfWeek = firstDayOfWeek.getDay();
     const offsetToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-    const monday = new Date(firstDay.date);
-    monday.setDate(firstDay.date.getDate() - offsetToMonday);
-    const wn = getWeekNumber(monday);
-    weeks.push(wn === prev ? null : wn);
-    prev = wn;
+    const monday = new Date(firstDayOfWeek);
+    monday.setDate(firstDayOfWeek.getDate() - offsetToMonday);
+    weeks.push(getWeekNumber(monday));
   }
   return weeks;
 });
