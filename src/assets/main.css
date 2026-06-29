@@ -96,3 +96,52 @@ input, select {
     font-size: 14px;
   }
 }
+
+/* ---- Calendar Grid Transitions ---- */
+.slide-left-enter-active,
+.slide-left-leave-active {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+.slide-left-enter-from {
+  transform: translateX(40px);
+  opacity: 0;
+}
+.slide-left-leave-to {
+  transform: translateX(-40px);
+  opacity: 0;
+}
+
+.default-enter-active,
+.default-leave-active {
+  transition: opacity 0.3s ease;
+}
+.default-enter-from,
+.default-leave-to {
+  opacity: 0;
+}
+
+.animate__bounce-enter-active {
+  animation: bounce-in 0.5s;
+}
+.animate__bounce-leave-active {
+  animation: bounce-in 0.3s reverse;
+}
+@keyframes bounce-in {
+  0% { transform: scale(0.3); opacity: 0; }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.animate__tada-enter-active {
+  animation: tada 0.5s;
+}
+.animate__tada-leave-active {
+  animation: tada 0.3s reverse;
+}
+@keyframes tada {
+  0% { transform: scale(1) rotate(0deg); }
+  10%, 20% { transform: scale(0.9) rotate(-3deg); }
+  30%, 50%, 70%, 90% { transform: scale(1.1) rotate(3deg); }
+  40%, 60%, 80% { transform: scale(1.1) rotate(-3deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}

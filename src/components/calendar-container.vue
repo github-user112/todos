@@ -18,23 +18,26 @@
       @changeShowLunar="changeShowLunar"
     />
 
-    <CalendarGrid
-      :weekdays="weekdays"
-      :calendarDays="calendarDays"
-      :weekNumbers="weekNumbers"
-      :animationType="animationType"
-      :weekCount="calendarWeekCount"
-      :selectedDate="selectedDate"
-      :todos="todos"
-      :holidayData="holidayData"
-      :completedInstances="completedInstances"
-      :deletedInstances="deletedInstances"
-      :showLunar="showLunar"
-      @openAddTodoPopup="openAddTodoPopup"
-      @openTodoActions="openTodoActions"
-      @selectDate="handleSelectDate"
-      @todoDrop="handleTodoDrop"
-    />
+    <Transition :name="resolvedAnimationType" mode="out-in">
+      <CalendarGrid
+        :key="`${currentYear}-${currentMonth}`"
+        :weekdays="weekdays"
+        :calendarDays="calendarDays"
+        :weekNumbers="weekNumbers"
+        :animationType="animationType"
+        :weekCount="calendarWeekCount"
+        :selectedDate="selectedDate"
+        :todos="todos"
+        :holidayData="holidayData"
+        :completedInstances="completedInstances"
+        :deletedInstances="deletedInstances"
+        :showLunar="showLunar"
+        @openAddTodoPopup="openAddTodoPopup"
+        @openTodoActions="openTodoActions"
+        @selectDate="handleSelectDate"
+        @todoDrop="handleTodoDrop"
+      />
+    </Transition>
 
     <AddTodoPopup
       v-if="showAddTodoPopup"
@@ -105,6 +108,13 @@ const emit = defineEmits([
 const animationType = ref(
   localStorage.getItem('calendar_animation_type') || 'slide-left',
 );
+const resolvedAnimationType = computed(() => {
+  if (animationType.value === 'random') {
+    const types = ['slide-left', 'default', 'animate__bounce', 'animate__tada'];
+    return types[Math.floor(Math.random() * types.length)];
+  }
+  return animationType.value;
+});
 const themeType = ref(localStorage.getItem('calendar_theme_type') || 'default');
 const viewMode = ref(
   localStorage.getItem('calendar_view_mode') || 'today-priority',
