@@ -37,9 +37,12 @@
         :completedInstances="completedInstances"
         :deletedInstances="deletedInstances"
         :showLunar="showLunar"
+        :class="{ 'stagger-day': animationType === 'stagger' }"
         :style="{
+          '--i': weekIndex * 7 + dayIndex,
           gridRow: weekIndex + 2,
           gridColumn: dayIndex + (isMobile ? 1 : 2),
+          animationDelay: animationType === 'stagger' ? `${(weekIndex * 7 + dayIndex) * 20}ms` : undefined,
         }"
         @dblclick="$emit('openAddTodoPopup', day.dateStr)"
         @openTodoActions="

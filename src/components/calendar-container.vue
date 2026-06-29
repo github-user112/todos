@@ -110,7 +110,7 @@ const animationType = ref(
 );
 const resolvedAnimationType = computed(() => {
   if (animationType.value === 'random') {
-    const types = ['slide-left', 'default', 'animate__bounce', 'animate__tada', 'fade-up', 'flip', 'scale-pop', 'skew', 'reveal'];
+    const types = ['slide-left', 'default', 'animate__bounce', 'animate__tada', 'fade-up', 'flip', 'scale-pop', 'skew', 'reveal', 'cube', 'depth-zoom', 'glass-flip', 'split', 'ripple', 'stagger'];
     return types[Math.floor(Math.random() * types.length)];
   }
   return animationType.value;

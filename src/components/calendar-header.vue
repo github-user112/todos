@@ -150,6 +150,12 @@
                   <option value="scale-pop">💥 缩放</option>
                   <option value="skew">⚡ 倾斜</option>
                   <option value="reveal">🌈 展开</option>
+                  <option value="cube">🧊 立方体</option>
+                  <option value="depth-zoom">🔍 景深缩放</option>
+                  <option value="glass-flip">🪟 玻璃翻转</option>
+                  <option value="split">🚪 分裂</option>
+                  <option value="ripple">🌊 波纹</option>
+                  <option value="stagger">🎯 错峰</option>
                   <option value="random">随机</option>
                 </select>
               </div>
