@@ -289,20 +289,29 @@ const calendarRows = computed(() => {
       rows.push(flat.slice(i, i + 7).map(d => d.isOtherMonth ? null : d));
     }
   } else {
-    let cur = [];
+    // 按月份分组
+    const monthGroups = [];
+    let curGroup = [];
     let prevMonth = null;
     for (const day of flat) {
       const m = day.date.getMonth();
-      if (prevMonth !== null && m !== prevMonth && cur.length > 0) {
-        while (cur.length < 7) cur.push(null);
-        rows.push(cur);
-        cur = [];
+      if (prevMonth !== null && m !== prevMonth) {
+        monthGroups.push(curGroup);
+        curGroup = [];
       }
       prevMonth = m;
-      cur.push(day);
+      curGroup.push(day);
     }
-    while (cur.length < 7) cur.push(null);
-    if (cur.length > 0) rows.push(cur);
+    if (curGroup.length > 0) monthGroups.push(curGroup);
+
+    // 每个月份组内按 7 格切行
+    for (const group of monthGroups) {
+      for (let i = 0; i < group.length; i += 7) {
+        const row = group.slice(i, i + 7);
+        while (row.length < 7) row.push(null);
+        rows.push(row);
+      }
+    }
   }
 
   return rows;
