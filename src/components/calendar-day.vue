@@ -86,8 +86,8 @@ import {
   isHoliday,
   isWorkday,
   findLastWorkday,
-  formatDate,
 } from '../utils/holidayAdjustment';
+import { formatDate } from '../utils/dateUtils';
 import { shouldShowRepeatingTodo } from '../utils/repeatUtils';
 import { formatReminderDesc } from '../utils/reminderManager';
 
