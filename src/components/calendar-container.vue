@@ -303,11 +303,12 @@ const weekNumbers = computed(() => {
   const weekCount = calendarWeekCount.value;
   const weeks = [];
   for (let i = 0; i < weekCount; i++) {
-    const firstDayOfWeek = new Date(calendarDays.value[i * 7].date);
-    const dayOfWeek = firstDayOfWeek.getDay();
+    const firstNonNull = calendarDays.value.slice(i * 7, i * 7 + 7).find(d => d);
+    if (!firstNonNull) { weeks.push(null); continue; }
+    const dayOfWeek = firstNonNull.date.getDay();
     const offsetToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-    const monday = new Date(firstDayOfWeek);
-    monday.setDate(firstDayOfWeek.getDate() - offsetToMonday);
+    const monday = new Date(firstNonNull.date);
+    monday.setDate(firstNonNull.date.getDate() - offsetToMonday);
     weeks.push(getWeekNumber(monday));
   }
   return weeks;
