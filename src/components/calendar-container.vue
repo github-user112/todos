@@ -275,6 +275,11 @@ const calendarDays = computed(() => {
     const isCurrentMonth =
       date.getMonth() === currentMonth.value &&
       date.getFullYear() === currentYear.value;
+    if (!isCurrentMonth) {
+      result.push(null);
+      continue;
+    }
+
     const dateStr = formatDate(date);
     const isToday =
       date.getDate() === today.getDate() &&
@@ -283,7 +288,7 @@ const calendarDays = computed(() => {
 
     result.push({
       dayNumber: date.getDate(),
-      isOtherMonth: !isCurrentMonth,
+      isOtherMonth: false,
       isToday,
       date,
       dateStr,
