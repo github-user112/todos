@@ -143,9 +143,7 @@
                 >
                   <option value="slide-left">← 滑动</option>
                   <option value="default">淡入淡出</option>
-                  <option value="animate__bounce">弹跳</option>
-                  <option value="animate__tada">抖动</option>
-                  <option value="random">随机</option>
+
                 </select>
               </div>
               <div class="setting-group">
@@ -244,7 +242,6 @@ defineProps({
   viewMode: { type: String, required: true },
   showTodoList: { type: Boolean, default: false },
   showLunar: { type: Boolean, default: true },
-  webhookUrlProp: { type: String, default: '' },
 });
 
 defineEmits([
@@ -256,7 +253,6 @@ defineEmits([
   'changeViewMode',
   'openTodoList',
   'changeShowLunar',
-  'changeWebhookUrl',
 ]);
 
 const showDrawer = ref(false);

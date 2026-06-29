@@ -8,7 +8,6 @@
       :viewMode="viewMode"
       :showTodoList="showTodoListDrawer"
       :showLunar="showLunar"
-      :webhookUrlProp="webhookUrl"
       @prevMonth="prevMonth"
       @nextMonth="nextMonth"
       @goToToday="goToToday"
@@ -110,9 +109,6 @@ const themeType = ref(localStorage.getItem('calendar_theme_type') || 'default');
 const viewMode = ref(
   localStorage.getItem('calendar_view_mode') || 'today-priority',
 );
-const showTodoList = ref(
-  localStorage.getItem('calendar_show_todo_list') === '1',
-);
 const showLunar = ref(localStorage.getItem('calendar_show_lunar') !== '0');
 const lunarReady = ref(isLunarLoaded());
 const webhookUrl = ref('');
@@ -134,12 +130,11 @@ const loadUserSettings = async () => {
       localStorage.setItem('calendar_view_mode', settings.view_mode);
     }
     if (settings.show_todo_list !== undefined) {
-      showTodoList.value = !!settings.show_todo_list;
+      showTodoListDrawer.value = !!settings.show_todo_list;
       localStorage.setItem(
         'calendar_show_todo_list',
         settings.show_todo_list ? '1' : '0',
       );
-      showTodoListDrawer.value = !!settings.show_todo_list;
     }
     if (settings.show_lunar !== undefined) {
       showLunar.value = !!settings.show_lunar;
@@ -511,7 +506,6 @@ const handleTodoDrop = async ({ type, source, targetTodoId, targetDate }) => {
 // ---- 待办列表开关 ----
 const toggleTodoList = () => {
   showTodoListDrawer.value = !showTodoListDrawer.value;
-  showTodoList.value = showTodoListDrawer.value;
   saveUserSettings('showTodoList', showTodoListDrawer.value);
 };
 

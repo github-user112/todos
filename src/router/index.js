@@ -1,6 +1,5 @@
 import { createRouter, createWebHashHistory } from 'vue-router';
 import CalendarPage from '../pages/CalendarPage.vue';
-import SettingsPage from '../pages/SettingsPage.vue';
 
 const routes = [
   {
@@ -11,7 +10,7 @@ const routes = [
   {
     path: '/settings',
     name: 'settings',
-    component: SettingsPage,
+    component: () => import('../pages/SettingsPage.vue'),
   },
 ];
 

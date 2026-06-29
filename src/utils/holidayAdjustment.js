@@ -88,7 +88,7 @@ export function findLastWorkday(dateStr, holidayData, maxDays = 7) {
  * @param {Object} holidayData - 节假日数据
  * @returns {Object} - { adjustedDate, shouldAdjust, reminderDate }
  */
-export function adjustTodoDate(todo, dateStr, holidayData) {
+function adjustTodoDate(todo, dateStr, holidayData) {
   // 兼容两种字段名
   const skipHolidays = todo.skip_holidays ?? todo.skipHolidays;
 
@@ -131,6 +131,6 @@ export function adjustTodoDate(todo, dateStr, holidayData) {
  * @param {Object} holidayData - 节假日数据
  * @returns {Object|null} - 节假日信息或null
  */
-export function getHolidayInfo(dateStr, holidayData) {
+function getHolidayInfo(dateStr, holidayData) {
   return holidayData?.[dateStr] || null;
 }
