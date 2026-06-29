@@ -37,7 +37,7 @@
         :completedInstances="completedInstances"
         :deletedInstances="deletedInstances"
         :showLunar="showLunar"
-        :class="{ 'stagger-day': animationType === 'stagger' }"
+        :class="{ 'stagger-day': animationType === 'stagger', 'month-boundary': isMonthBoundary(weekIndex, dayIndex) }"
         :style="{
           '--i': weekIndex * 7 + dayIndex,
           gridRow: weekIndex + 2,
@@ -83,6 +83,13 @@ const onResize = () => {
 };
 onMounted(() => window.addEventListener('resize', onResize));
 onUnmounted(() => window.removeEventListener('resize', onResize));
+
+const isMonthBoundary = (weekIndex, dayIndex) => {
+  if (dayIndex === 0) return false;
+  const prev = props.calendarDays[weekIndex * 7 + dayIndex - 1];
+  const curr = props.calendarDays[weekIndex * 7 + dayIndex];
+  return prev && curr && prev.date && curr.date && prev.date.getMonth() !== curr.date.getMonth();
+};
 </script>
 
 <style scoped>
@@ -140,6 +147,12 @@ onUnmounted(() => window.removeEventListener('resize', onResize));
   z-index: 10;
   position: relative;
   user-select: none;
+}
+
+/* 月份分隔线（同一行内跨月时显示） */
+.month-boundary {
+  border-left: 3px solid var(--primary-color) !important;
+  margin-left: -1px;
 }
 
 /* ========== 移动端 ========== */
