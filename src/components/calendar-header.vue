@@ -145,6 +145,11 @@
                   <option value="default">淡入淡出</option>
                   <option value="animate__bounce">弹跳</option>
                   <option value="animate__tada">抖动</option>
+                  <option value="fade-up">✨ 浮入</option>
+                  <option value="flip">🌀 翻转</option>
+                  <option value="scale-pop">💥 缩放</option>
+                  <option value="skew">⚡ 倾斜</option>
+                  <option value="reveal">🌈 展开</option>
                   <option value="random">随机</option>
                 </select>
               </div>

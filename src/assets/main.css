@@ -145,3 +145,79 @@ input, select {
   40%, 60%, 80% { transform: scale(1.1) rotate(-3deg); }
   100% { transform: scale(1) rotate(0deg); }
 }
+
+/* ---- fade-up ---- */
+.fade-up-enter-active,
+.fade-up-leave-active {
+  transition: transform 0.35s ease-out, opacity 0.35s ease-out;
+}
+.fade-up-enter-from {
+  transform: translateY(30px);
+  opacity: 0;
+}
+.fade-up-leave-to {
+  transform: translateY(-20px);
+  opacity: 0;
+}
+
+/* ---- flip ---- */
+.flip-enter-active,
+.flip-leave-active {
+  transition: transform 0.4s ease, opacity 0.4s ease;
+  perspective: 1000px;
+}
+.flip-enter-from {
+  transform: rotateY(-90deg) scale(0.9);
+  opacity: 0;
+}
+.flip-leave-to {
+  transform: rotateY(90deg) scale(0.9);
+  opacity: 0;
+}
+
+/* ---- scale-pop ---- */
+.scale-pop-enter-active {
+  animation: scale-pop-in 0.35s ease-out;
+}
+.scale-pop-leave-active {
+  animation: scale-pop-out 0.25s ease-in;
+}
+@keyframes scale-pop-in {
+  0% { transform: scale(0.8); opacity: 0; }
+  70% { transform: scale(1.05); }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes scale-pop-out {
+  0% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(0.7); opacity: 0; }
+}
+
+/* ---- skew ---- */
+.skew-enter-active,
+.skew-leave-active {
+  transition: transform 0.35s ease, opacity 0.35s ease;
+}
+.skew-enter-from {
+  transform: skewX(-12deg) translateX(-20px);
+  opacity: 0;
+}
+.skew-leave-to {
+  transform: skewX(12deg) translateX(20px);
+  opacity: 0;
+}
+
+/* ---- reveal ---- */
+.reveal-enter-active {
+  animation: reveal-in 0.4s ease-out;
+}
+.reveal-leave-active {
+  animation: reveal-out 0.3s ease-in;
+}
+@keyframes reveal-in {
+  0% { clip-path: circle(0% at 50% 50%); opacity: 0; }
+  100% { clip-path: circle(100% at 50% 50%); opacity: 1; }
+}
+@keyframes reveal-out {
+  0% { clip-path: circle(100% at 50% 50%); opacity: 1; }
+  100% { clip-path: circle(0% at 50% 50%); opacity: 0; }
+}
