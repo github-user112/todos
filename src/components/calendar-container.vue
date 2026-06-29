@@ -289,27 +289,27 @@ const calendarRows = computed(() => {
       rows.push(flat.slice(i, i + 7).map(d => d.isOtherMonth ? null : d));
     }
   } else {
-    // 按月份分组
-    const monthGroups = [];
-    let curGroup = [];
-    let prevMonth = null;
-    for (const day of flat) {
-      const m = day.date.getMonth();
-      if (prevMonth !== null && m !== prevMonth) {
-        monthGroups.push(curGroup);
-        curGroup = [];
-      }
-      prevMonth = m;
-      curGroup.push(day);
-    }
-    if (curGroup.length > 0) monthGroups.push(curGroup);
+    // 按 7 天一周切分，遇到月份边界拆行，保留每天的星期列位置
+    for (let i = 0; i < flat.length; i += 7) {
+      const week = flat.slice(i, i + 7);
+      const monthsInWeek = [...new Set(week.map(d => d.date.getMonth()))];
 
-    // 每个月份组内按 7 格切行
-    for (const group of monthGroups) {
-      for (let i = 0; i < group.length; i += 7) {
-        const row = group.slice(i, i + 7);
-        while (row.length < 7) row.push(null);
-        rows.push(row);
+      if (monthsInWeek.length === 1) {
+        rows.push(week);
+      } else {
+        const byMonth = new Map();
+        for (let j = 0; j < week.length; j++) {
+          const m = week[j].date.getMonth();
+          if (!byMonth.has(m)) byMonth.set(m, []);
+          byMonth.get(m).push({ day: week[j], pos: j });
+        }
+        for (const entries of byMonth.values()) {
+          const row = new Array(7).fill(null);
+          for (const { day, pos } of entries) {
+            row[pos] = day;
+          }
+          rows.push(row);
+        }
       }
     }
   }
