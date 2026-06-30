@@ -1080,3 +1080,519 @@ html.ios-glass-theme body > *:first-child::before {
     transform: none;
   }
 }
+
+/* ==================
+   液态玻璃主题（Liquid Glass）
+   参考 iOS 风格液态玻璃设计
+   ================== */
+.liquid-glass-theme {
+  --primary-color: #a855f7;
+  --primary-light: rgba(168, 85, 247, 0.15);
+  --primary-dark: #7c3aed;
+
+  --success-color: #10b981;
+  --danger-color: #ef4444;
+  --info-color: #3b82f6;
+  --warning-color: #f59e0b;
+
+  --background-color: rgba(255, 255, 255, 0.15);
+  --card-background: rgba(255, 255, 255, 0.35);
+  --text-primary: #1a1a2e;
+  --text-secondary: rgba(26, 26, 46, 0.6);
+  --border-color: rgba(255, 255, 255, 0.45);
+  --hover-color: rgba(255, 255, 255, 0.4);
+  --calendar-day-other-month-opacity: 0.3;
+
+  --current-month-bg: rgba(255, 255, 255, 0.2);
+  --current-month-border: rgba(255, 255, 255, 0.3);
+  --other-month-bg: transparent;
+  --other-month-border: transparent;
+  --other-month-text: rgba(26, 26, 46, 0.25);
+
+  --button-primary-bg: rgba(168, 85, 247, 0.25);
+  --button-primary-hover-bg: rgba(168, 85, 247, 0.4);
+  --button-secondary-bg: rgba(255, 255, 255, 0.3);
+  --button-secondary-hover-bg: rgba(255, 255, 255, 0.45);
+  --button-success-bg: rgba(16, 185, 129, 0.18);
+  --button-success-hover-bg: rgba(16, 185, 129, 0.3);
+  --button-danger-bg: rgba(239, 68, 68, 0.18);
+  --button-danger-hover-bg: rgba(239, 68, 68, 0.3);
+
+  --calendar-day-bg: rgba(255, 255, 255, 0.4);
+  --calendar-day-border: rgba(255, 255, 255, 0.5);
+  --calendar-day-hover-bg: rgba(255, 255, 255, 0.55);
+  --calendar-day-current-bg: rgba(168, 85, 247, 0.18);
+  --calendar-day-current-border: rgba(168, 85, 247, 0.5);
+  --calendar-day-weekend-bg: rgba(251, 191, 36, 0.08);
+  --calendar-day-weekend-border: rgba(251, 191, 36, 0.2);
+  --calendar-day-holiday-rest-bg: rgba(239, 68, 68, 0.08);
+  --calendar-day-holiday-rest-border: rgba(239, 68, 68, 0.18);
+  --calendar-day-holiday-work-bg: rgba(168, 85, 247, 0.08);
+  --calendar-day-holiday-work-border: rgba(168, 85, 247, 0.18);
+
+  --todo-item-bg: rgba(255, 255, 255, 0.35);
+  --todo-item-border-left: rgba(168, 85, 247, 0.5);
+  --todo-item-hover-bg: rgba(255, 255, 255, 0.5);
+  --todo-item-completed-bg: rgba(16, 185, 129, 0.08);
+  --todo-item-completed-border-left: rgba(16, 185, 129, 0.35);
+  --todo-item-completed-text: rgba(26, 26, 46, 0.4);
+
+  --preview-bg: rgba(168, 85, 247, 0.1);
+  --preview-border: rgba(168, 85, 247, 0.2);
+  --preview-text: #7c3aed;
+  --preview-hover-bg: rgba(168, 85, 247, 0.18);
+  --preview-hover-border: rgba(168, 85, 247, 0.3);
+
+  --badge-rest-bg: #ef4444;
+  --badge-rest-text: #fff;
+  --badge-work-bg: #a855f7;
+  --badge-work-text: #fff;
+
+  --loading-overlay-bg: rgba(243, 244, 246, 0.6);
+  --loading-spinner-border: rgba(255, 255, 255, 0.3);
+  --loading-spinner-border-top: #a855f7;
+  --loading-text: #1a1a2e;
+
+  --form-input-border: rgba(255, 255, 255, 0.4);
+  --form-input-focus-border: rgba(168, 85, 247, 0.5);
+  --form-input-focus-shadow: 0 0 0 3px rgba(168, 85, 247, 0.12);
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.08), 0 4px 8px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.1), 0 8px 16px rgba(0, 0, 0, 0.06);
+
+  --glass-grid-backdrop: none;
+  --glass-day-backdrop: blur(30px) saturate(200%);
+}
+
+/* 液态玻璃渐变背景 */
+html.liquid-glass-theme {
+  background: linear-gradient(135deg, #fdf2f8 0%, #f3e8ff 50%, #e0e7ff 100%);
+}
+
+html.liquid-glass-theme body {
+  background:
+    radial-gradient(ellipse at 10% 10%, rgba(255, 182, 193, 0.6) 0%, transparent 45%),
+    radial-gradient(ellipse at 90% 20%, rgba(221, 160, 221, 0.55) 0%, transparent 45%),
+    radial-gradient(ellipse at 80% 80%, rgba(173, 216, 230, 0.5) 0%, transparent 45%),
+    radial-gradient(ellipse at 20% 70%, rgba(255, 218, 185, 0.45) 0%, transparent 45%),
+    linear-gradient(135deg, #fff0f5 0%, #f8f0ff 30%, #e6e6fa 60%, #e0f7fa 100%);
+  background-size: 100% 100%;
+  min-height: 100vh;
+}
+
+/* 动态流动色块 */
+html.liquid-glass-theme body::after {
+  content: '';
+  position: fixed;
+  inset: -30%;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(255, 105, 180, 0.3) 0%, transparent 40%),
+    radial-gradient(circle at 80% 20%, rgba(148, 0, 211, 0.25) 0%, transparent 40%),
+    radial-gradient(circle at 60% 70%, rgba(100, 149, 237, 0.28) 0%, transparent 40%),
+    radial-gradient(circle at 30% 80%, rgba(255, 182, 193, 0.25) 0%, transparent 40%);
+  filter: blur(80px);
+  animation: liquid-blob-flow 20s ease-in-out infinite;
+}
+
+@keyframes liquid-blob-flow {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0deg) scale(1);
+  }
+  25% {
+    transform: translate(5%, -3%) rotate(2deg) scale(1.08);
+  }
+  50% {
+    transform: translate(-3%, 4%) rotate(-1.5deg) scale(0.95);
+  }
+  75% {
+    transform: translate(3%, 2%) rotate(1deg) scale(1.03);
+  }
+}
+
+/* 细腻噪声纹理 */
+html.liquid-glass-theme body > *:first-child::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.03;
+  mix-blend-mode: soft-light;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='5' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-size: 512px 512px;
+}
+
+/* 彩虹边缘效果 */
+@keyframes liquid-rainbow-shimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* 日历容器液态玻璃效果 */
+.liquid-glass-theme .calendar-container {
+  position: relative;
+  z-index: 1;
+}
+
+/* 日历格子液态玻璃 */
+.liquid-glass-theme .calendar-day {
+  background: rgba(255, 255, 255, 0.45) !important;
+  backdrop-filter: blur(30px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(30px) saturate(200%) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.55) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.02),
+    0 2px 12px rgba(0, 0, 0, 0.05) !important;
+  transition: all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.liquid-glass-theme .calendar-day::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 45%;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.2), transparent);
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.liquid-glass-theme .calendar-day::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1px solid transparent;
+  background: linear-gradient(135deg, rgba(255,255,255,0.8), rgba(255,255,255,0.2), rgba(255,255,255,0.6)) border-box;
+  -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.liquid-glass-theme .calendar-day:hover {
+  background: rgba(255, 255, 255, 0.55) !important;
+  border-color: rgba(255, 255, 255, 0.7) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.03),
+    0 8px 28px rgba(168, 85, 247, 0.12),
+    0 4px 14px rgba(0, 0, 0, 0.06) !important;
+  transform: translateY(-3px) scale(1.02) !important;
+  z-index: 10;
+}
+
+.liquid-glass-theme .calendar-day:hover::after {
+  opacity: 1;
+}
+
+.liquid-glass-theme .calendar-day:hover .day-number {
+  color: var(--primary-color) !important;
+  font-weight: 700;
+}
+
+/* 星期标题液态玻璃 */
+.liquid-glass-theme .calendar-weekday {
+  backdrop-filter: blur(24px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(200%) !important;
+  background: rgba(255, 255, 255, 0.25) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.35) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    0 1px 4px rgba(0, 0, 0, 0.03) !important;
+  color: rgba(26, 26, 46, 0.65) !important;
+  font-weight: 600 !important;
+}
+
+/* 特殊日期液态玻璃 */
+.liquid-glass-theme .weekend-day {
+  border-color: rgba(251, 191, 36, 0.3) !important;
+}
+.liquid-glass-theme .weekend-day::before {
+  background: linear-gradient(to bottom, rgba(255, 255, 200, 0.2), transparent);
+}
+
+.liquid-glass-theme .holiday-rest-day {
+  border-color: rgba(239, 68, 68, 0.25) !important;
+}
+.liquid-glass-theme .holiday-rest-day::before {
+  background: linear-gradient(to bottom, rgba(255, 200, 200, 0.18), transparent);
+}
+
+.liquid-glass-theme .holiday-work-day {
+  border-color: rgba(168, 85, 247, 0.25) !important;
+}
+.liquid-glass-theme .holiday-work-day::before {
+  background: linear-gradient(to bottom, rgba(220, 200, 255, 0.18), transparent);
+}
+
+.liquid-glass-theme .current-day {
+  border-color: rgba(168, 85, 247, 0.55) !important;
+  background: rgba(168, 85, 247, 0.15) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    0 0 0 2px rgba(168, 85, 247, 0.15),
+    0 6px 16px rgba(168, 85, 247, 0.18) !important;
+}
+.liquid-glass-theme .current-day::before {
+  background: linear-gradient(to bottom, rgba(220, 200, 255, 0.3), transparent);
+}
+
+.liquid-glass-theme .selected-day {
+  border-color: rgba(168, 85, 247, 0.6) !important;
+  background: rgba(168, 85, 247, 0.22) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    0 0 0 3px rgba(168, 85, 247, 0.18),
+    0 6px 16px rgba(168, 85, 247, 0.22) !important;
+}
+
+/* 周号液态玻璃 */
+.liquid-glass-theme .week-number {
+  backdrop-filter: blur(18px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(180%) !important;
+  background: rgba(255, 255, 255, 0.15) !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  color: rgba(26, 26, 46, 0.4) !important;
+}
+
+/* 头部液态玻璃效果 */
+.liquid-glass-theme .calendar-header {
+  background: rgba(255, 255, 255, 0.35) !important;
+  backdrop-filter: blur(35px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(35px) saturate(200%) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.45) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    0 6px 20px rgba(0, 0, 0, 0.06) !important;
+  position: relative;
+  z-index: 2;
+}
+
+/* 设置面板液态玻璃效果 */
+.liquid-glass-theme .drawer-panel {
+  background: rgba(255, 255, 255, 0.4) !important;
+  backdrop-filter: blur(40px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(40px) saturate(200%) !important;
+  border-left: 1.5px solid rgba(255, 255, 255, 0.4) !important;
+  box-shadow: -10px 0 36px rgba(0, 0, 0, 0.08) !important;
+}
+
+.liquid-glass-theme .drawer-overlay {
+  background: rgba(0, 0, 0, 0.15) !important;
+  backdrop-filter: blur(6px) !important;
+  -webkit-backdrop-filter: blur(6px) !important;
+}
+
+.liquid-glass-theme .theme-chip {
+  background: rgba(255, 255, 255, 0.4) !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+  color: rgba(26, 26, 46, 0.7) !important;
+  backdrop-filter: blur(15px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(15px) saturate(180%) !important;
+}
+.liquid-glass-theme .theme-chip.active {
+  background: rgba(168, 85, 247, 0.25) !important;
+  border-color: rgba(168, 85, 247, 0.5) !important;
+  color: #7c3aed !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    0 2px 10px rgba(168, 85, 247, 0.18) !important;
+}
+
+.liquid-glass-theme .setting-select {
+  background: rgba(255, 255, 255, 0.4) !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+  color: #1a1a2e !important;
+  backdrop-filter: blur(15px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(15px) saturate(180%) !important;
+}
+
+.liquid-glass-theme .setting-select:focus {
+  border-color: rgba(168, 85, 247, 0.5) !important;
+  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.15) !important;
+}
+
+/* 待办事项液态玻璃 */
+.liquid-glass-theme .todo-item {
+  background: rgba(255, 255, 255, 0.4) !important;
+  backdrop-filter: blur(15px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(15px) saturate(180%) !important;
+  border-left: 3px solid rgba(168, 85, 247, 0.5) !important;
+  transition: all 0.25s ease !important;
+}
+
+.liquid-glass-theme .todo-item:hover {
+  background: rgba(255, 255, 255, 0.5) !important;
+}
+
+.liquid-glass-theme .todo-item.completed {
+  background: rgba(16, 185, 129, 0.08) !important;
+  border-left-color: rgba(16, 185, 129, 0.35) !important;
+}
+
+/* 按钮液态玻璃效果 */
+.liquid-glass-theme .nav-btn,
+.liquid-glass-theme .icon-btn {
+  background: rgba(255, 255, 255, 0.35) !important;
+  backdrop-filter: blur(15px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(15px) saturate(180%) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.4) !important;
+  color: rgba(26, 26, 46, 0.65) !important;
+  transition: all 0.25s ease !important;
+}
+
+.liquid-glass-theme .nav-btn:hover,
+.liquid-glass-theme .icon-btn:hover {
+  background: rgba(255, 255, 255, 0.5) !important;
+  color: var(--primary-color) !important;
+  transform: scale(1.03);
+}
+
+.liquid-glass-theme .nav-btn:active,
+.liquid-glass-theme .icon-btn:active {
+  transform: scale(0.95);
+  background: rgba(255, 255, 255, 0.25) !important;
+}
+
+.liquid-glass-theme .icon-btn.active {
+  background: rgba(168, 85, 247, 0.25) !important;
+  color: #a855f7 !important;
+  border-color: rgba(168, 85, 247, 0.35) !important;
+}
+
+.liquid-glass-theme .today-btn {
+  background: rgba(168, 85, 247, 0.3) !important;
+  backdrop-filter: blur(15px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(15px) saturate(200%) !important;
+  border: 1.5px solid rgba(168, 85, 247, 0.4) !important;
+  color: #7c3aed !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    0 2px 10px rgba(168, 85, 247, 0.18) !important;
+  font-weight: 600 !important;
+}
+
+.liquid-glass-theme .today-btn:hover {
+  background: rgba(168, 85, 247, 0.4) !important;
+  transform: scale(1.03);
+}
+
+.liquid-glass-theme .today-btn:active {
+  transform: scale(0.95);
+}
+
+/* 提醒 toast 液态玻璃 */
+.liquid-glass-theme .reminder-toast {
+  background: rgba(255, 255, 255, 0.4) !important;
+  backdrop-filter: blur(30px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(30px) saturate(200%) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.5) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    0 10px 28px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* 添加待办弹窗液态玻璃 */
+.liquid-glass-theme .add-todo-popup {
+  background: rgba(255, 255, 255, 0.4) !important;
+  backdrop-filter: blur(40px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(40px) saturate(200%) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.5) !important;
+}
+
+/* 切换按钮液态玻璃 */
+.liquid-glass-theme .toggle-btn {
+  background: rgba(255, 255, 255, 0.4) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.45) !important;
+}
+
+.liquid-glass-theme .toggle-btn.active {
+  background: rgba(16, 185, 129, 0.6) !important;
+  border-color: rgba(16, 185, 129, 0.45) !important;
+}
+
+.liquid-glass-theme .toggle-thumb {
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.06) !important;
+}
+
+/* 设置抽屉内部各组独立卡片 */
+.liquid-glass-theme .setting-group {
+  background: rgba(255, 255, 255, 0.3) !important;
+  backdrop-filter: blur(15px) !important;
+  -webkit-backdrop-filter: blur(15px) !important;
+  border-radius: 14px !important;
+  padding: 14px !important;
+  border: 1px solid rgba(255, 255, 255, 0.35) !important;
+}
+
+/* 设置面板标签文字增强 */
+.liquid-glass-theme .setting-label {
+  font-weight: 700 !important;
+  color: #1a1a2e !important;
+}
+
+.liquid-glass-theme .toggle-desc {
+  color: rgba(26, 26, 46, 0.75) !important;
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+  html.liquid-glass-theme body {
+    background:
+      radial-gradient(ellipse at 20% 10%, rgba(255, 182, 193, 0.55) 0%, transparent 45%),
+      radial-gradient(ellipse at 80% 30%, rgba(221, 160, 221, 0.5) 0%, transparent 45%),
+      radial-gradient(ellipse at 50% 85%, rgba(173, 216, 230, 0.45) 0%, transparent 45%),
+      linear-gradient(180deg, #fff0f5 0%, #f8f0ff 50%, #e6e6fa 100%);
+  }
+
+  html.liquid-glass-theme body::after {
+    inset: -15%;
+    background:
+      radial-gradient(circle at 30% 25%, rgba(255, 105, 180, 0.25) 0%, transparent 38%),
+      radial-gradient(circle at 70% 65%, rgba(148, 0, 211, 0.22) 0%, transparent 38%),
+      radial-gradient(circle at 50% 50%, rgba(100, 149, 237, 0.24) 0%, transparent 38%);
+    filter: blur(50px);
+    animation: liquid-blob-flow-mobile 16s ease-in-out infinite;
+  }
+
+  @keyframes liquid-blob-flow-mobile {
+    0%, 100% {
+      transform: translate(0, 0) scale(1);
+    }
+    50% {
+      transform: translate(3%, -4%) scale(1.06);
+    }
+  }
+
+  .liquid-glass-theme .calendar-day:hover {
+    transform: none !important;
+  }
+
+  .liquid-glass-theme .nav-btn:hover,
+  .liquid-glass-theme .icon-btn:hover,
+  .liquid-glass-theme .today-btn:hover {
+    transform: none;
+  }
+
+  .liquid-glass-theme .setting-group {
+    padding: 12px !important;
+  }
+}
