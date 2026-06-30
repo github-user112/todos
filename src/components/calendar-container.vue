@@ -391,6 +391,7 @@ const applyTheme = (theme) => {
     'primrose-theme',
     'glass-theme',
     'ios-glass-theme',
+    'liquid-glass-theme',
     'dark-mode',
   );
 
@@ -406,6 +407,7 @@ const applyTheme = (theme) => {
     primrose: 'primrose-theme',
     glass: 'glass-theme',
     'ios-glass': 'ios-glass-theme',
+    'liquid-glass': 'liquid-glass-theme',
     dark: 'dark-mode',
   };
 
