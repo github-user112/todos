@@ -316,6 +316,7 @@ const themeOptions = [
   { value: 'primrose', label: '🌼 樱草黄' },
   { value: 'dark', label: '🌙 深色' },
   { value: 'glass', label: '🪟 液态玻璃' },
+  { value: 'ios-glass', label: '🍎 iOS 玻璃' },
   { value: 'auto', label: '🔄 跟随系统' },
 ];
 
