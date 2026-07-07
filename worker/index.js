@@ -81,7 +81,7 @@ export default {
 
   async scheduled(event, env, ctx) {
     const cron = event.cron;
-    if (cron === '0 0 * * *') {
+    if (cron === '30 0 * * *') {
       ctx.waitUntil(handleDailyWebhookPush(env));
     }
     if (cron === '0 1 * * *') {
