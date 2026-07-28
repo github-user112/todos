@@ -70,7 +70,7 @@
                 <div class="todo-row-actions">
                   <button
                     class="row-action-btn complete"
-                    @click="handleComplete(item)"
+                    @click="handleComplete(item, $event)"
                     :title="item.isCompleted ? '撤销' : '完成'"
                   >
                     <svg
@@ -192,7 +192,7 @@
             <div class="todo-row-actions">
               <button
                 class="row-action-btn complete"
-                @click="handleComplete(item)"
+                @click="handleComplete(item, $event)"
                 :title="item.isCompleted ? '撤销' : '完成'"
               >
                 <svg
@@ -241,6 +241,14 @@
       </div>
     </div>
   </Transition>
+
+  <!-- 完成待办彩蛋动效 -->
+  <CelebrationEffect
+    :trigger="celebrationTrigger"
+    :effect="celebrationEffect"
+    :originX="celebrationX"
+    :originY="celebrationY"
+  />
 </template>
 
 <script setup>
@@ -256,6 +264,11 @@ import {
   isWorkday,
   findLastWorkday,
 } from '../utils/holidayAdjustment';
+import CelebrationEffect from './CelebrationEffect.vue';
+import {
+  getCelebrationEffect,
+  setCelebrationEffect,
+} from '../utils/celebrationUtils';
 
 const props = defineProps({
   show: { type: Boolean, required: true },
@@ -280,8 +293,19 @@ const onResize = () => {
 onMounted(() => {
   window.addEventListener('resize', onResize);
   loadAlmanac();
+  // 监听动效风格变化
+  window.addEventListener('celebration-effect-change', onCelebrationEffectChange);
 });
-onUnmounted(() => window.removeEventListener('resize', onResize));
+onUnmounted(() => {
+  window.removeEventListener('resize', onResize);
+  window.removeEventListener('celebration-effect-change', onCelebrationEffectChange);
+});
+
+function onCelebrationEffectChange(e) {
+  if (e.detail) {
+    celebrationEffect.value = e.detail;
+  }
+}
 
 const PAGE_SIZE = 15;
 const pastOffset = ref(0);
@@ -291,12 +315,41 @@ const loading = ref(false);
 // 每日宜忌数据
 const almanac = ref(null);
 
+// 完成待办彩蛋动效
+const celebrationTrigger = ref(0);
+const celebrationEffect = ref(getCelebrationEffect());
+const celebrationX = ref(80); // 默认右侧待办列表区域
+const celebrationY = ref(50);
+
+// 暴露给设置页修改动效风格时同步更新
+defineExpose({
+  isOpen: computed(() => props.show),
+  updateCelebrationEffect(effect) {
+    setCelebrationEffect(effect);
+    celebrationEffect.value = effect;
+  },
+  triggerCelebration,
+});
+
 const loadAlmanac = async () => {
   try {
-    await ensureLunarLoaded();
+    // 尝试加载农历模块（失败也不影响宜忌展示，只是没有农历信息）
+    try {
+      await ensureLunarLoaded();
+    } catch (e) {
+      console.warn('农历模块加载失败，宜忌将不显示农历信息:', e);
+    }
     almanac.value = getDailyAlmanac(new Date());
   } catch (e) {
     console.warn('加载今日宜忌失败:', e);
+    // 兜底：3秒后重试一次
+    setTimeout(() => {
+      if (!almanac.value) {
+        try {
+          almanac.value = getDailyAlmanac(new Date());
+        } catch {}
+      }
+    }, 3000);
   }
 };
 
@@ -520,7 +573,7 @@ function getReminderTooltip(item) {
   return `${todoTime} ${reminderDesc}提醒`;
 }
 
-function handleComplete(item) {
+function handleComplete(item, event) {
   // 完成待办前先记录状态，用于反馈
   const wasCompleted = item.isCompleted;
   emit('complete-todo', {
@@ -531,7 +584,22 @@ function handleComplete(item) {
   // 仅在「完成」时反馈（撤销完成不反馈）
   if (!wasCompleted) {
     showCompletionFeedback(item.text);
+    triggerCelebration(event);
   }
+}
+
+function triggerCelebration(event) {
+  if (celebrationEffect.value === 'none') return;
+  // 基于点击位置计算动效起点（相对视口百分比）
+  if (event && (event.clientX !== undefined || event.target)) {
+    const target = event.target;
+    const rect = (target.closest?.('.row-action-btn') || target).getBoundingClientRect?.();
+    if (rect) {
+      celebrationX.value = (rect.left + rect.width / 2) / window.innerWidth * 100;
+      celebrationY.value = (rect.top + rect.height / 2) / window.innerHeight * 100;
+    }
+  }
+  celebrationTrigger.value++;
 }
 
 function showCompletionFeedback(todoText) {
@@ -656,8 +724,6 @@ watch(
     }
   },
 );
-
-defineExpose({ isOpen: computed(() => props.show) });
 </script>
 
 <style scoped>
@@ -666,7 +732,7 @@ defineExpose({ isOpen: computed(() => props.show) });
   inset: 0;
   background: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(4px);
-  z-index: 2000;
+  z-index: 2500;
   display: flex;
   justify-content: flex-end;
 }
@@ -677,6 +743,8 @@ defineExpose({ isOpen: computed(() => props.show) });
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  position: relative;
+  z-index: 2501;
 }
 .pc-panel {
   position: fixed;
@@ -690,7 +758,7 @@ defineExpose({ isOpen: computed(() => props.show) });
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  z-index: 1000;
+  z-index: 2500;
 }
 
 .drawer-header {

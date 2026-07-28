@@ -18,8 +18,6 @@
       @changeShowLunar="changeShowLunar"
     />
 
-    <FestivalCountdown />
-
     <Transition :name="resolvedAnimationType" mode="out-in">
       <CalendarGrid
         :key="`${currentYear}-${currentMonth}`"
@@ -78,8 +76,13 @@ import CalendarGrid from './calendar-grid.vue';
 import AddTodoPopup from './add-todo-popup.vue';
 import TodoActionsMenu from './todo-actions-menu.vue';
 import TodoListDrawer from './TodoListDrawer.vue';
-import FestivalCountdown from './FestivalCountdown.vue';
 import { formatDate, getWeekNumber } from '../utils/dateUtils';
+import {
+  isDynamicBackgroundEnabled,
+  applyDynamicBackground,
+  startDynamicBackgroundRefresh,
+  stopDynamicBackgroundRefresh,
+} from '../utils/dynamicBackground';
 import {
   getLunarDateStr,
   ensureLunarLoaded,
@@ -608,6 +611,12 @@ onMounted(() => {
 
   const colorSchemeMedia = window.matchMedia('(prefers-color-scheme: dark)');
   colorSchemeMedia.addEventListener('change', handleColorSchemeChange);
+
+  // 初始化动态背景
+  if (isDynamicBackgroundEnabled()) {
+    applyDynamicBackground();
+    startDynamicBackgroundRefresh();
+  }
 });
 </script>
 

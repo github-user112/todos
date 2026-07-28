@@ -31,6 +31,7 @@
         </svg>
       </button>
       <button class="today-btn" @click="$emit('goToToday')">今天</button>
+      <FestivalCountdown />
     </div>
 
     <div class="header-right">
@@ -123,16 +124,15 @@
               </div>
               <div class="setting-group">
                 <label class="setting-label">🎨 主题风格</label>
-                <div class="theme-grid">
-                  <button
-                    v-for="t in themeOptions"
-                    :key="t.value"
-                    :class="['theme-chip', { active: themeType === t.value }]"
-                    @click="$emit('changeTheme', t.value)"
-                  >
+                <select
+                  class="setting-select"
+                  :value="themeType"
+                  @change="$emit('changeTheme', $event.target.value)"
+                >
+                  <option v-for="t in themeOptions" :key="t.value" :value="t.value">
                     {{ t.label }}
-                  </button>
-                </div>
+                  </option>
+                </select>
               </div>
               <div class="setting-group">
                 <label class="setting-label">🎬 切换动画</label>
@@ -160,12 +160,38 @@
                 </select>
               </div>
               <div class="setting-group">
+                <label class="setting-label">🎉 完成动效</label>
+                <select
+                  class="setting-select"
+                  :value="celebrationEffect"
+                  @change="changeCelebrationEffect($event.target.value)"
+                >
+                  <option value="confetti">🎊 彩色纸屑</option>
+                  <option value="stars">✨ 星星粒子</option>
+                  <option value="rainbow">🌈 彩虹光波</option>
+                  <option value="all">🎉 全部动效</option>
+                  <option value="none">🚫 关闭动效</option>
+                </select>
+              </div>
+              <div class="setting-group">
                 <label class="setting-label">🌙 农历显示</label>
                 <div class="toggle-row">
                   <span class="toggle-desc">在日期旁显示农历/节气</span>
                   <button
                     :class="['toggle-btn', { active: showLunar }]"
                     @click="$emit('changeShowLunar', !showLunar)"
+                  >
+                    <span class="toggle-thumb"></span>
+                  </button>
+                </div>
+              </div>
+              <div class="setting-group">
+                <label class="setting-label">🌦️ 动态背景</label>
+                <div class="toggle-row">
+                  <span class="toggle-desc">根据时间和天气自动切换背景</span>
+                  <button
+                    :class="['toggle-btn', { active: dynamicBgEnabled }]"
+                    @click="toggleDynamicBackground"
                   >
                     <span class="toggle-thumb"></span>
                   </button>
@@ -247,6 +273,19 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { apiRequest } from '../utils/api';
+import FestivalCountdown from './FestivalCountdown.vue';
+import {
+  getCelebrationEffect,
+  setCelebrationEffect,
+} from '../utils/celebrationUtils';
+import {
+  isDynamicBackgroundEnabled,
+  setDynamicBackgroundEnabled,
+  applyDynamicBackground,
+  removeDynamicBackground,
+  startDynamicBackgroundRefresh,
+  stopDynamicBackgroundRefresh,
+} from '../utils/dynamicBackground';
 defineProps({
   currentYear: { type: Number, required: true },
   currentMonth: { type: Number, required: true },
@@ -257,7 +296,7 @@ defineProps({
   showLunar: { type: Boolean, default: true },
 });
 
-defineEmits([
+const emit = defineEmits([
   'prevMonth',
   'nextMonth',
   'goToToday',
@@ -266,9 +305,32 @@ defineEmits([
   'changeViewMode',
   'openTodoList',
   'changeShowLunar',
+  'changeCelebrationEffect',
 ]);
 
 const showDrawer = ref(false);
+const celebrationEffect = ref(getCelebrationEffect());
+const dynamicBgEnabled = ref(isDynamicBackgroundEnabled());
+
+const changeCelebrationEffect = (effect) => {
+  setCelebrationEffect(effect);
+  celebrationEffect.value = effect;
+  emit('changeCelebrationEffect', effect);
+  window.dispatchEvent(new CustomEvent('celebration-effect-change', { detail: effect }));
+};
+
+const toggleDynamicBackground = () => {
+  const next = !dynamicBgEnabled.value;
+  setDynamicBackgroundEnabled(next);
+  dynamicBgEnabled.value = next;
+  if (next) {
+    applyDynamicBackground();
+    startDynamicBackgroundRefresh();
+  } else {
+    removeDynamicBackground();
+    stopDynamicBackgroundRefresh();
+  }
+};
 const webhookUrl = ref('');
 const webhookTesting = ref(false);
 const webhookSaving = ref(false);
@@ -543,7 +605,7 @@ const copyUrlToClipboard = () => {
   inset: 0;
   background: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(4px);
-  z-index: 2000;
+  z-index: 3000;
   display: flex;
   justify-content: flex-end;
 }
@@ -557,6 +619,8 @@ const copyUrlToClipboard = () => {
   flex-direction: column;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  position: relative;
+  z-index: 3001;
 }
 
 .drawer-header {

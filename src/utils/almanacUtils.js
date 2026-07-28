@@ -128,7 +128,13 @@ function getLunarDayInfo(date) {
  * @returns {Object} { yi: [], ji: [], luckyHour: '', fortune: '', lunarInfo: {} }
  */
 export function getDailyAlmanac(date = new Date()) {
-  const lunarInfo = getLunarDayInfo(date);
+  let lunarInfo = null;
+  try {
+    lunarInfo = getLunarDayInfo(date);
+  } catch (e) {
+    // 农历加载失败时仍返回宜忌数据，只是没有农历信息
+    console.warn('获取农历信息失败，使用纯日期生成宜忌:', e);
+  }
 
   // 使用日期作为种子，保证同一天结果稳定
   const seed = date.getFullYear() * 10000 +

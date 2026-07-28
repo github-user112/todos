@@ -1,28 +1,22 @@
 <template>
-  <Transition name="festival-banner">
-    <div
+  <Transition name="festival-chip">
+    <span
       v-if="visible && festivalInfo"
-      class="festival-banner"
+      class="festival-chip"
       :class="{ 'is-today': festivalInfo.isToday }"
+      @click="dismiss"
+      :title="festivalInfo.isToday ? festivalGreeting : `${festivalInfo.def.name} (${festivalDateStr})`"
     >
-      <div class="banner-content">
-        <span class="festival-emoji">{{ festivalInfo.def.emoji }}</span>
-        <div class="festival-text">
-          <template v-if="festivalInfo.isToday">
-            <span class="festival-name">今天是 {{ festivalInfo.def.name }}！</span>
-            <span class="festival-desc">{{ festivalGreeting }}</span>
-          </template>
-          <template v-else>
-            <span class="festival-name">
-              距{{ festivalInfo.def.name }}还有
-              <strong>{{ festivalInfo.daysLeft }}</strong> 天
-            </span>
-            <span class="festival-desc">{{ festivalDateStr }}</span>
-          </template>
-        </div>
-      </div>
-      <button class="banner-close" @click="dismiss" aria-label="关闭">×</button>
-    </div>
+      <span class="chip-emoji">{{ festivalInfo.def.emoji }}</span>
+      <template v-if="festivalInfo.isToday">
+        <span class="chip-text">今天是{{ festivalInfo.def.name }}</span>
+      </template>
+      <template v-else>
+        <span class="chip-text">
+          距{{ festivalInfo.def.name }}<strong>{{ festivalInfo.daysLeft }}</strong>天
+        </span>
+      </template>
+    </span>
   </Transition>
 </template>
 
@@ -67,7 +61,6 @@ const checkFestival = async () => {
 
     // 如果是今天，或者 30 天内，显示
     if (info.isToday || info.daysLeft <= 30) {
-      // 检查是否被用户关闭过（按日期+节日key）
       const dismissKey = `festival_dismissed_${info.def.key}_${formatDateKey(new Date())}`;
       try {
         if (info.isToday && localStorage.getItem(dismissKey) === '1') return;
@@ -84,7 +77,6 @@ const checkFestival = async () => {
 
 const dismiss = () => {
   visible.value = false;
-  // 仅在节日当天关闭时记录，避免每天弹
   if (festivalInfo.value?.isToday && dismissedKey.value) {
     try {
       localStorage.setItem(dismissedKey.value, '1');
@@ -100,135 +92,86 @@ function formatDateKey(date) {
 }
 
 onMounted(() => {
-  // 延迟 1s 避免与初始化抢资源
   setTimeout(checkFestival, 1000);
 });
 </script>
 
 <style scoped>
-.festival-banner {
-  display: flex;
+.festival-chip {
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 8px 14px;
-  margin: 0 0 6px;
-  border-radius: 12px;
+  gap: 4px;
+  padding: 5px 10px;
+  border-radius: 9px;
   background: linear-gradient(135deg, var(--primary-light, #e0e7ff), var(--card-background, #fff));
   border: 1px solid var(--primary-color, #6366f1);
-  box-shadow: var(--shadow-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-primary, #0f172a);
+  cursor: pointer;
+  white-space: nowrap;
   flex-shrink: 0;
-  animation: banner-glow 3s ease-in-out infinite;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  animation: chip-glow 3s ease-in-out infinite;
 }
 
-@keyframes banner-glow {
-  0%, 100% { box-shadow: 0 0 0 0 var(--form-input-focus-shadow, rgba(99,102,241,0.1)); }
-  50% { box-shadow: 0 0 12px 2px var(--form-input-focus-shadow, rgba(99,102,241,0.15)); }
+@keyframes chip-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(99,102,241,0); }
+  50% { box-shadow: 0 0 8px 1px rgba(99,102,241,0.18); }
 }
 
-.festival-banner.is-today {
-  background: linear-gradient(135deg, rgba(244,63,94,0.1), rgba(244,63,94,0.05));
+.festival-chip.is-today {
+  background: linear-gradient(135deg, rgba(244,63,94,0.12), rgba(244,63,94,0.04));
   border-color: var(--danger-color, #ef4444);
+  color: var(--danger-color, #e11d48);
 }
 
-.banner-content {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex: 1;
-  min-width: 0;
-}
-
-.festival-emoji {
-  font-size: 1.6rem;
+.chip-emoji {
+  font-size: 0.95rem;
   line-height: 1;
-  flex-shrink: 0;
   animation: emoji-bounce 2s ease-in-out infinite;
 }
 
 @keyframes emoji-bounce {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-3px); }
+  50% { transform: translateY(-2px); }
 }
 
-.festival-text {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  min-width: 0;
-}
-
-.festival-name {
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--text-primary, #0f172a);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.festival-name strong {
+.chip-text strong {
   color: var(--danger-color, #e11d48);
-  font-size: 1.05rem;
-  margin: 0 2px;
+  font-size: 0.9rem;
+  margin: 0 1px;
 }
 
-.festival-desc {
-  font-size: 0.72rem;
-  color: var(--text-secondary, #64748b);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.banner-close {
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-secondary, #64748b);
-  font-size: 1.1rem;
-  line-height: 1;
-  background: transparent;
-  cursor: pointer;
-  flex-shrink: 0;
-  -webkit-tap-highlight-color: transparent;
-}
-.banner-close:active {
-  background: var(--hover-color, #f1f5f9);
-  transform: scale(0.9);
+.festival-chip:active {
+  transform: scale(0.95);
 }
 
 /* 动画 */
-.festival-banner-enter-active {
+.festival-chip-enter-active {
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.festival-banner-leave-active {
+.festival-chip-leave-active {
   transition: all 0.3s ease;
 }
-.festival-banner-enter-from {
+.festival-chip-enter-from {
   opacity: 0;
-  transform: translateY(-10px) scale(0.95);
+  transform: scale(0.7);
 }
-.festival-banner-leave-to {
+.festival-chip-leave-to {
   opacity: 0;
-  transform: translateY(-10px) scale(0.95);
+  transform: scale(0.7);
 }
 
 @media (max-width: 380px) {
-  .festival-banner {
-    padding: 6px 10px;
-    border-radius: 10px;
+  .festival-chip {
+    padding: 4px 8px;
+    font-size: 0.7rem;
+    border-radius: 8px;
   }
-  .festival-emoji {
-    font-size: 1.3rem;
-  }
-  .festival-name {
-    font-size: 0.78rem;
-  }
-  .festival-desc {
-    font-size: 0.68rem;
+  .chip-emoji {
+    font-size: 0.85rem;
   }
 }
 </style>

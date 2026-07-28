@@ -57,7 +57,7 @@ const close = () => {
   inset: 0;
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(6px);
-  z-index: 5000;
+  z-index: 6000;
   display: flex;
   align-items: center;
   justify-content: center;

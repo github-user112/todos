@@ -29,6 +29,44 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* ---- 动态背景（根据时间/天气） ---- */
+body.dynamic-background,
+html body.dynamic-background {
+  background: var(--dynamic-bg, var(--background-color));
+  background-size: 100% 100%;
+  background-attachment: fixed;
+  transition: background 1.5s ease;
+  position: relative;
+}
+
+body.dynamic-background::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: var(--dynamic-overlay, transparent);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* 动态背景启用时，日历容器背景半透明，让动态背景透出 */
+body.dynamic-background .calendar-container {
+  background: transparent;
+}
+
+body.dynamic-background .calendar-header,
+body.dynamic-background .pc-panel,
+body.dynamic-background .mobile-panel {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+}
+
+body.dynamic-background.dark-mode .calendar-header,
+body.dynamic-background.dark-mode .pc-panel,
+body.dynamic-background.dark-mode .mobile-panel {
+  background: rgba(15, 23, 42, 0.75);
+}
+
 /* ---- Scrollbar ---- */
 ::-webkit-scrollbar {
   width: 4px;
