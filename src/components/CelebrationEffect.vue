@@ -1,28 +1,30 @@
 <template>
-  <div v-if="active" class="celebration-layer" aria-hidden="true">
-    <!-- 彩色纸屑 -->
-    <template v-if="effect === 'confetti' || effect === 'all'">
-      <span
-        v-for="(p, i) in confettiParticles"
-        :key="'c' + i"
-        class="confetti"
-        :style="p.style"
-      ></span>
-    </template>
-    <!-- 星星粒子 -->
-    <template v-if="effect === 'stars' || effect === 'all'">
-      <span
-        v-for="(s, i) in starParticles"
-        :key="'s' + i"
-        class="star"
-        :style="s.style"
-      >✨</span>
-    </template>
-    <!-- 彩虹光波 -->
-    <template v-if="effect === 'rainbow' || effect === 'all'">
-      <div class="rainbow-wave"></div>
-    </template>
-  </div>
+  <Teleport to="body">
+    <div v-if="active" class="celebration-layer" aria-hidden="true">
+      <!-- 彩色纸屑 -->
+      <template v-if="effect === 'confetti' || effect === 'all'">
+        <span
+          v-for="(p, i) in confettiParticles"
+          :key="'c' + i"
+          class="confetti"
+          :style="p.style"
+        ></span>
+      </template>
+      <!-- 星星粒子 -->
+      <template v-if="effect === 'stars' || effect === 'all'">
+        <span
+          v-for="(s, i) in starParticles"
+          :key="'s' + i"
+          class="star"
+          :style="s.style"
+        >✨</span>
+      </template>
+      <!-- 彩虹光波 -->
+      <template v-if="effect === 'rainbow' || effect === 'all'">
+        <div class="rainbow-wave"></div>
+      </template>
+    </div>
+  </Teleport>
 </template>
 
 <script setup>

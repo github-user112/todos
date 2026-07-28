@@ -820,7 +820,7 @@ watch(
   color: var(--text-secondary);
 }
 
-/* 每日宜忌卡片 */
+/* 每日宜忌卡片 - 固定在顶部不随列表滚动 */
 .almanac-card {
   background: linear-gradient(135deg, var(--primary-light, #e0e7ff), var(--card-background, #fff));
   border: 1px solid var(--border-color, #e2e8f0);
@@ -828,6 +828,10 @@ watch(
   padding: 12px 14px;
   margin-bottom: 12px;
   flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .almanac-title {

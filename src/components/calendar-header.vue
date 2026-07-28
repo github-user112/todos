@@ -93,15 +93,16 @@
       </button>
     </div>
 
-    <!-- 设置抽屉 -->
-    <Transition name="drawer-overlay">
-      <div
-        v-if="showDrawer"
-        class="drawer-overlay"
-        @click.self="showDrawer = false"
-      >
-        <Transition name="drawer-panel">
-          <div v-if="showDrawer" class="drawer-panel">
+    <!-- 设置抽屉 - Teleport 到 body 避免祖先 backdrop-filter 影响固定定位 -->
+    <Teleport to="body">
+      <Transition name="drawer-overlay">
+        <div
+          v-if="showDrawer"
+          class="drawer-overlay"
+          @click.self="showDrawer = false"
+        >
+          <Transition name="drawer-panel">
+            <div v-if="showDrawer" class="drawer-panel">
             <div class="drawer-header">
               <span class="drawer-title">⚙️ 设置</span>
               <button class="drawer-close" @click="showDrawer = false">
@@ -196,6 +197,22 @@
                     <span class="toggle-thumb"></span>
                   </button>
                 </div>
+                <div v-if="dynamicBgEnabled" class="city-input-row">
+                  <span class="city-desc">城市（未授权定位时使用）</span>
+                  <div class="city-input-wrap">
+                    <input
+                      type="text"
+                      class="city-input"
+                      v-model="customCity"
+                      placeholder="如：北京、上海"
+                      @keyup.enter="saveCity"
+                    />
+                    <button class="city-save-btn" @click="saveCity">确定</button>
+                  </div>
+                  <p v-if="cityMessage" :class="['webhook-result', cityMessage.success ? 'success' : 'error']">
+                    {{ cityMessage.text }}
+                  </p>
+                </div>
               </div>
               <div class="setting-group">
                 <label class="setting-label">💾 数据管理</label>
@@ -267,6 +284,7 @@
         </Transition>
       </div>
     </Transition>
+    </Teleport>
   </div>
 </template>
 
@@ -285,6 +303,8 @@ import {
   removeDynamicBackground,
   startDynamicBackgroundRefresh,
   stopDynamicBackgroundRefresh,
+  getCustomCity,
+  setCustomCity,
 } from '../utils/dynamicBackground';
 defineProps({
   currentYear: { type: Number, required: true },
@@ -311,6 +331,8 @@ const emit = defineEmits([
 const showDrawer = ref(false);
 const celebrationEffect = ref(getCelebrationEffect());
 const dynamicBgEnabled = ref(isDynamicBackgroundEnabled());
+const customCity = ref(getCustomCity());
+const cityMessage = ref(null);
 
 const changeCelebrationEffect = (effect) => {
   setCelebrationEffect(effect);
@@ -330,6 +352,21 @@ const toggleDynamicBackground = () => {
     removeDynamicBackground();
     stopDynamicBackgroundRefresh();
   }
+};
+
+const saveCity = () => {
+  const city = customCity.value.trim();
+  setCustomCity(city);
+  if (city) {
+    cityMessage.value = { success: true, text: `✅ 城市已设为「${city}」，将重新获取天气` };
+    // 重新应用动态背景
+    if (dynamicBgEnabled.value) {
+      applyDynamicBackground();
+    }
+  } else {
+    cityMessage.value = { success: true, text: '✅ 已清除自定义城市' };
+  }
+  setTimeout(() => { cityMessage.value = null; }, 3000);
 };
 const webhookUrl = ref('');
 const webhookTesting = ref(false);
@@ -770,6 +807,62 @@ const copyUrlToClipboard = () => {
 }
 .toggle-btn.active .toggle-thumb {
   transform: translateX(20px);
+}
+
+/* 城市输入 */
+.city-input-row {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--border-color);
+}
+
+.city-desc {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  display: block;
+  margin-bottom: 6px;
+}
+
+.city-input-wrap {
+  display: flex;
+  gap: 6px;
+}
+
+.city-input {
+  flex: 1;
+  padding: 8px 10px;
+  border: 1.5px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 0.8rem;
+  background: var(--card-background);
+  color: var(--text-primary);
+  -webkit-appearance: none;
+  box-sizing: border-box;
+}
+
+.city-input:focus {
+  outline: none;
+  border-color: var(--form-input-focus-border);
+  box-shadow: 0 0 0 3px var(--form-input-focus-shadow);
+}
+
+.city-input::placeholder {
+  color: var(--other-month-text);
+}
+
+.city-save-btn {
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: var(--button-primary-bg);
+  color: white;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.city-save-btn:active {
+  transform: scale(0.95);
 }
 
 .webhook-desc {

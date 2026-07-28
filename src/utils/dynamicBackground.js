@@ -5,6 +5,7 @@
 const STORAGE_KEY = 'dynamic_background_enabled';
 const WEATHER_CACHE_KEY = 'weather_cache';
 const WEATHER_CACHE_TTL = 30 * 60 * 1000; // 30 分钟缓存
+const CITY_STORAGE_KEY = 'dynamic_bg_city'; // 自定义城市
 
 let enabled = null;
 let listeners = new Set();
@@ -52,7 +53,7 @@ export function getTimePeriod(hour = new Date().getHours()) {
 /**
  * 获取天气（带缓存）
  * 使用 Open-Meteo 免费 API（无需 key，无 CORS 限制）
- * 失败返回 null
+ * 优先用地理位置，失败后用自定义城市，都失败返回 null
  */
 export async function fetchWeather() {
   // 检查缓存
@@ -66,9 +67,33 @@ export async function fetchWeather() {
     }
   } catch {}
 
+  let coords = null;
+  let coordsSource = '';
+
+  // 1. 先尝试地理位置（超时 4s）
   try {
-    // 先获取位置（超时 5s）
-    const coords = await getCoords(5000);
+    coords = await getCoords(4000);
+    coordsSource = 'geolocation';
+  } catch (e) {
+    console.warn('地理位置获取失败，尝试自定义城市:', e.message);
+    // 2. 失败后用自定义城市
+    const city = getCustomCity();
+    if (city) {
+      try {
+        coords = await getCoordsByCity(city);
+        coordsSource = 'city:' + city;
+      } catch (e2) {
+        console.warn('城市查询失败:', e2.message);
+      }
+    }
+  }
+
+  if (!coords) {
+    console.warn('无法获取位置，使用纯时间段背景');
+    return null;
+  }
+
+  try {
     // 调用 Open-Meteo API
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${coords.lat}&longitude=${coords.lon}&current=weather_code,temperature_2m`;
     const res = await fetch(url, { signal: AbortSignal.timeout(6000) });
@@ -78,6 +103,7 @@ export async function fetchWeather() {
       code: data.current?.weather_code,
       temp: data.current?.temperature_2m,
       condition: mapWeatherCode(data.current?.weather_code),
+      source: coordsSource,
     };
     // 写缓存
     try {
@@ -90,6 +116,48 @@ export async function fetchWeather() {
   } catch (e) {
     console.warn('获取天气失败，使用纯时间段背景:', e.message);
     return null;
+  }
+}
+
+/**
+ * 通过城市名获取坐标（使用 Open-Meteo Geocoding API）
+ * @param {string} cityName - 城市名（支持中文）
+ * @returns {Promise<{lat: number, lon: number}>}
+ */
+export async function getCoordsByCity(cityName) {
+  const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cityName)}&count=1&language=zh`;
+  const res = await fetch(url, { signal: AbortSignal.timeout(6000) });
+  if (!res.ok) throw new Error('geocoding API error');
+  const data = await res.json();
+  if (!data.results || data.results.length === 0) {
+    throw new Error(`未找到城市: ${cityName}`);
+  }
+  return { lat: data.results[0].latitude, lon: data.results[0].longitude };
+}
+
+/**
+ * 保存自定义城市
+ */
+export function setCustomCity(city) {
+  try {
+    if (city) {
+      localStorage.setItem(CITY_STORAGE_KEY, city);
+    } else {
+      localStorage.removeItem(CITY_STORAGE_KEY);
+    }
+    // 清除天气缓存，让下次获取使用新城市
+    localStorage.removeItem(WEATHER_CACHE_KEY);
+  } catch {}
+}
+
+/**
+ * 获取自定义城市
+ */
+export function getCustomCity() {
+  try {
+    return localStorage.getItem(CITY_STORAGE_KEY) || '';
+  } catch {
+    return '';
   }
 }
 
