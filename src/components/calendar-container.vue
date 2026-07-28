@@ -19,6 +19,8 @@
       @changeShowLunar="changeShowLunar"
     />
 
+    <FestivalCountdown />
+
     <CalendarGrid
       :weekdays="weekdays"
       :calendarDays="calendarDays"
@@ -74,6 +76,7 @@ import CalendarGrid from './calendar-grid.vue';
 import AddTodoPopup from './add-todo-popup.vue';
 import TodoActionsMenu from './todo-actions-menu.vue';
 import TodoListDrawer from './TodoListDrawer.vue';
+import FestivalCountdown from './FestivalCountdown.vue';
 import { formatDate, getWeekNumber } from '../utils/dateUtils';
 import {
   getLunarDateStr,

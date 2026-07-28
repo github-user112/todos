@@ -14,13 +14,20 @@
         @delete-todo="handleDeleteTodo"
         @moveTodoDate="handleMoveTodoDate"
         @reorderTodos="handleReorderTodos"
-    /></n-message-provider>
+    />
+    <SolarTermPopup
+      :visible="showSolarTermPopup"
+      :termInfo="solarTermInfo"
+      @close="closeSolarTermPopup"
+    />
+    </n-message-provider>
   </n-dialog-provider>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted, provide } from 'vue';
 import CalendarContainer from '../components/calendar-container.vue';
+import SolarTermPopup from '../components/SolarTermPopup.vue';
 import { formatDate } from '../utils/dateUtils';
 import { NDialogProvider, NMessageProvider } from 'naive-ui';
 import { apiRequest, getUserId } from '../utils/api';
@@ -29,12 +36,50 @@ import {
   initReminderManager,
   destroyReminderManager,
 } from '../utils/reminderManager';
+import { ensureLunarLoaded } from '../utils/lunarUtils';
+import {
+  getTodaySolarTerm,
+  isSolarTermPopupShown,
+  markSolarTermPopupShown,
+} from '../utils/solarTermTips.js';
 
 const userId = getUserId();
 const todos = ref([]);
 const completedInstances = ref([]);
 const deletedInstances = ref([]);
 const holidayData = ref({});
+
+// 节气弹窗状态
+const showSolarTermPopup = ref(false);
+const solarTermInfo = ref({
+  emoji: '🌿',
+  name: '',
+  summary: '',
+  greeting: '',
+  tips: [],
+});
+
+const checkAndShowSolarTermPopup = async () => {
+  try {
+    await ensureLunarLoaded();
+    const today = new Date();
+    // 如果今天已经展示过，不再弹出
+    if (isSolarTermPopupShown(today)) return;
+
+    const info = getTodaySolarTerm(today);
+    if (info) {
+      solarTermInfo.value = info;
+      showSolarTermPopup.value = true;
+      markSolarTermPopupShown(today);
+    }
+  } catch (e) {
+    console.warn('节气弹窗检查失败:', e);
+  }
+};
+
+const closeSolarTermPopup = () => {
+  showSolarTermPopup.value = false;
+};
 
 const activeReminders = ref([]);
 let reminderKeyCounter = 0;
@@ -376,6 +421,8 @@ onMounted(() => {
     deletedInstances,
     handleInPageReminder,
   );
+  // 节气养生提醒弹窗（延迟 1.5s 避免与初始化抢资源）
+  setTimeout(checkAndShowSolarTermPopup, 1500);
 });
 
 onUnmounted(() => {

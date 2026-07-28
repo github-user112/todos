@@ -14,6 +14,21 @@
             <button class="drawer-close" @click="$emit('close')">✕</button>
           </div>
           <div class="drawer-body" ref="scrollBody" @scroll="onScroll">
+            <!-- 每日宜忌 -->
+            <div v-if="almanac" class="almanac-card">
+              <div class="almanac-title">📜 今日黄历</div>
+              <div class="almanac-row">
+                <span class="almanac-label almanac-yi-label">宜</span>
+                <span class="almanac-content">{{ almanac.yi.join('、') }}</span>
+              </div>
+              <div class="almanac-row">
+                <span class="almanac-label almanac-ji-label">忌</span>
+                <span class="almanac-content">{{ almanac.ji.join('、') }}</span>
+              </div>
+              <div class="almanac-footer">
+                <span class="almanac-lucky">🍀 {{ almanac.fortune }}</span>
+              </div>
+            </div>
             <!-- <div class="load-zone" v-if="hasMorePast"></div> -->
             <template v-for="(group, gi) in groupedTodos" :key="'m' + gi">
               <div
@@ -121,6 +136,21 @@
         <button class="drawer-close" @click="$emit('close')">✕</button>
       </div>
       <div class="drawer-body" ref="scrollBody2" @scroll="onScroll">
+        <!-- 每日宜忌 -->
+        <div v-if="almanac" class="almanac-card">
+          <div class="almanac-title">📜 今日黄历</div>
+          <div class="almanac-row">
+            <span class="almanac-label almanac-yi-label">宜</span>
+            <span class="almanac-content">{{ almanac.yi.join('、') }}</span>
+          </div>
+          <div class="almanac-row">
+            <span class="almanac-label almanac-ji-label">忌</span>
+            <span class="almanac-content">{{ almanac.ji.join('、') }}</span>
+          </div>
+          <div class="almanac-footer">
+            <span class="almanac-lucky">🍀 {{ almanac.fortune }}</span>
+          </div>
+        </div>
         <!-- <div class="load-zone" v-if="hasMorePast"></div> -->
         <template v-for="(group, gi) in groupedTodos" :key="'p' + gi">
           <div
@@ -219,6 +249,8 @@ import { useDialog, useMessage } from 'naive-ui';
 import { formatDate } from '../utils/dateUtils';
 import { shouldShowRepeatingTodo } from '../utils/repeatUtils';
 import { formatReminderDesc } from '../utils/reminderManager';
+import { ensureLunarLoaded } from '../utils/lunarUtils';
+import { getDailyAlmanac, getCompletionFeedback } from '../utils/almanacUtils';
 
 const props = defineProps({
   show: { type: Boolean, required: true },
@@ -240,13 +272,28 @@ const isMobile = ref(window.innerWidth <= 768);
 const onResize = () => {
   isMobile.value = window.innerWidth <= 768;
 };
-onMounted(() => window.addEventListener('resize', onResize));
+onMounted(() => {
+  window.addEventListener('resize', onResize);
+  loadAlmanac();
+});
 onUnmounted(() => window.removeEventListener('resize', onResize));
 
 const PAGE_SIZE = 15;
 const pastOffset = ref(0);
 const futureOffset = ref(PAGE_SIZE);
 const loading = ref(false);
+
+// 每日宜忌数据
+const almanac = ref(null);
+
+const loadAlmanac = async () => {
+  try {
+    await ensureLunarLoaded();
+    almanac.value = getDailyAlmanac(new Date());
+  } catch (e) {
+    console.warn('加载今日宜忌失败:', e);
+  }
+};
 
 const todayKey = computed(() => formatDate(new Date()));
 const baseDate = computed(() => props.selectedDate || todayKey.value);
@@ -373,11 +420,25 @@ function getReminderTooltip(item) {
 }
 
 function handleComplete(item) {
+  // 完成待办前先记录状态，用于反馈
+  const wasCompleted = item.isCompleted;
   emit('complete-todo', {
     todoId: item.id,
     date: item.date,
     allInstances: false,
   });
+  // 仅在「完成」时反馈（撤销完成不反馈）
+  if (!wasCompleted) {
+    showCompletionFeedback(item.text);
+  }
+}
+
+function showCompletionFeedback(todoText) {
+  let feedback = '🎉 完成一项待办！';
+  try {
+    feedback = getCompletionFeedback(todoText, almanac.value);
+  } catch {}
+  message.success(feedback, { duration: 3000 });
 }
 
 function handleDelete(item) {
@@ -588,6 +649,75 @@ defineExpose({ isOpen: computed(() => props.show) });
 .todo-summary {
   font-size: 0.78rem;
   color: var(--text-secondary);
+}
+
+/* 每日宜忌卡片 */
+.almanac-card {
+  background: linear-gradient(135deg, var(--primary-light, #e0e7ff), var(--card-background, #fff));
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  flex-shrink: 0;
+}
+
+.almanac-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-primary, #0f172a);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.almanac-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.almanac-label {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: white;
+  line-height: 1;
+}
+
+.almanac-yi-label {
+  background: var(--success-color, #10b981);
+}
+
+.almanac-ji-label {
+  background: var(--danger-color, #ef4444);
+}
+
+.almanac-content {
+  font-size: 0.78rem;
+  color: var(--text-primary, #0f172a);
+  line-height: 1.5;
+  flex: 1;
+  padding-top: 1px;
+}
+
+.almanac-footer {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--border-color, #e2e8f0);
+}
+
+.almanac-lucky {
+  font-size: 0.74rem;
+  color: var(--text-secondary, #64748b);
+  font-weight: 500;
 }
 .load-zone {
   text-align: center;

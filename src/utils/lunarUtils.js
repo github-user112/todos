@@ -1,3 +1,7 @@
+import { setLunarModule as setSolarTermModule } from './solarTermTips.js';
+import { setLunarModule as setFestivalModule } from './festivalUtils.js';
+import { setLunarModule as setAlmanacModule } from './almanacUtils.js';
+
 let lunarModule = null;
 let lunarLoading = false;
 let lunarCallbacks = [];
@@ -14,6 +18,10 @@ async function loadLunarModule() {
   try {
     const mod = await import('lunar-javascript');
     lunarModule = mod;
+    // 同步给节气/节日/黄历工具模块使用
+    setSolarTermModule(mod);
+    setFestivalModule(mod);
+    setAlmanacModule(mod);
     lunarCallbacks.forEach((cb) => cb(mod));
     lunarCallbacks = [];
     return mod;
