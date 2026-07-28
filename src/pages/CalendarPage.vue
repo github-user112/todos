@@ -63,7 +63,6 @@ const checkAndShowSolarTermPopup = async () => {
   try {
     await ensureLunarLoaded();
     const today = new Date();
-    // 如果今天已经展示过，不再弹出
     if (isSolarTermPopupShown(today)) return;
 
     const info = getTodaySolarTerm(today);
@@ -81,37 +80,7 @@ const closeSolarTermPopup = () => {
   showSolarTermPopup.value = false;
 };
 
-const activeReminders = ref([]);
-let reminderKeyCounter = 0;
-
-const handleInPageReminder = ({
-  todo,
-  dateStr,
-  timeDesc,
-  todoTime,
-  reminderDesc,
-}) => {
-  const key = `reminder-${++reminderKeyCounter}`;
-  activeReminders.value.push({
-    key,
-    text: todo.text,
-    timeDesc,
-    todoTime,
-    reminderDesc,
-    dateStr,
-  });
-
-  setTimeout(() => {
-    dismissReminder(key);
-  }, 15000);
-};
-
-const dismissReminder = (key) => {
-  const idx = activeReminders.value.findIndex((r) => r.key === key);
-  if (idx >= 0) {
-    activeReminders.value.splice(idx, 1);
-  }
-};
+import { addReminder } from '../utils/reminderState';
 
 const fetchHolidayData = async (currentYear) => {
   try {
@@ -419,7 +388,7 @@ onMounted(() => {
     holidayData,
     completedInstances,
     deletedInstances,
-    handleInPageReminder,
+    addReminder,
   );
   // 节气养生提醒弹窗（延迟 1.5s 避免与初始化抢资源）
   setTimeout(checkAndShowSolarTermPopup, 1500);

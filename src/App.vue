@@ -30,43 +30,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { onMounted } from 'vue';
 import LoadingComponent from './components/LoadingComponent.vue';
 import { generateHash } from './utils/hashUtils';
 import { getUserId } from './utils/api';
 import { loading } from './utils/loading';
-
-const activeReminders = ref([]);
-let reminderKeyCounter = 0;
-
-const handleInPageReminder = ({
-  todo,
-  dateStr,
-  timeDesc,
-  todoTime,
-  reminderDesc,
-}) => {
-  const key = `reminder-${++reminderKeyCounter}`;
-  activeReminders.value.push({
-    key,
-    text: todo.text,
-    timeDesc,
-    todoTime,
-    reminderDesc,
-    dateStr,
-  });
-
-  setTimeout(() => {
-    dismissReminder(key);
-  }, 15000);
-};
-
-const dismissReminder = (key) => {
-  const idx = activeReminders.value.findIndex((r) => r.key === key);
-  if (idx >= 0) {
-    activeReminders.value.splice(idx, 1);
-  }
-};
+import { activeReminders, dismissReminder } from './utils/reminderState';
 
 const initializeUserId = () => {
   let uid = getUserId();

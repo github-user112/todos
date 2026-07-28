@@ -8,7 +8,6 @@
       :viewMode="viewMode"
       :showTodoList="showTodoListDrawer"
       :showLunar="showLunar"
-      :webhookUrlProp="webhookUrl"
       @prevMonth="prevMonth"
       @nextMonth="nextMonth"
       @goToToday="goToToday"
@@ -21,23 +20,26 @@
 
     <FestivalCountdown />
 
-    <CalendarGrid
-      :weekdays="weekdays"
-      :calendarDays="calendarDays"
-      :weekNumbers="weekNumbers"
-      :animationType="animationType"
-      :weekCount="calendarWeekCount"
-      :selectedDate="selectedDate"
-      :todos="todos"
-      :holidayData="holidayData"
-      :completedInstances="completedInstances"
-      :deletedInstances="deletedInstances"
-      :showLunar="showLunar"
-      @openAddTodoPopup="openAddTodoPopup"
-      @openTodoActions="openTodoActions"
-      @selectDate="handleSelectDate"
-      @todoDrop="handleTodoDrop"
-    />
+    <Transition :name="resolvedAnimationType" mode="out-in">
+      <CalendarGrid
+        :key="`${currentYear}-${currentMonth}`"
+        :weekdays="weekdays"
+        :calendarDays="calendarRows"
+        :weekNumbers="weekNumbers"
+        :animationType="animationType"
+        :weekCount="calendarWeekCount"
+        :selectedDate="selectedDate"
+        :todos="todos"
+        :holidayData="holidayData"
+        :completedInstances="completedInstances"
+        :deletedInstances="deletedInstances"
+        :showLunar="showLunar"
+        @openAddTodoPopup="openAddTodoPopup"
+        @openTodoActions="openTodoActions"
+        @selectDate="handleSelectDate"
+        @todoDrop="handleTodoDrop"
+      />
+    </Transition>
 
     <AddTodoPopup
       v-if="showAddTodoPopup"
@@ -109,12 +111,16 @@ const emit = defineEmits([
 const animationType = ref(
   localStorage.getItem('calendar_animation_type') || 'slide-left',
 );
+const resolvedAnimationType = computed(() => {
+  if (animationType.value === 'random') {
+    const types = ['slide-left', 'default', 'animate__bounce', 'animate__tada', 'fade-up', 'flip', 'scale-pop', 'skew', 'reveal', 'cube', 'depth-zoom', 'glass-flip', 'split', 'ripple', 'stagger'];
+    return types[Math.floor(Math.random() * types.length)];
+  }
+  return animationType.value;
+});
 const themeType = ref(localStorage.getItem('calendar_theme_type') || 'default');
 const viewMode = ref(
   localStorage.getItem('calendar_view_mode') || 'today-priority',
-);
-const showTodoList = ref(
-  localStorage.getItem('calendar_show_todo_list') === '1',
 );
 const showLunar = ref(localStorage.getItem('calendar_show_lunar') !== '0');
 const lunarReady = ref(isLunarLoaded());
@@ -137,12 +143,11 @@ const loadUserSettings = async () => {
       localStorage.setItem('calendar_view_mode', settings.view_mode);
     }
     if (settings.show_todo_list !== undefined) {
-      showTodoList.value = !!settings.show_todo_list;
+      showTodoListDrawer.value = !!settings.show_todo_list;
       localStorage.setItem(
         'calendar_show_todo_list',
         settings.show_todo_list ? '1' : '0',
       );
-      showTodoListDrawer.value = !!settings.show_todo_list;
     }
     if (settings.show_lunar !== undefined) {
       showLunar.value = !!settings.show_lunar;
@@ -220,32 +225,15 @@ let touchStartX = 0;
 let touchStartY = 0;
 
 // ---- 日历计算 ----
-const calendarWeekCount = computed(() => {
-  if (viewMode.value === 'today-priority') return 5;
-
-  // 完整月视图：计算当月实际有几周
-  const year = currentYear.value;
-  const month = currentMonth.value;
-  const firstDay = new Date(year, month, 1);
-  const lastDay = new Date(year, month + 1, 0);
-
-  // 本月第一天是周几（周一=1 ... 周日=0→7）
-  const firstDow = firstDay.getDay() || 7;
-  // 本月最后一天是周几
-  const lastDow = lastDay.getDay() || 7;
-
-  // 总格子数 = 月初前面空位 + 本月天数 + 月末后面空位
-  const totalCells = firstDow - 1 + lastDay.getDate() + (7 - lastDow);
-  return Math.ceil(totalCells / 7);
-});
+const calendarWeekCount = computed(() => calendarRows.value.length);
 
 const calendarDays = computed(() => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const _ = lunarReady.value;
 
-  const weekCount = calendarWeekCount.value;
   let startDate;
+  let totalDays;
 
   if (viewMode.value === 'today-priority') {
     const viewDate = new Date(currentDate.value);
@@ -256,16 +244,19 @@ const calendarDays = computed(() => {
     viewMonday.setHours(0, 0, 0, 0);
     startDate = new Date(viewMonday);
     startDate.setDate(startDate.getDate() - 7);
+    totalDays = 35;
   } else {
     const firstOfMonth = new Date(currentYear.value, currentMonth.value, 1);
     const dow = firstOfMonth.getDay() || 7;
     startDate = new Date(firstOfMonth);
     startDate.setDate(startDate.getDate() - (dow - 1));
     startDate.setHours(0, 0, 0, 0);
+    const lastDay = new Date(currentYear.value, currentMonth.value + 1, 0);
+    const lastDow = lastDay.getDay() || 7;
+    totalDays = dow - 1 + lastDay.getDate() + (7 - lastDow);
   }
 
   const result = [];
-  const totalDays = weekCount * 7;
   for (let i = 0; i < totalDays; i++) {
     const date = new Date(startDate);
     date.setDate(date.getDate() + i);
@@ -292,16 +283,56 @@ const calendarDays = computed(() => {
   return result;
 });
 
+const calendarRows = computed(() => {
+  const flat = calendarDays.value;
+  const rows = [];
+
+  if (viewMode.value === 'full-month') {
+    for (let i = 0; i < flat.length; i += 7) {
+      rows.push(flat.slice(i, i + 7).map(d => d.isOtherMonth ? null : d));
+    }
+  } else {
+    // 按 7 天一周切分，遇到月份边界拆行，保留每天的星期列位置
+    for (let i = 0; i < flat.length; i += 7) {
+      const week = flat.slice(i, i + 7);
+      const monthsInWeek = [...new Set(week.map(d => d.date.getMonth()))];
+
+      if (monthsInWeek.length === 1) {
+        rows.push(week);
+      } else {
+        const byMonth = new Map();
+        for (let j = 0; j < week.length; j++) {
+          const m = week[j].date.getMonth();
+          if (!byMonth.has(m)) byMonth.set(m, []);
+          byMonth.get(m).push({ day: week[j], pos: j });
+        }
+        for (const entries of byMonth.values()) {
+          const row = new Array(7).fill(null);
+          for (const { day, pos } of entries) {
+            row[pos] = day;
+          }
+          rows.push(row);
+        }
+      }
+    }
+  }
+
+  return rows;
+});
+
 const weekNumbers = computed(() => {
-  const weekCount = calendarWeekCount.value;
   const weeks = [];
-  for (let i = 0; i < weekCount; i++) {
-    const firstDayOfWeek = new Date(calendarDays.value[i * 7].date);
-    const dayOfWeek = firstDayOfWeek.getDay();
+  let prev = null;
+  for (const row of calendarRows.value) {
+    const firstNonNull = row.find(d => d);
+    if (!firstNonNull) { weeks.push(null); continue; }
+    const dayOfWeek = firstNonNull.date.getDay();
     const offsetToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-    const monday = new Date(firstDayOfWeek);
-    monday.setDate(firstDayOfWeek.getDate() - offsetToMonday);
-    weeks.push(getWeekNumber(monday));
+    const monday = new Date(firstNonNull.date);
+    monday.setDate(firstNonNull.date.getDate() - offsetToMonday);
+    const wn = getWeekNumber(monday);
+    weeks.push(wn === prev ? null : wn);
+    prev = wn;
   }
   return weeks;
 });
@@ -361,6 +392,9 @@ const applyTheme = (theme) => {
     'mint-theme',
     'amber-theme',
     'primrose-theme',
+    'glass-theme',
+    'ios-glass-theme',
+    'liquid-glass-theme',
     'dark-mode',
   );
 
@@ -374,6 +408,9 @@ const applyTheme = (theme) => {
     mint: 'mint-theme',
     amber: 'amber-theme',
     primrose: 'primrose-theme',
+    glass: 'glass-theme',
+    'ios-glass': 'ios-glass-theme',
+    'liquid-glass': 'liquid-glass-theme',
     dark: 'dark-mode',
   };
 
@@ -514,7 +551,6 @@ const handleTodoDrop = async ({ type, source, targetTodoId, targetDate }) => {
 // ---- 待办列表开关 ----
 const toggleTodoList = () => {
   showTodoListDrawer.value = !showTodoListDrawer.value;
-  showTodoList.value = showTodoListDrawer.value;
   saveUserSettings('showTodoList', showTodoListDrawer.value);
 };
 

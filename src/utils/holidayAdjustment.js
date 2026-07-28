@@ -1,7 +1,4 @@
-/**
- * 节假日调整工具函数
- * 用于处理"避开节假日"功能的日期调整逻辑
- */
+import { formatDate } from './dateUtils';
 
 /**
  * 判断指定日期是否为工作日
@@ -91,7 +88,7 @@ export function findLastWorkday(dateStr, holidayData, maxDays = 7) {
  * @param {Object} holidayData - 节假日数据
  * @returns {Object} - { adjustedDate, shouldAdjust, reminderDate }
  */
-export function adjustTodoDate(todo, dateStr, holidayData) {
+function adjustTodoDate(todo, dateStr, holidayData) {
   // 兼容两种字段名
   const skipHolidays = todo.skip_holidays ?? todo.skipHolidays;
 
@@ -129,23 +126,11 @@ export function adjustTodoDate(todo, dateStr, holidayData) {
 }
 
 /**
- * 格式化日期为 YYYY-MM-DD 格式
- * @param {Date} date - 日期对象
- * @returns {string} - 格式化后的日期字符串
- */
-export function formatDate(date) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
-
-/**
  * 获取指定日期的节假日信息
  * @param {string} dateStr - 日期字符串 YYYY-MM-DD
  * @param {Object} holidayData - 节假日数据
  * @returns {Object|null} - 节假日信息或null
  */
-export function getHolidayInfo(dateStr, holidayData) {
+function getHolidayInfo(dateStr, holidayData) {
   return holidayData?.[dateStr] || null;
 }

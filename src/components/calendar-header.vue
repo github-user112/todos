@@ -145,6 +145,17 @@
                   <option value="default">淡入淡出</option>
                   <option value="animate__bounce">弹跳</option>
                   <option value="animate__tada">抖动</option>
+                  <option value="fade-up">✨ 浮入</option>
+                  <option value="flip">🌀 翻转</option>
+                  <option value="scale-pop">💥 缩放</option>
+                  <option value="skew">⚡ 倾斜</option>
+                  <option value="reveal">🌈 展开</option>
+                  <option value="cube">🧊 立方体</option>
+                  <option value="depth-zoom">🔍 景深缩放</option>
+                  <option value="glass-flip">🪟 玻璃翻转</option>
+                  <option value="split">🚪 分裂</option>
+                  <option value="ripple">🌊 波纹</option>
+                  <option value="stagger">🎯 错峰</option>
                   <option value="random">随机</option>
                 </select>
               </div>
@@ -244,7 +255,6 @@ defineProps({
   viewMode: { type: String, required: true },
   showTodoList: { type: Boolean, default: false },
   showLunar: { type: Boolean, default: true },
-  webhookUrlProp: { type: String, default: '' },
 });
 
 defineEmits([
@@ -256,7 +266,6 @@ defineEmits([
   'changeViewMode',
   'openTodoList',
   'changeShowLunar',
-  'changeWebhookUrl',
 ]);
 
 const showDrawer = ref(false);
@@ -306,6 +315,9 @@ const themeOptions = [
   { value: 'amber', label: '🟠 琥珀橙' },
   { value: 'primrose', label: '🌼 樱草黄' },
   { value: 'dark', label: '🌙 深色' },
+  { value: 'glass', label: '🪟 液态玻璃' },
+  { value: 'ios-glass', label: '🍎 iOS 玻璃' },
+  { value: 'liquid-glass', label: '💧 流动玻璃' },
   { value: 'auto', label: '🔄 跟随系统' },
 ];
 

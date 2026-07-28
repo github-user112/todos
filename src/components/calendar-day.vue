@@ -86,8 +86,8 @@ import {
   isHoliday,
   isWorkday,
   findLastWorkday,
-  formatDate,
 } from '../utils/holidayAdjustment';
+import { formatDate } from '../utils/dateUtils';
 import { shouldShowRepeatingTodo } from '../utils/repeatUtils';
 import { formatReminderDesc } from '../utils/reminderManager';
 
@@ -339,6 +339,8 @@ function getHolidayName(holiday) {
   min-height: 0;
   position: relative;
   box-shadow: var(--shadow-sm);
+  backdrop-filter: var(--glass-day-backdrop, none);
+  -webkit-backdrop-filter: var(--glass-day-backdrop, none);
   transition:
     box-shadow 0.2s ease,
     transform 0.2s ease,

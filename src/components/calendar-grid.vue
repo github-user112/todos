@@ -1,5 +1,5 @@
 <template>
-  <div class="calendar-grid" :style="{ '--week-count': weekCount }">
+  <div class="calendar-grid" :style="{ '--week-count': calendarDays.length }">
     <!-- 左上角空格 -->
     <div class="empty-corner"></div>
 
@@ -14,7 +14,7 @@
 
     <!-- 周数 -->
     <template
-      v-for="(week, weekIndex) in weekCount"
+      v-for="(row, weekIndex) in calendarDays"
       :key="`week-number-${weekIndex}`"
     >
       <div class="week-number" :style="{ gridRow: weekIndex + 2 }">
@@ -23,33 +23,42 @@
     </template>
 
     <!-- 日历天 -->
-    <template v-for="(week, weekIndex) in weekCount" :key="`week-${weekIndex}`">
-      <CalendarDay
-        v-for="(day, dayIndex) in calendarDays.slice(
-          weekIndex * 7,
-          (weekIndex + 1) * 7,
-        )"
-        :key="`${day.dateStr}-${day.isOtherMonth}`"
-        :day="day"
-        :selectedDate="selectedDate"
-        :todos="todos"
-        :holidayData="holidayData"
-        :completedInstances="completedInstances"
-        :deletedInstances="deletedInstances"
-        :showLunar="showLunar"
-        :style="{
-          gridRow: weekIndex + 2,
-          gridColumn: dayIndex + (isMobile ? 1 : 2),
-        }"
-        @dblclick="$emit('openAddTodoPopup', day.dateStr)"
-        @openTodoActions="
-          (todoId, event) =>
-            $emit('openTodoActions', todoId, day.dateStr, event)
-        "
-        @openAddPopup="(dateStr) => $emit('openAddTodoPopup', dateStr)"
-        @selectDate="(dateStr) => $emit('selectDate', dateStr)"
-        @todoDrop="(data) => $emit('todoDrop', data)"
-      />
+    <template v-for="(row, weekIndex) in calendarDays" :key="`week-${weekIndex}`">
+      <template v-for="(day, dayIndex) in row" :key="dayIndex">
+        <CalendarDay
+          v-if="day"
+          :day="day"
+          :selectedDate="selectedDate"
+          :todos="todos"
+          :holidayData="holidayData"
+          :completedInstances="completedInstances"
+          :deletedInstances="deletedInstances"
+          :showLunar="showLunar"
+          :class="{ 'stagger-day': animationType === 'stagger' }"
+          :style="{
+            '--i': weekIndex * 7 + dayIndex,
+            gridRow: weekIndex + 2,
+            gridColumn: dayIndex + (isMobile ? 1 : 2),
+            animationDelay: animationType === 'stagger' ? `${(weekIndex * 7 + dayIndex) * 20}ms` : undefined,
+          }"
+          @dblclick="$emit('openAddTodoPopup', day.dateStr)"
+          @openTodoActions="
+            (todoId, event) =>
+              $emit('openTodoActions', todoId, day.dateStr, event)
+          "
+          @openAddPopup="(dateStr) => $emit('openAddTodoPopup', dateStr)"
+          @selectDate="(dateStr) => $emit('selectDate', dateStr)"
+          @todoDrop="(data) => $emit('todoDrop', data)"
+        />
+        <div
+          v-else
+          class="calendar-day empty-day"
+          :style="{
+            gridRow: weekIndex + 2,
+            gridColumn: dayIndex + (isMobile ? 1 : 2),
+          }"
+        />
+      </template>
     </template>
   </div>
 </template>
@@ -80,6 +89,8 @@ const onResize = () => {
 };
 onMounted(() => window.addEventListener('resize', onResize));
 onUnmounted(() => window.removeEventListener('resize', onResize));
+
+
 </script>
 
 <style scoped>
@@ -92,6 +103,9 @@ onUnmounted(() => window.removeEventListener('resize', onResize));
   min-height: 0;
   padding: 0 2px;
   position: relative;
+  backdrop-filter: var(--glass-grid-backdrop, none);
+  -webkit-backdrop-filter: var(--glass-grid-backdrop, none);
+  border-radius: 8px;
 }
 
 .empty-corner {
@@ -134,6 +148,11 @@ onUnmounted(() => window.removeEventListener('resize', onResize));
   z-index: 10;
   position: relative;
   user-select: none;
+}
+
+.empty-day {
+  visibility: hidden;
+  pointer-events: none;
 }
 
 /* ========== 移动端 ========== */

@@ -1,9 +1,9 @@
 name = "calendar-app"
 main = "worker/index.js"
-compatibility_date = "2023-10-30"
+compatibility_date = "2025-01-01"
 
 [triggers]
-crons = ["0 0 * * *", "0 1 * * *"]
+crons = ["30 0 * * *", "0 1 * * *"]
 
 [[d1_databases]]
 binding = "DB"
