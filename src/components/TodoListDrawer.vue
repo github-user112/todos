@@ -13,22 +13,22 @@
             <button class="today-jump-btn" @click="jumpToToday">今天</button>
             <button class="drawer-close" @click="$emit('close')">✕</button>
           </div>
-          <div class="drawer-body" ref="scrollBody" @scroll="onScroll">
-            <!-- 每日宜忌 -->
-            <div v-if="almanac" class="almanac-card">
-              <div class="almanac-title">📜 今日黄历</div>
-              <div class="almanac-row">
-                <span class="almanac-label almanac-yi-label">宜</span>
-                <span class="almanac-content">{{ almanac.yi.join('、') }}</span>
-              </div>
-              <div class="almanac-row">
-                <span class="almanac-label almanac-ji-label">忌</span>
-                <span class="almanac-content">{{ almanac.ji.join('、') }}</span>
-              </div>
-              <div class="almanac-footer">
-                <span class="almanac-lucky">🍀 {{ almanac.fortune }}</span>
-              </div>
+          <!-- 每日宜忌 - 固定在顶部不随列表滚动 -->
+          <div v-if="almanac" class="almanac-card">
+            <div class="almanac-title">📜 今日黄历</div>
+            <div class="almanac-row">
+              <span class="almanac-label almanac-yi-label">宜</span>
+              <span class="almanac-content">{{ almanac.yi.join('、') }}</span>
             </div>
+            <div class="almanac-row">
+              <span class="almanac-label almanac-ji-label">忌</span>
+              <span class="almanac-content">{{ almanac.ji.join('、') }}</span>
+            </div>
+            <div class="almanac-footer">
+              <span class="almanac-lucky">🍀 {{ almanac.fortune }}</span>
+            </div>
+          </div>
+          <div class="drawer-body" ref="scrollBody" @scroll="onScroll">
             <!-- <div class="load-zone" v-if="hasMorePast"></div> -->
             <template v-for="(group, gi) in groupedTodos" :key="'m' + gi">
               <div
@@ -135,22 +135,22 @@
         <button class="today-jump-btn" @click="jumpToToday">今天</button>
         <button class="drawer-close" @click="$emit('close')">✕</button>
       </div>
-      <div class="drawer-body" ref="scrollBody2" @scroll="onScroll">
-        <!-- 每日宜忌 -->
-        <div v-if="almanac" class="almanac-card">
-          <div class="almanac-title">📜 今日黄历</div>
-          <div class="almanac-row">
-            <span class="almanac-label almanac-yi-label">宜</span>
-            <span class="almanac-content">{{ almanac.yi.join('、') }}</span>
-          </div>
-          <div class="almanac-row">
-            <span class="almanac-label almanac-ji-label">忌</span>
-            <span class="almanac-content">{{ almanac.ji.join('、') }}</span>
-          </div>
-          <div class="almanac-footer">
-            <span class="almanac-lucky">🍀 {{ almanac.fortune }}</span>
-          </div>
+      <!-- 每日宜忌 - 固定在顶部不随列表滚动 -->
+      <div v-if="almanac" class="almanac-card">
+        <div class="almanac-title">📜 今日黄历</div>
+        <div class="almanac-row">
+          <span class="almanac-label almanac-yi-label">宜</span>
+          <span class="almanac-content">{{ almanac.yi.join('、') }}</span>
         </div>
+        <div class="almanac-row">
+          <span class="almanac-label almanac-ji-label">忌</span>
+          <span class="almanac-content">{{ almanac.ji.join('、') }}</span>
+        </div>
+        <div class="almanac-footer">
+          <span class="almanac-lucky">🍀 {{ almanac.fortune }}</span>
+        </div>
+      </div>
+      <div class="drawer-body" ref="scrollBody2" @scroll="onScroll">
         <!-- <div class="load-zone" v-if="hasMorePast"></div> -->
         <template v-for="(group, gi) in groupedTodos" :key="'p' + gi">
           <div
@@ -820,18 +820,12 @@ watch(
   color: var(--text-secondary);
 }
 
-/* 每日宜忌卡片 - 固定在顶部不随列表滚动 */
+/* 每日宜忌卡片 - 固定区域，不随列表滚动 */
 .almanac-card {
   background: linear-gradient(135deg, var(--primary-light, #e0e7ff), var(--card-background, #fff));
-  border: 1px solid var(--border-color, #e2e8f0);
-  border-radius: 12px;
-  padding: 12px 14px;
-  margin-bottom: 12px;
+  border-bottom: 1px solid var(--border-color, #e2e8f0);
+  padding: 10px 14px;
   flex-shrink: 0;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .almanac-title {
