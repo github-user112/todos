@@ -64,6 +64,15 @@
       @close="showTodoListDrawer = false"
       @complete-todo="handleListComplete"
       @delete-todo="handleListDelete"
+      @celebrate="handleCelebrate"
+    />
+
+    <!-- 完成待办彩蛋动效 — 放在始终挂载的 calendar-container 中，避免 drawer fragment 导致渲染异常 -->
+    <CelebrationEffect
+      :trigger="celebrationTrigger"
+      :effect="celebrationEffect"
+      :originX="celebrationX"
+      :originY="celebrationY"
     />
   </div>
 </template>
@@ -76,6 +85,8 @@ import CalendarGrid from './calendar-grid.vue';
 import AddTodoPopup from './add-todo-popup.vue';
 import TodoActionsMenu from './todo-actions-menu.vue';
 import TodoListDrawer from './TodoListDrawer.vue';
+import CelebrationEffect from './CelebrationEffect.vue';
+import { getCelebrationEffect } from '../utils/celebrationUtils';
 import { formatDate, getWeekNumber } from '../utils/dateUtils';
 import {
   isDynamicBackgroundEnabled,
@@ -221,6 +232,14 @@ const showTodoActions = ref(false);
 const todoActionsStyle = ref({});
 const selectedTodo = ref(null);
 const selectedTodoDate = ref(null);
+
+// 完成待办彩蛋动效
+const celebrationTrigger = ref(0);
+const celebrationEffect = ref(getCelebrationEffect());
+const celebrationX = ref(50);
+const celebrationY = ref(50);
+// 记录打开操作菜单时的点击位置，用于动效起点
+let lastActionRect = null;
 
 // Touch
 let touchStartTime = 0;
@@ -472,6 +491,7 @@ const openTodoActions = (todoId, todoDate, event) => {
     const target = event?.target || event?.currentTarget;
     if (target) {
       const rect = target.getBoundingClientRect();
+      lastActionRect = rect;
       todoActionsStyle.value = {
         position: 'absolute',
         top: `${rect.bottom + 4}px`,
@@ -479,18 +499,42 @@ const openTodoActions = (todoId, todoDate, event) => {
       };
     }
   } else {
+    lastActionRect = null;
     todoActionsStyle.value = {};
   }
 };
 
+function triggerCelebration() {
+  if (celebrationEffect.value === 'none') return;
+  if (lastActionRect) {
+    celebrationX.value =
+      ((lastActionRect.left + lastActionRect.width / 2) / window.innerWidth) *
+      100;
+    celebrationY.value =
+      ((lastActionRect.top + lastActionRect.height / 2) /
+        window.innerHeight) *
+      100;
+  }
+  celebrationTrigger.value++;
+}
+
 const completeTodo = async () => {
   if (!selectedTodo.value || !selectedTodoDate.value) return;
+  // 记录完成前状态，用于判断是完成还是撤销
+  const wasCompleted = props.completedInstances.some(
+    (i) =>
+      i.todo_id === selectedTodo.value && i.date === selectedTodoDate.value,
+  );
   await emit('complete-todo', {
     todoId: selectedTodo.value,
     date: selectedTodoDate.value,
     allInstances: false,
   });
   showTodoActions.value = false;
+  // 仅在「完成」时触发动效（撤销不触发）
+  if (!wasCompleted) {
+    triggerCelebration();
+  }
 };
 
 const deleteTodo = async () => {
@@ -565,6 +609,13 @@ const handleListDelete = async ({ todoId, date, allInstances }) => {
   await emit('delete-todo', { todoId, date, allInstances });
 };
 
+// 抽屉完成动效 — 接收点击位置并触发动效
+const handleCelebrate = ({ x, y }) => {
+  celebrationX.value = x;
+  celebrationY.value = y;
+  celebrationTrigger.value++;
+};
+
 // ---- 点击外部关闭 ----
 const closeActionsOnOutsideClick = (event) => {
   if (
@@ -593,8 +644,16 @@ const handleTouchEnd = async (event) => {
   }
 };
 
+function onCelebrationEffectChange(e) {
+  if (e.detail) {
+    celebrationEffect.value = e.detail;
+  }
+}
+
 onMounted(() => {
   document.addEventListener('click', closeActionsOnOutsideClick);
+  // 监听动效风格变化，与设置页同步
+  window.addEventListener('celebration-effect-change', onCelebrationEffectChange);
   const calendarEl = document.querySelector('.calendar-grid');
   if (calendarEl) {
     calendarEl.addEventListener('touchstart', handleTouchStart, {

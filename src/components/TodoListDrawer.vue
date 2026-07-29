@@ -242,13 +242,6 @@
     </div>
   </Transition>
 
-  <!-- 完成待办彩蛋动效 -->
-  <CelebrationEffect
-    :trigger="celebrationTrigger"
-    :effect="celebrationEffect"
-    :originX="celebrationX"
-    :originY="celebrationY"
-  />
 </template>
 
 <script setup>
@@ -264,11 +257,6 @@ import {
   isWorkday,
   findLastWorkday,
 } from '../utils/holidayAdjustment';
-import CelebrationEffect from './CelebrationEffect.vue';
-import {
-  getCelebrationEffect,
-  setCelebrationEffect,
-} from '../utils/celebrationUtils';
 
 const props = defineProps({
   show: { type: Boolean, required: true },
@@ -278,7 +266,7 @@ const props = defineProps({
   selectedDate: { type: String, default: '' },
 });
 
-const emit = defineEmits(['close', 'complete-todo', 'delete-todo']);
+const emit = defineEmits(['close', 'complete-todo', 'delete-todo', 'celebrate']);
 const dialog = useDialog();
 const message = useMessage();
 
@@ -293,19 +281,10 @@ const onResize = () => {
 onMounted(() => {
   window.addEventListener('resize', onResize);
   loadAlmanac();
-  // 监听动效风格变化
-  window.addEventListener('celebration-effect-change', onCelebrationEffectChange);
 });
 onUnmounted(() => {
   window.removeEventListener('resize', onResize);
-  window.removeEventListener('celebration-effect-change', onCelebrationEffectChange);
 });
-
-function onCelebrationEffectChange(e) {
-  if (e.detail) {
-    celebrationEffect.value = e.detail;
-  }
-}
 
 const PAGE_SIZE = 15;
 const pastOffset = ref(0);
@@ -315,20 +294,8 @@ const loading = ref(false);
 // 每日宜忌数据
 const almanac = ref(null);
 
-// 完成待办彩蛋动效
-const celebrationTrigger = ref(0);
-const celebrationEffect = ref(getCelebrationEffect());
-const celebrationX = ref(80); // 默认右侧待办列表区域
-const celebrationY = ref(50);
-
-// 暴露给设置页修改动效风格时同步更新
 defineExpose({
   isOpen: computed(() => props.show),
-  updateCelebrationEffect(effect) {
-    setCelebrationEffect(effect);
-    celebrationEffect.value = effect;
-  },
-  triggerCelebration,
 });
 
 const loadAlmanac = async () => {
@@ -584,22 +551,18 @@ function handleComplete(item, event) {
   // 仅在「完成」时反馈（撤销完成不反馈）
   if (!wasCompleted) {
     showCompletionFeedback(item.text);
-    triggerCelebration(event);
-  }
-}
-
-function triggerCelebration(event) {
-  if (celebrationEffect.value === 'none') return;
-  // 基于点击位置计算动效起点（相对视口百分比）
-  if (event && (event.clientX !== undefined || event.target)) {
-    const target = event.target;
-    const rect = (target.closest?.('.row-action-btn') || target).getBoundingClientRect?.();
-    if (rect) {
-      celebrationX.value = (rect.left + rect.width / 2) / window.innerWidth * 100;
-      celebrationY.value = (rect.top + rect.height / 2) / window.innerHeight * 100;
+    // 通知父组件触发动效，传递点击位置
+    let x = 80, y = 50;
+    if (event && event.target) {
+      const target = event.target;
+      const rect = (target.closest?.('.row-action-btn') || target).getBoundingClientRect?.();
+      if (rect) {
+        x = ((rect.left + rect.width / 2) / window.innerWidth) * 100;
+        y = ((rect.top + rect.height / 2) / window.innerHeight) * 100;
+      }
     }
+    emit('celebrate', { x, y });
   }
-  celebrationTrigger.value++;
 }
 
 function showCompletionFeedback(todoText) {
@@ -684,12 +647,21 @@ function onScroll(e) {
   }
 }
 
+// 精确滚动到目标元素：让其紧贴 drawer-body 顶部（黄历卡片下方）
+function scrollToTarget(el) {
+  const scrollEl = scrollBody.value || scrollBody2.value;
+  if (!scrollEl || !el) return;
+  const scrollRect = scrollEl.getBoundingClientRect();
+  const targetRect = el.getBoundingClientRect();
+  const offset = targetRect.top - scrollRect.top + scrollEl.scrollTop;
+  scrollEl.scrollTo({ top: Math.max(0, offset - 4), behavior: 'smooth' });
+}
+
 function jumpToToday() {
   pastOffset.value = 0;
   futureOffset.value = PAGE_SIZE;
   nextTick(() => {
-    if (todayEl.value)
-      todayEl.value.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (todayEl.value) scrollToTarget(todayEl.value);
   });
 }
 
@@ -697,9 +669,9 @@ async function scrollToBase() {
   await nextTick();
   setTimeout(() => {
     if (baseEl.value) {
-      baseEl.value.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      scrollToTarget(baseEl.value);
     } else if (todayEl.value) {
-      todayEl.value.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      scrollToTarget(todayEl.value);
     }
   }, 300);
 }

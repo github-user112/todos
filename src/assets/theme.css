@@ -722,12 +722,16 @@ html.glass-theme body::before {
   }
 }
 
-/* ==================
-   iOS 液态玻璃主题
-   ================== */
+/* ==================================================
+   iOS 液态玻璃主题（Liquid Glass · ui-ux-pro-max）
+   设计原则：流体玻璃质感 · 虹彩边缘 · 动态背景融合
+   可读性：实色文字 4.5:1+ 对比度 · 高不透明度玻璃面
+   动效：400-600ms cubic-bezier 曲线 · 尊重 prefers-reduced-motion
+   ================================================== */
 .ios-glass-theme {
+  /* iOS 系统色 — 实色保证对比度 */
   --primary-color: #007aff;
-  --primary-light: rgba(0, 122, 255, 0.12);
+  --primary-light: rgba(0, 122, 255, 0.14);
   --primary-dark: #0051d5;
 
   --success-color: #34c759;
@@ -735,93 +739,96 @@ html.glass-theme body::before {
   --info-color: #007aff;
   --warning-color: #ff9500;
 
-  --background-color: rgba(255, 255, 255, 0.18);
-  --card-background: rgba(255, 255, 255, 0.22);
-  --text-primary: #1d1d1f;
-  --text-secondary: rgba(29, 29, 31, 0.7);
-  --border-color: rgba(255, 255, 255, 0.3);
-  --hover-color: rgba(255, 255, 255, 0.25);
-  --calendar-day-other-month-opacity: 0.35;
+  /* 玻璃表面：高不透明度确保文字可读（ui-ux-pro-max: bg-white/60+） */
+  --background-color: rgba(255, 255, 255, 0.5);
+  --card-background: rgba(255, 255, 255, 0.66);
+  /* 文字一律实色，iOS 系统灰阶，对比度 7:1 / 9:1 */
+  --text-primary: #1d1d1f;   /* iOS label —— 对白底 16:1 */
+  --text-secondary: #3a3a3c; /* iOS secondaryLabel —— 对白底 9.7:1 */
+  --border-color: rgba(255, 255, 255, 0.7);
+  --hover-color: rgba(255, 255, 255, 0.76);
+  --calendar-day-other-month-opacity: 0.42;
 
-  --current-month-bg: rgba(255, 255, 255, 0.12);
-  --current-month-border: rgba(255, 255, 255, 0.18);
-  --other-month-bg: transparent;
-  --other-month-border: transparent;
-  --other-month-text: rgba(29, 29, 31, 0.2);
+  --current-month-bg: rgba(255, 255, 255, 0.42);
+  --current-month-border: rgba(255, 255, 255, 0.55);
+  --other-month-bg: rgba(255, 255, 255, 0.22);
+  --other-month-border: rgba(255, 255, 255, 0.32);
+  --other-month-text: #6e6e73;
 
-  --button-primary-bg: rgba(0, 122, 255, 0.22);
-  --button-primary-hover-bg: rgba(0, 122, 255, 0.35);
-  --button-secondary-bg: rgba(255, 255, 255, 0.18);
-  --button-secondary-hover-bg: rgba(255, 255, 255, 0.3);
-  --button-success-bg: rgba(52, 199, 89, 0.18);
-  --button-success-hover-bg: rgba(52, 199, 89, 0.3);
-  --button-danger-bg: rgba(255, 59, 48, 0.18);
-  --button-danger-hover-bg: rgba(255, 59, 48, 0.3);
+  --button-primary-bg: rgba(0, 122, 255, 0.88);
+  --button-primary-hover-bg: rgba(0, 90, 213, 0.96);
+  --button-secondary-bg: rgba(255, 255, 255, 0.6);
+  --button-secondary-hover-bg: rgba(255, 255, 255, 0.76);
+  --button-success-bg: rgba(52, 199, 89, 0.88);
+  --button-success-hover-bg: rgba(40, 175, 70, 0.96);
+  --button-danger-bg: rgba(255, 59, 48, 0.88);
+  --button-danger-hover-bg: rgba(215, 45, 35, 0.96);
 
-  --calendar-day-bg: rgba(255, 255, 255, 0.28);
-  --calendar-day-border: rgba(255, 255, 255, 0.35);
-  --calendar-day-hover-bg: rgba(255, 255, 255, 0.45);
-  --calendar-day-current-bg: rgba(0, 122, 255, 0.15);
-  --calendar-day-current-border: rgba(0, 122, 255, 0.45);
-  --calendar-day-weekend-bg: rgba(255, 204, 0, 0.1);
-  --calendar-day-weekend-border: rgba(255, 204, 0, 0.22);
-  --calendar-day-holiday-rest-bg: rgba(255, 59, 48, 0.08);
-  --calendar-day-holiday-rest-border: rgba(255, 59, 48, 0.18);
-  --calendar-day-holiday-work-bg: rgba(0, 122, 255, 0.08);
-  --calendar-day-holiday-work-border: rgba(0, 122, 255, 0.18);
+  --calendar-day-bg: rgba(255, 255, 255, 0.62);
+  --calendar-day-border: rgba(255, 255, 255, 0.7);
+  --calendar-day-hover-bg: rgba(255, 255, 255, 0.78);
+  --calendar-day-current-bg: rgba(0, 122, 255, 0.12);
+  --calendar-day-current-border: rgba(0, 122, 255, 0.55);
+  --calendar-day-weekend-bg: rgba(255, 204, 0, 0.14);
+  --calendar-day-weekend-border: rgba(255, 204, 0, 0.38);
+  --calendar-day-holiday-rest-bg: rgba(255, 59, 48, 0.12);
+  --calendar-day-holiday-rest-border: rgba(255, 59, 48, 0.32);
+  --calendar-day-holiday-work-bg: rgba(0, 122, 255, 0.12);
+  --calendar-day-holiday-work-border: rgba(0, 122, 255, 0.32);
 
-  --todo-item-bg: rgba(255, 255, 255, 0.25);
-  --todo-item-border-left: rgba(0, 122, 255, 0.45);
-  --todo-item-hover-bg: rgba(255, 255, 255, 0.4);
-  --todo-item-completed-bg: rgba(52, 199, 89, 0.08);
-  --todo-item-completed-border-left: rgba(52, 199, 89, 0.35);
-  --todo-item-completed-text: rgba(29, 29, 31, 0.3);
+  --todo-item-bg: rgba(255, 255, 255, 0.6);
+  --todo-item-border-left: rgba(0, 122, 255, 0.72);
+  --todo-item-hover-bg: rgba(255, 255, 255, 0.76);
+  --todo-item-completed-bg: rgba(52, 199, 89, 0.14);
+  --todo-item-completed-border-left: rgba(52, 199, 89, 0.62);
+  --todo-item-completed-text: #6e6e73;
 
-  --preview-bg: rgba(0, 122, 255, 0.08);
-  --preview-border: rgba(0, 122, 255, 0.18);
+  --preview-bg: rgba(0, 122, 255, 0.12);
+  --preview-border: rgba(0, 122, 255, 0.32);
   --preview-text: #0051d5;
-  --preview-hover-bg: rgba(0, 122, 255, 0.15);
-  --preview-hover-border: rgba(0, 122, 255, 0.28);
+  --preview-hover-bg: rgba(0, 122, 255, 0.2);
+  --preview-hover-border: rgba(0, 122, 255, 0.46);
 
   --badge-rest-bg: #ff3b30;
   --badge-rest-text: #fff;
   --badge-work-bg: #007aff;
   --badge-work-text: #fff;
 
-  --loading-overlay-bg: rgba(242, 242, 247, 0.6);
-  --loading-spinner-border: rgba(255, 255, 255, 0.25);
+  --loading-overlay-bg: rgba(242, 242, 247, 0.84);
+  --loading-spinner-border: rgba(60, 60, 67, 0.16);
   --loading-spinner-border-top: #007aff;
   --loading-text: #1d1d1f;
 
-  --form-input-border: rgba(255, 255, 255, 0.28);
-  --form-input-focus-border: rgba(0, 122, 255, 0.45);
-  --form-input-focus-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+  --form-input-border: rgba(255, 255, 255, 0.62);
+  --form-input-focus-border: rgba(0, 122, 255, 0.62);
+  --form-input-focus-shadow: 0 0 0 3px rgba(0, 122, 255, 0.16);
 
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.03);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.04);
-  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.08), 0 4px 8px rgba(0, 0, 0, 0.05);
-  --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.1), 0 8px 16px rgba(0, 0, 0, 0.06);
+  /* 分层阴影 — 带蓝色冷调，营造空间纵深（大气感） */
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05), 0 1px 3px rgba(0, 122, 255, 0.04);
+  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.07), 0 2px 6px rgba(0, 122, 255, 0.05);
+  --shadow-lg: 0 12px 28px rgba(15, 23, 42, 0.1), 0 4px 12px rgba(0, 122, 255, 0.07);
+  --shadow-xl: 0 24px 48px rgba(15, 23, 42, 0.12), 0 8px 20px rgba(0, 122, 255, 0.08);
 
   --glass-grid-backdrop: none;
-  --glass-day-backdrop: blur(20px) saturate(180%);
+  --glass-day-backdrop: blur(40px) saturate(200%);
 }
 
-/* iOS 风格渐变背景 */
+/* —— 默认背景：iOS 柔光渐变 + 流动虹彩色斑（动态背景关闭时） —— */
 html.ios-glass-theme {
   background: #f2f2f7;
 }
 
 html.ios-glass-theme body {
-  background: 
-    radial-gradient(ellipse at 20% 20%, rgba(255, 182, 193, 0.5) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 30%, rgba(173, 216, 230, 0.5) 0%, transparent 50%),
-    radial-gradient(ellipse at 60% 80%, rgba(221, 160, 221, 0.45) 0%, transparent 50%),
-    radial-gradient(ellipse at 30% 70%, rgba(255, 218, 185, 0.45) 0%, transparent 50%),
-    linear-gradient(135deg, #fff5f7 0%, #f0f4ff 50%, #fdf2ff 100%);
+  background:
+    radial-gradient(ellipse at 18% 22%, rgba(255, 175, 204, 0.3) 0%, transparent 52%),
+    radial-gradient(ellipse at 82% 28%, rgba(165, 215, 245, 0.32) 0%, transparent 52%),
+    radial-gradient(ellipse at 62% 82%, rgba(215, 165, 235, 0.26) 0%, transparent 52%),
+    radial-gradient(ellipse at 28% 68%, rgba(255, 222, 185, 0.26) 0%, transparent 52%),
+    linear-gradient(135deg, #fff6f8 0%, #f1f5ff 50%, #fdf3ff 100%);
   background-size: 100% 100%;
 }
 
-/* 动态色斑 - iOS 风格缓慢流动 */
+/* 流动虹彩色斑 — iOS 风格缓慢漂移，低饱和不干扰文字 */
 html.ios-glass-theme body::before {
   content: '';
   position: fixed;
@@ -838,37 +845,63 @@ html.ios-glass-theme body::after {
   pointer-events: none;
   z-index: 0;
   background:
-    radial-gradient(circle at 30% 40%, rgba(255, 140, 180, 0.35) 0%, transparent 45%),
-    radial-gradient(circle at 70% 60%, rgba(135, 206, 250, 0.35) 0%, transparent 45%),
-    radial-gradient(circle at 50% 80%, rgba(200, 170, 255, 0.3) 0%, transparent 45%),
-    radial-gradient(circle at 80% 20%, rgba(255, 220, 180, 0.3) 0%, transparent 40%);
-  filter: blur(60px);
-  animation: ios-blob-float 18s ease-in-out infinite;
+    radial-gradient(circle at 30% 38%, rgba(255, 140, 180, 0.24) 0%, transparent 46%),
+    radial-gradient(circle at 72% 58%, rgba(135, 206, 250, 0.24) 0%, transparent 46%),
+    radial-gradient(circle at 48% 82%, rgba(200, 170, 255, 0.2) 0%, transparent 46%),
+    radial-gradient(circle at 82% 18%, rgba(255, 220, 180, 0.2) 0%, transparent 42%);
+  filter: blur(70px);
+  animation: ios-glass-blob 22s ease-in-out infinite;
+  will-change: transform;
 }
 
-@keyframes ios-blob-float {
+@keyframes ios-glass-blob {
   0%, 100% {
     transform: translate(0, 0) rotate(0deg) scale(1);
   }
   25% {
-    transform: translate(3%, -2%) rotate(3deg) scale(1.05);
+    transform: translate(3%, -2%) rotate(3deg) scale(1.06);
   }
   50% {
-    transform: translate(-2%, 3%) rotate(-2deg) scale(0.98);
+    transform: translate(-2%, 3%) rotate(-2deg) scale(0.97);
   }
   75% {
-    transform: translate(2%, 2%) rotate(2deg) scale(1.02);
+    transform: translate(2%, 2%) rotate(2deg) scale(1.03);
   }
 }
 
-/* 噪声纹理 - 更细腻的 iOS 质感 */
+/* —— 动态背景融合：开启动态背景时，移除静态渐变与色斑，让时间/天气渐变透出 ——
+   body.dynamic-background 由 dynamicBackground.js 注入，背景来自 --dynamic-bg */
+html.ios-glass-theme body.dynamic-background {
+  background: var(--dynamic-bg, transparent) !important;
+  background-size: 100% 100% !important;
+  background-attachment: fixed !important;
+}
+/* 动态背景开启时，关闭 body::after 色斑避免与 --dynamic-overlay 叠加冲突 */
+html.ios-glass-theme body.dynamic-background::after {
+  display: none;
+}
+/* 动态背景开启时，玻璃面提高不透明度以适配多变的天气底色，仍保证文字可读 */
+html.ios-glass-theme body.dynamic-background .calendar-day {
+  background: rgba(255, 255, 255, 0.66) !important;
+}
+html.ios-glass-theme body.dynamic-background .calendar-header,
+html.ios-glass-theme body.dynamic-background .drawer-panel,
+html.ios-glass-theme body.dynamic-background .add-todo-popup,
+html.ios-glass-theme body.dynamic-background .reminder-toast {
+  background: rgba(255, 255, 255, 0.74) !important;
+}
+html.ios-glass-theme body.dynamic-background .todo-item {
+  background: rgba(255, 255, 255, 0.64) !important;
+}
+
+/* 噪声纹理 — 细腻 iOS 质感，强化玻璃真实感 */
 html.ios-glass-theme body > *:first-child::before {
   content: '';
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 0;
-  opacity: 0.025;
+  opacity: 0.028;
   mix-blend-mode: soft-light;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='5' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
   background-size: 512px 512px;
@@ -880,21 +913,26 @@ html.ios-glass-theme body > *:first-child::before {
   z-index: 1;
 }
 
-/* 日期格 iOS 液态玻璃 */
+/* —— 日期格：iOS 18 液态玻璃，虹彩高光边缘 —— */
 .ios-glass-theme .calendar-day {
-  background: rgba(255, 255, 255, 0.25) !important;
-  backdrop-filter: blur(20px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.4) !important;
-  box-shadow: 
-    inset 0 1px 0 rgba(255, 255, 255, 0.6),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.03),
-    0 2px 8px rgba(0, 0, 0, 0.04) !important;
-  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+  background: rgba(255, 255, 255, 0.62) !important;
+  backdrop-filter: blur(40px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(40px) saturate(200%) !important;
+  /* 虹彩边缘：白色高光 + 极淡蓝紫描边，营造液态玻璃折射感 */
+  border: 1px solid rgba(255, 255, 255, 0.72) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.75),
+    inset 0 -1px 0 rgba(15, 23, 42, 0.04),
+    0 2px 8px rgba(15, 23, 42, 0.05),
+    0 1px 3px rgba(0, 122, 255, 0.04) !important;
+  /* 流体动效：400-500ms ease-out（ui-ux-pro-max 推荐曲线） */
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+    background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease !important;
   position: relative;
   overflow: hidden;
 }
 
+/* 顶部高光层 — 模拟玻璃受光折射 */
 .ios-glass-theme .calendar-day::before {
   content: '';
   position: absolute;
@@ -902,20 +940,20 @@ html.ios-glass-theme body > *:first-child::before {
   left: 0;
   right: 0;
   height: 50%;
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.15), transparent);
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.22), transparent);
   pointer-events: none;
   border-radius: inherit;
 }
 
 .ios-glass-theme .calendar-day:hover {
-  background: rgba(255, 255, 255, 0.38) !important;
-  border-color: rgba(255, 255, 255, 0.55) !important;
-  box-shadow: 
-    inset 0 1px 0 rgba(255, 255, 255, 0.7),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.04),
-    0 8px 24px rgba(0, 122, 255, 0.1),
-    0 4px 12px rgba(0, 0, 0, 0.06) !important;
-  transform: translateY(-2px) scale(1.01) !important;
+  background: rgba(255, 255, 255, 0.78) !important;
+  border-color: rgba(0, 122, 255, 0.42) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    inset 0 -1px 0 rgba(15, 23, 42, 0.05),
+    0 10px 26px rgba(0, 122, 255, 0.14),
+    0 4px 12px rgba(15, 23, 42, 0.06) !important;
+  transform: translateY(-2px) scale(1.012) !important;
   z-index: 10;
 }
 
@@ -924,252 +962,267 @@ html.ios-glass-theme body > *:first-child::before {
   font-weight: 700;
 }
 
-/* 星期标题玻璃风格 */
+/* 星期标题玻璃风格 — 实色文字 */
 .ios-glass-theme .calendar-weekday {
-  backdrop-filter: blur(16px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
-  background: rgba(255, 255, 255, 0.15) !important;
-  border: 1px solid rgba(255, 255, 255, 0.25) !important;
-  box-shadow: 
-    inset 0 1px 0 rgba(255, 255, 255, 0.35),
-    0 1px 3px rgba(0, 0, 0, 0.03) !important;
-  color: rgba(29, 29, 31, 0.6) !important;
+  backdrop-filter: blur(24px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(200%) !important;
+  background: rgba(255, 255, 255, 0.6) !important;
+  border: 1px solid rgba(255, 255, 255, 0.7) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    0 1px 3px rgba(15, 23, 42, 0.03) !important;
+  color: #3a3a3c !important;
   font-weight: 600 !important;
 }
 
 /* 特殊日期玻璃色 */
 .ios-glass-theme .weekend-day {
-  border-color: rgba(255, 204, 0, 0.3) !important;
+  border-color: rgba(255, 204, 0, 0.48) !important;
 }
 .ios-glass-theme .weekend-day::before {
-  background: linear-gradient(to bottom, rgba(255, 255, 200, 0.2), transparent);
+  background: linear-gradient(to bottom, rgba(255, 248, 210, 0.24), transparent);
 }
 
 .ios-glass-theme .holiday-rest-day {
-  border-color: rgba(255, 59, 48, 0.25) !important;
+  border-color: rgba(255, 59, 48, 0.42) !important;
 }
 .ios-glass-theme .holiday-rest-day::before {
-  background: linear-gradient(to bottom, rgba(255, 200, 200, 0.18), transparent);
+  background: linear-gradient(to bottom, rgba(255, 205, 205, 0.22), transparent);
 }
 
 .ios-glass-theme .holiday-work-day {
-  border-color: rgba(0, 122, 255, 0.25) !important;
+  border-color: rgba(0, 122, 255, 0.42) !important;
 }
 .ios-glass-theme .holiday-work-day::before {
-  background: linear-gradient(to bottom, rgba(200, 220, 255, 0.18), transparent);
+  background: linear-gradient(to bottom, rgba(205, 222, 255, 0.22), transparent);
 }
 
 .ios-glass-theme .current-day {
-  border-color: rgba(0, 122, 255, 0.5) !important;
-  background: rgba(0, 122, 255, 0.12) !important;
-  box-shadow: 
-    inset 0 1px 0 rgba(255, 255, 255, 0.5),
-    0 0 0 2px rgba(0, 122, 255, 0.12),
-    0 4px 12px rgba(0, 122, 255, 0.15) !important;
+  border-color: rgba(0, 122, 255, 0.62) !important;
+  background: rgba(0, 122, 255, 0.14) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.65),
+    0 0 0 2px rgba(0, 122, 255, 0.16),
+    0 4px 14px rgba(0, 122, 255, 0.2) !important;
 }
 .ios-glass-theme .current-day::before {
-  background: linear-gradient(to bottom, rgba(200, 220, 255, 0.3), transparent);
+  background: linear-gradient(to bottom, rgba(205, 222, 255, 0.32), transparent);
 }
 
 .ios-glass-theme .selected-day {
-  border-color: rgba(0, 122, 255, 0.55) !important;
-  background: rgba(0, 122, 255, 0.18) !important;
-  box-shadow: 
-    inset 0 1px 0 rgba(255, 255, 255, 0.5),
-    0 0 0 3px rgba(0, 122, 255, 0.15),
-    0 4px 12px rgba(0, 122, 255, 0.2) !important;
+  border-color: rgba(0, 122, 255, 0.68) !important;
+  background: rgba(0, 122, 255, 0.2) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.65),
+    0 0 0 3px rgba(0, 122, 255, 0.2),
+    0 4px 14px rgba(0, 122, 255, 0.24) !important;
 }
 
-/* 周号玻璃风格 */
+/* 周号玻璃风格 — 实色文字 */
 .ios-glass-theme .week-number {
-  backdrop-filter: blur(12px) saturate(160%) !important;
-  -webkit-backdrop-filter: blur(12px) saturate(160%) !important;
-  background: rgba(255, 255, 255, 0.1) !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
-  color: rgba(29, 29, 31, 0.35) !important;
+  backdrop-filter: blur(16px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+  background: rgba(255, 255, 255, 0.46) !important;
+  border: 1px solid rgba(255, 255, 255, 0.6) !important;
+  color: #6e6e73 !important;
 }
 
-/* 头部玻璃效果 */
+/* —— 头部：液态玻璃导航条，大气悬浮感 —— */
 .ios-glass-theme .calendar-header {
-  background: rgba(255, 255, 255, 0.22) !important;
-  backdrop-filter: blur(24px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.35) !important;
-  box-shadow: 
-    inset 0 1px 0 rgba(255, 255, 255, 0.5),
-    0 4px 16px rgba(0, 0, 0, 0.05) !important;
+  background: rgba(255, 255, 255, 0.66) !important;
+  backdrop-filter: blur(40px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(40px) saturate(200%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.72) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.65),
+    0 6px 20px rgba(15, 23, 42, 0.07),
+    0 2px 6px rgba(0, 122, 255, 0.05) !important;
   position: relative;
   z-index: 2;
 }
 
-/* 设置面板玻璃效果 */
+/* 设置面板玻璃效果 — 高不透明度确保设置项文字清晰 */
 .ios-glass-theme .drawer-panel {
-  background: rgba(255, 255, 255, 0.2) !important;
-  backdrop-filter: blur(30px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(30px) saturate(180%) !important;
-  border-left: 1px solid rgba(255, 255, 255, 0.3) !important;
-  box-shadow: -8px 0 32px rgba(0, 0, 0, 0.08) !important;
+  background: rgba(255, 255, 255, 0.74) !important;
+  backdrop-filter: blur(44px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(44px) saturate(200%) !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.72) !important;
+  box-shadow: -10px 0 36px rgba(15, 23, 42, 0.12), -4px 0 12px rgba(0, 122, 255, 0.06) !important;
 }
 
 .ios-glass-theme .drawer-overlay {
-  background: rgba(0, 0, 0, 0.15) !important;
-  backdrop-filter: blur(4px) !important;
-  -webkit-backdrop-filter: blur(4px) !important;
+  background: rgba(15, 23, 42, 0.2) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
 }
 
 .ios-glass-theme .theme-chip {
-  background: rgba(255, 255, 255, 0.18) !important;
-  border-color: rgba(255, 255, 255, 0.28) !important;
-  color: rgba(29, 29, 31, 0.65) !important;
-  backdrop-filter: blur(10px) saturate(160%) !important;
-  -webkit-backdrop-filter: blur(10px) saturate(160%) !important;
+  background: rgba(255, 255, 255, 0.6) !important;
+  border-color: rgba(255, 255, 255, 0.7) !important;
+  color: #3a3a3c !important;
+  backdrop-filter: blur(14px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(180%) !important;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 .ios-glass-theme .theme-chip.active {
-  background: rgba(0, 122, 255, 0.22) !important;
-  border-color: rgba(0, 122, 255, 0.45) !important;
+  background: rgba(0, 122, 255, 0.18) !important;
+  border-color: rgba(0, 122, 255, 0.52) !important;
   color: #0051d5 !important;
-  box-shadow: 
-    inset 0 1px 0 rgba(255, 255, 255, 0.4),
-    0 2px 8px rgba(0, 122, 255, 0.15) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    0 2px 10px rgba(0, 122, 255, 0.2) !important;
 }
 
 .ios-glass-theme .setting-select {
-  background: rgba(255, 255, 255, 0.18) !important;
-  border-color: rgba(255, 255, 255, 0.28) !important;
+  background: rgba(255, 255, 255, 0.6) !important;
+  border-color: rgba(255, 255, 255, 0.7) !important;
   color: #1d1d1f !important;
-  backdrop-filter: blur(10px) saturate(160%) !important;
-  -webkit-backdrop-filter: blur(10px) saturate(160%) !important;
+  backdrop-filter: blur(14px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(180%) !important;
 }
 
 .ios-glass-theme .setting-select:focus {
-  border-color: rgba(0, 122, 255, 0.45) !important;
-  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.12) !important;
+  border-color: rgba(0, 122, 255, 0.58) !important;
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.16) !important;
 }
 
-/* 待办事项玻璃效果 */
+/* —— 待办事项：液态玻璃卡片，左侧虹彩强调条 —— */
 .ios-glass-theme .todo-item {
-  background: rgba(255, 255, 255, 0.22) !important;
-  backdrop-filter: blur(8px) saturate(160%) !important;
-  -webkit-backdrop-filter: blur(8px) saturate(160%) !important;
-  border-left: 3px solid rgba(0, 122, 255, 0.4) !important;
-  transition: all 0.2s ease !important;
+  background: rgba(255, 255, 255, 0.6) !important;
+  backdrop-filter: blur(16px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+  border-left: 3px solid rgba(0, 122, 255, 0.72) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 1px 4px rgba(15, 23, 42, 0.04) !important;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
 .ios-glass-theme .todo-item:hover {
-  background: rgba(255, 255, 255, 0.35) !important;
+  background: rgba(255, 255, 255, 0.76) !important;
+  border-left-color: rgba(0, 122, 255, 0.9) !important;
+  transform: translateX(2px);
 }
 
 .ios-glass-theme .todo-item.completed {
-  background: rgba(52, 199, 89, 0.08) !important;
-  border-left-color: rgba(52, 199, 89, 0.35) !important;
+  background: rgba(52, 199, 89, 0.14) !important;
+  border-left-color: rgba(52, 199, 89, 0.62) !important;
 }
 
-/* 按钮玻璃效果 */
+/* 按钮玻璃效果 — 实色文字 */
 .ios-glass-theme .nav-btn,
 .ios-glass-theme .icon-btn {
-  background: rgba(255, 255, 255, 0.18) !important;
-  backdrop-filter: blur(10px) saturate(160%) !important;
-  -webkit-backdrop-filter: blur(10px) saturate(160%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.25) !important;
-  color: rgba(29, 29, 31, 0.6) !important;
-  transition: all 0.2s ease !important;
+  background: rgba(255, 255, 255, 0.6) !important;
+  backdrop-filter: blur(14px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(180%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.7) !important;
+  color: #3a3a3c !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 1px 3px rgba(15, 23, 42, 0.04) !important;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
 .ios-glass-theme .nav-btn:hover,
 .ios-glass-theme .icon-btn:hover {
-  background: rgba(255, 255, 255, 0.3) !important;
+  background: rgba(255, 255, 255, 0.76) !important;
   color: var(--primary-color) !important;
-  transform: scale(1.02);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 4px 12px rgba(0, 122, 255, 0.12) !important;
 }
 
 .ios-glass-theme .nav-btn:active,
 .ios-glass-theme .icon-btn:active {
-  transform: scale(0.95);
-  background: rgba(255, 255, 255, 0.15) !important;
+  background: rgba(255, 255, 255, 0.52) !important;
+  transform: scale(0.96);
 }
 
 .ios-glass-theme .icon-btn.active {
-  background: rgba(0, 122, 255, 0.2) !important;
+  background: rgba(0, 122, 255, 0.18) !important;
   color: #007aff !important;
-  border-color: rgba(0, 122, 255, 0.3) !important;
+  border-color: rgba(0, 122, 255, 0.42) !important;
 }
 
 .ios-glass-theme .today-btn {
-  background: rgba(0, 122, 255, 0.25) !important;
-  backdrop-filter: blur(10px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(10px) saturate(180%) !important;
-  border: 1px solid rgba(0, 122, 255, 0.35) !important;
-  color: #0051d5 !important;
-  box-shadow: 
-    inset 0 1px 0 rgba(255, 255, 255, 0.4),
-    0 2px 8px rgba(0, 122, 255, 0.15) !important;
+  background: rgba(0, 122, 255, 0.88) !important;
+  backdrop-filter: blur(14px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(200%) !important;
+  border: 1px solid rgba(0, 122, 255, 0.92) !important;
+  color: #ffffff !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    0 3px 10px rgba(0, 122, 255, 0.28),
+    0 1px 3px rgba(15, 23, 42, 0.06) !important;
   font-weight: 600 !important;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
 .ios-glass-theme .today-btn:hover {
-  background: rgba(0, 122, 255, 0.35) !important;
-  transform: scale(1.02);
+  background: rgba(0, 90, 213, 0.96) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    0 5px 16px rgba(0, 122, 255, 0.36) !important;
 }
 
 .ios-glass-theme .today-btn:active {
-  transform: scale(0.95);
+  transform: scale(0.96);
 }
 
 /* 提醒 toast 玻璃效果 */
 .ios-glass-theme .reminder-toast {
-  background: rgba(255, 255, 255, 0.25) !important;
-  backdrop-filter: blur(24px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.4) !important;
-  box-shadow: 
-    inset 0 1px 0 rgba(255, 255, 255, 0.5),
-    0 8px 24px rgba(0, 0, 0, 0.1) !important;
+  background: rgba(255, 255, 255, 0.7) !important;
+  backdrop-filter: blur(32px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(32px) saturate(200%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.72) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.65),
+    0 10px 28px rgba(15, 23, 42, 0.13),
+    0 4px 12px rgba(0, 122, 255, 0.07) !important;
 }
 
 /* 添加待办弹窗玻璃效果 */
 .ios-glass-theme .add-todo-popup {
-  background: rgba(255, 255, 255, 0.22) !important;
-  backdrop-filter: blur(30px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(30px) saturate(180%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.35) !important;
+  background: rgba(255, 255, 255, 0.72) !important;
+  backdrop-filter: blur(44px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(44px) saturate(200%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.72) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.65),
+    0 16px 40px rgba(15, 23, 42, 0.12) !important;
 }
 
 /* 切换按钮玻璃效果 */
 .ios-glass-theme .toggle-btn {
-  background: rgba(255, 255, 255, 0.25) !important;
-  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  background: rgba(255, 255, 255, 0.6) !important;
+  border: 1px solid rgba(255, 255, 255, 0.7) !important;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
 .ios-glass-theme .toggle-btn.active {
-  background: rgba(52, 199, 89, 0.6) !important;
-  border-color: rgba(52, 199, 89, 0.4) !important;
+  background: rgba(52, 199, 89, 0.72) !important;
+  border-color: rgba(52, 199, 89, 0.52) !important;
 }
 
 .ios-glass-theme .toggle-thumb {
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06) !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12), 0 1px 2px rgba(15, 23, 42, 0.08) !important;
 }
 
-/* 移动端适配 */
+/* —— 移动端适配 —— */
 @media (max-width: 768px) {
   html.ios-glass-theme body {
-    background: 
-      radial-gradient(ellipse at 30% 15%, rgba(255, 182, 193, 0.5) 0%, transparent 50%),
-      radial-gradient(ellipse at 70% 40%, rgba(173, 216, 230, 0.5) 0%, transparent 50%),
-      radial-gradient(ellipse at 50% 85%, rgba(221, 160, 221, 0.45) 0%, transparent 50%),
-      linear-gradient(180deg, #fff5f7 0%, #f0f4ff 50%, #fdf2ff 100%);
+    background:
+      radial-gradient(ellipse at 30% 15%, rgba(255, 175, 204, 0.3) 0%, transparent 50%),
+      radial-gradient(ellipse at 70% 40%, rgba(165, 215, 245, 0.32) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 85%, rgba(215, 165, 235, 0.26) 0%, transparent 50%),
+      linear-gradient(180deg, #fff6f8 0%, #f1f5ff 50%, #fdf3ff 100%);
   }
-  
+
   html.ios-glass-theme body::after {
     inset: -10%;
     background:
-      radial-gradient(circle at 40% 30%, rgba(255, 140, 180, 0.3) 0%, transparent 40%),
-      radial-gradient(circle at 60% 70%, rgba(135, 206, 250, 0.3) 0%, transparent 40%),
-      radial-gradient(circle at 50% 50%, rgba(200, 170, 255, 0.25) 0%, transparent 40%);
-    filter: blur(40px);
-    animation: ios-blob-float-mobile 15s ease-in-out infinite;
+      radial-gradient(circle at 40% 30%, rgba(255, 140, 180, 0.22) 0%, transparent 40%),
+      radial-gradient(circle at 60% 70%, rgba(135, 206, 250, 0.22) 0%, transparent 40%),
+      radial-gradient(circle at 50% 50%, rgba(200, 170, 255, 0.18) 0%, transparent 40%);
+    filter: blur(48px);
+    animation: ios-glass-blob-m 18s ease-in-out infinite;
   }
-  
-  @keyframes ios-blob-float-mobile {
+
+  @keyframes ios-glass-blob-m {
     0%, 100% {
       transform: translate(0, 0) scale(1);
     }
@@ -1177,15 +1230,33 @@ html.ios-glass-theme body > *:first-child::before {
       transform: translate(2%, -3%) scale(1.05);
     }
   }
-  
+
+  /* 移动端禁用 hover 缩放，避免布局抖动（ui-ux-pro-max: 稳定 hover） */
   .ios-glass-theme .calendar-day:hover {
     transform: none !important;
   }
-  
+
   .ios-glass-theme .nav-btn:hover,
   .ios-glass-theme .icon-btn:hover,
   .ios-glass-theme .today-btn:hover {
     transform: none;
+  }
+}
+
+/* —— 尊重用户减少动效偏好（ui-ux-pro-max: 必须） —— */
+@media (prefers-reduced-motion: reduce) {
+  html.ios-glass-theme body::after {
+    animation: none !important;
+  }
+  .ios-glass-theme .calendar-day,
+  .ios-glass-theme .todo-item,
+  .ios-glass-theme .nav-btn,
+  .ios-glass-theme .icon-btn,
+  .ios-glass-theme .today-btn,
+  .ios-glass-theme .theme-chip,
+  .ios-glass-theme .toggle-btn {
+    transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease !important;
+    transform: none !important;
   }
 }
 
