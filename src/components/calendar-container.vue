@@ -361,13 +361,11 @@ const weekNumbers = computed(() => {
 
 // ---- 导航 ----
 const prevMonth = () => {
-  document.documentElement.style.setProperty('--direction', '-1');
   const d = new Date(currentDate.value);
   d.setMonth(d.getMonth() - 1);
   currentDate.value = d;
 };
 const nextMonth = () => {
-  document.documentElement.style.setProperty('--direction', '1');
   const d = new Date(currentDate.value);
   d.setMonth(d.getMonth() + 1);
   currentDate.value = d;
