@@ -7,3 +7,4 @@ dist/
 /.idea
 node_modules
 /.trae
+/package-lock.json

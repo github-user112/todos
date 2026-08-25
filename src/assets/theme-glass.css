@@ -1,0 +1,303 @@
+/* ============================================================
+   玻璃拟态主题 · 统一表面处理
+   ------------------------------------------------------------
+   三套玻璃主题（liquid-glass / ios-glass / liquid-glass）共用
+   同一套玻璃配方，只保留各自的强调色与动态背景差异；
+   所有颜色均取自 theme.css 设计令牌，保证与整体协调。
+   ============================================================ */
+
+/* ---- 玻璃主题的页面底色（动态渐变） ---- */
+html.glass-theme {
+  background: #f3f0fb;
+}
+html.glass-theme body {
+  background: linear-gradient(135deg, #f5f0fc, #eef2fd, #fdf1f7, #f5f0fc);
+  background-size: 300% 300%;
+  animation: glass-bg-shift 14s ease infinite;
+}
+
+html.ios-glass-theme {
+  background: #f2f4fa;
+}
+html.ios-glass-theme body {
+  background:
+    radial-gradient(ellipse at 18% 22%, rgba(255, 182, 210, 0.26) 0%, transparent 52%),
+    radial-gradient(ellipse at 82% 28%, rgba(170, 215, 250, 0.28) 0%, transparent 52%),
+    radial-gradient(ellipse at 62% 82%, rgba(205, 185, 245, 0.24) 0%, transparent 52%),
+    linear-gradient(135deg, #f7f8fe 0%, #f2f6ff 50%, #faf4fe 100%);
+}
+
+html.liquid-glass-theme {
+  background: #f4f0fb;
+}
+html.liquid-glass-theme body {
+  background:
+    radial-gradient(ellipse at 12% 12%, rgba(255, 190, 214, 0.3) 0%, transparent 46%),
+    radial-gradient(ellipse at 88% 20%, rgba(206, 182, 250, 0.3) 0%, transparent 46%),
+    radial-gradient(ellipse at 78% 82%, rgba(178, 216, 248, 0.26) 0%, transparent 46%),
+    radial-gradient(ellipse at 22% 72%, rgba(255, 222, 190, 0.24) 0%, transparent 46%),
+    linear-gradient(135deg, #fbf4fb 0%, #f5f2fe 50%, #eff5fd 100%);
+  background-size: 100% 100%;
+}
+
+@keyframes glass-bg-shift {
+  0% { background-position: 0% 50%; }
+  25% { background-position: 100% 0%; }
+  50% { background-position: 100% 100%; }
+  75% { background-position: 0% 100%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* 缓慢漂移的柔光色斑 —— 低饱和，不干扰内容 */
+.glass-theme body::after,
+.ios-glass-theme body::after,
+.liquid-glass-theme body::after {
+  content: '';
+  position: fixed;
+  inset: -25%;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(circle at 30% 35%, rgba(255, 150, 190, 0.16) 0%, transparent 45%),
+    radial-gradient(circle at 70% 60%, rgba(140, 200, 250, 0.16) 0%, transparent 45%),
+    radial-gradient(circle at 48% 80%, rgba(190, 165, 250, 0.14) 0%, transparent 45%);
+  filter: blur(70px);
+  animation: glass-blob-drift 26s ease-in-out infinite;
+  will-change: transform;
+}
+
+@keyframes glass-blob-drift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(3%, -2%) scale(1.05); }
+  66% { transform: translate(-2%, 3%) scale(0.96); }
+}
+
+/* ============================================================
+   共用玻璃表面 —— 全部走设计令牌
+   ============================================================ */
+
+/* ---- 日历容器浮起 ---- */
+.glass-theme .calendar-container,
+.ios-glass-theme .calendar-container,
+.liquid-glass-theme .calendar-container {
+  position: relative;
+  z-index: 1;
+}
+
+/* ---- 日期格：液态玻璃面 ---- */
+.glass-theme .calendar-day,
+.ios-glass-theme .calendar-day,
+.liquid-glass-theme .calendar-day {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    var(--shadow-sm) !important;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease !important;
+}
+
+.glass-theme .calendar-day:hover,
+.ios-glass-theme .calendar-day:hover,
+.liquid-glass-theme .calendar-day:hover {
+  background: rgba(255, 255, 255, 0.8) !important;
+  border-color: var(--primary-color) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 10px 26px -8px var(--form-input-focus-shadow) !important;
+  transform: translateY(-2px) !important;
+  z-index: 5;
+}
+
+.glass-theme .calendar-day:hover .day-number,
+.ios-glass-theme .calendar-day:hover .day-number,
+.liquid-glass-theme .calendar-day:hover .day-number {
+  color: var(--primary-color) !important;
+}
+
+/* 今天：玻璃面上叠加强调色光环 */
+.glass-theme .current-day,
+.ios-glass-theme .current-day,
+.liquid-glass-theme .current-day {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    0 0 0 2px var(--calendar-day-current-border),
+    0 6px 18px -6px var(--form-input-focus-shadow) !important;
+}
+.glass-theme .selected-day,
+.ios-glass-theme .selected-day,
+.liquid-glass-theme .selected-day {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    0 0 0 2px var(--primary-color) !important;
+}
+
+/* 星期标题 / 周号：轻玻璃条 */
+.glass-theme .calendar-weekday,
+.ios-glass-theme .calendar-weekday,
+.liquid-glass-theme .calendar-weekday {
+  backdrop-filter: blur(12px) saturate(160%);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
+  background: rgba(255, 255, 255, 0.34) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+.glass-theme .week-number,
+.ios-glass-theme .week-number,
+.liquid-glass-theme .week-number {
+  backdrop-filter: blur(8px) saturate(150%);
+  -webkit-backdrop-filter: blur(8px) saturate(150%);
+  background: rgba(255, 255, 255, 0.26) !important;
+}
+
+/* ---- 头部：悬浮玻璃导航条 ---- */
+.glass-theme .calendar-header,
+.ios-glass-theme .calendar-header,
+.liquid-glass-theme .calendar-header {
+  backdrop-filter: blur(28px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+  background: var(--card-background) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), var(--shadow-md) !important;
+  position: relative;
+  z-index: 2;
+}
+
+/* ---- 按钮 ---- */
+.glass-theme .nav-btn,
+.glass-theme .icon-btn,
+.ios-glass-theme .nav-btn,
+.ios-glass-theme .icon-btn,
+.liquid-glass-theme .nav-btn,
+.liquid-glass-theme .icon-btn {
+  backdrop-filter: blur(10px) saturate(160%);
+  -webkit-backdrop-filter: blur(10px) saturate(160%);
+  background: rgba(255, 255, 255, 0.42) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+.glass-theme .nav-btn:hover,
+.glass-theme .icon-btn:hover,
+.ios-glass-theme .nav-btn:hover,
+.ios-glass-theme .icon-btn:hover,
+.liquid-glass-theme .nav-btn:hover,
+.liquid-glass-theme .icon-btn:hover {
+  background: rgba(255, 255, 255, 0.62) !important;
+}
+.glass-theme .today-btn,
+.ios-glass-theme .today-btn,
+.liquid-glass-theme .today-btn {
+  backdrop-filter: blur(10px) saturate(170%);
+  -webkit-backdrop-filter: blur(10px) saturate(170%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 4px 14px -4px var(--form-input-focus-shadow) !important;
+}
+
+/* ---- 设置抽屉 / 弹窗 ---- */
+.glass-theme .drawer-panel,
+.ios-glass-theme .drawer-panel,
+.liquid-glass-theme .drawer-panel {
+  backdrop-filter: blur(36px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(36px) saturate(190%) !important;
+  background: rgba(255, 255, 255, 0.78) !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.7) !important;
+}
+
+.glass-theme .drawer-overlay,
+.ios-glass-theme .drawer-overlay,
+.liquid-glass-theme .drawer-overlay {
+  background: rgba(29, 36, 51, 0.28) !important;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.glass-theme .add-todo-popup,
+.ios-glass-theme .add-todo-popup,
+.liquid-glass-theme .add-todo-popup {
+  backdrop-filter: blur(36px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(36px) saturate(190%) !important;
+  background: rgba(255, 255, 255, 0.82) !important;
+}
+
+.glass-theme .reminder-toast,
+.ios-glass-theme .reminder-toast,
+.liquid-glass-theme .reminder-toast {
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+}
+
+.glass-theme .pc-panel,
+.ios-glass-theme .pc-panel,
+.liquid-glass-theme .pc-panel,
+.glass-theme .mobile-panel,
+.ios-glass-theme .mobile-panel,
+.liquid-glass-theme .mobile-panel {
+  backdrop-filter: blur(32px) saturate(185%);
+  -webkit-backdrop-filter: blur(32px) saturate(185%);
+  background: rgba(255, 255, 255, 0.74);
+}
+
+/* ---- 待办事项玻璃片 ---- */
+.glass-theme .todo-item,
+.ios-glass-theme .todo-item,
+.liquid-glass-theme .todo-item {
+  backdrop-filter: blur(8px) saturate(150%);
+  -webkit-backdrop-filter: blur(8px) saturate(150%);
+}
+
+/* ---- 动态背景开启时提高玻璃面不透明度，保证可读性 ---- */
+body.dynamic-background.glass-theme .calendar-day,
+body.dynamic-background.ios-glass-theme .calendar-day,
+body.dynamic-background.liquid-glass-theme .calendar-day {
+  background: rgba(255, 255, 255, 0.72) !important;
+}
+body.dynamic-background.glass-theme .calendar-header,
+body.dynamic-background.ios-glass-theme .calendar-header,
+body.dynamic-background.liquid-glass-theme .calendar-header,
+body.dynamic-background.glass-theme .drawer-panel,
+body.dynamic-background.ios-glass-theme .drawer-panel,
+body.dynamic-background.liquid-glass-theme .drawer-panel,
+body.dynamic-background.glass-theme .add-todo-popup,
+body.dynamic-background.ios-glass-theme .add-todo-popup,
+body.dynamic-background.liquid-glass-theme .add-todo-popup {
+  background: rgba(255, 255, 255, 0.84) !important;
+}
+
+/* ---- 移动端：收敛动效，避免抖动 ---- */
+@media (max-width: 768px) {
+  html.glass-theme body {
+    background: linear-gradient(180deg, #f5f0fc, #eef2fd, #fdf1f7);
+    background-size: 100% 200%;
+    animation: glass-bg-shift-mobile 10s ease infinite;
+  }
+  @keyframes glass-bg-shift-mobile {
+    0%, 100% { background-position: 50% 0%; }
+    50% { background-position: 50% 100%; }
+  }
+
+  .glass-theme body::after,
+  .ios-glass-theme body::after,
+  .liquid-glass-theme body::after {
+    filter: blur(44px);
+  }
+
+  .glass-theme .calendar-day:hover,
+  .ios-glass-theme .calendar-day:hover,
+  .liquid-glass-theme .calendar-day:hover {
+    transform: none !important;
+  }
+}
+
+/* ---- 尊重系统减弱动效偏好 ---- */
+@media (prefers-reduced-motion: reduce) {
+  html.glass-theme body,
+  html.ios-glass-theme body,
+  html.liquid-glass-theme body {
+    animation: none !important;
+  }
+  .glass-theme body::after,
+  .ios-glass-theme body::after,
+  .liquid-glass-theme body::after {
+    animation: none !important;
+  }
+  .glass-theme .calendar-day,
+  .ios-glass-theme .calendar-day,
+  .liquid-glass-theme .calendar-day {
+    transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease !important;
+    transform: none !important;
+  }
+}

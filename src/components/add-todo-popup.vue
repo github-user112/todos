@@ -342,7 +342,7 @@ onMounted(() => {
 }
 
 .holiday-switch:checked + .switch-slider {
-  background: var(--primary-color, #18a058);
+  background: var(--primary-color);
 }
 
 .holiday-switch:checked + .switch-slider::before {
@@ -416,7 +416,7 @@ onMounted(() => {
 .reminder-warning {
   margin: 4px 0 0;
   font-size: 0.72rem;
-  color: var(--danger-color, #e74c3c);
+  color: var(--danger-color);
   font-weight: 500;
 }
 
@@ -436,7 +436,7 @@ onMounted(() => {
 .add-todo-popup {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.45);
+  background: rgba(23, 28, 45, 0.45);
   backdrop-filter: blur(6px);
   display: flex;
   justify-content: center;
@@ -510,8 +510,8 @@ onMounted(() => {
   width: calc(100% - 36px);
   margin: 14px 18px;
   padding: 12px 14px;
-  border: 2px solid var(--border-color);
-  border-radius: 10px;
+  border: 1px solid var(--form-input-border);
+  border-radius: 12px;
   font-size: 0.95rem;
   background: var(--card-background);
   color: var(--text-primary);
@@ -520,7 +520,7 @@ onMounted(() => {
 .todo-input:focus {
   outline: none;
   border-color: var(--form-input-focus-border);
-  box-shadow: 0 0 0 4px var(--form-input-focus-shadow);
+  box-shadow: 0 0 0 3px var(--form-input-focus-shadow);
 }
 .todo-input::placeholder {
   color: var(--other-month-text);
@@ -648,8 +648,12 @@ onMounted(() => {
 }
 .btn-save {
   background: var(--button-primary-bg);
-  color: white;
-  box-shadow: var(--shadow-sm);
+  color: #fff;
+  box-shadow: 0 3px 10px -3px var(--form-input-focus-shadow);
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+.btn-save:hover {
+  background: var(--button-primary-hover-bg);
 }
 .btn-save:active {
   background: var(--button-primary-hover-bg);

@@ -84,21 +84,26 @@ onMounted(() => {
   gap: 10px;
   padding: 12px 14px;
   background: var(--card-background);
-  border: 1px solid var(--primary-color);
-  border-radius: 12px;
-  box-shadow:
-    0 8px 24px rgba(0, 0, 0, 0.15),
-    0 0 0 1px var(--primary-color);
+  border: 1px solid var(--border-color);
+  border-left: 3px solid var(--primary-color);
+  border-radius: 14px;
+  box-shadow: var(--shadow-lg);
   pointer-events: auto;
   cursor: pointer;
   animation: reminder-toast-in 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .reminder-toast-icon {
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   flex-shrink: 0;
   line-height: 1;
-  margin-top: 1px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary-light);
+  border-radius: 11px;
 }
 
 .reminder-toast-content {
@@ -109,7 +114,7 @@ onMounted(() => {
 .reminder-toast-title {
   font-size: 0.78rem;
   font-weight: 600;
-  color: var(--primary-color);
+  color: var(--primary-dark);
   margin-bottom: 2px;
 }
 

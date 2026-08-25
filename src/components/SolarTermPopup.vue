@@ -55,7 +55,7 @@ const close = () => {
 .solar-term-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(23, 28, 45, 0.5);
   backdrop-filter: blur(6px);
   z-index: 6000;
   display: flex;
@@ -68,10 +68,10 @@ const close = () => {
   position: relative;
   width: 100%;
   max-width: 380px;
-  background: var(--card-background, #fff);
+  background: var(--card-background);
   border-radius: 20px;
   padding: 28px 24px 20px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  box-shadow: var(--shadow-xl);
   max-height: 85vh;
   overflow-y: auto;
   animation: card-pop-in 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -98,9 +98,9 @@ const close = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-secondary, #64748b);
+  color: var(--text-secondary);
   font-size: 0.9rem;
-  background: var(--hover-color, #f1f5f9);
+  background: var(--hover-color);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
@@ -116,9 +116,16 @@ const close = () => {
 }
 
 .term-emoji {
-  font-size: 3rem;
+  font-size: 2.6rem;
   line-height: 1;
   flex-shrink: 0;
+  width: 68px;
+  height: 68px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--primary-color) 8%, transparent);
+  border-radius: 20px;
   animation: emoji-float 2s ease-in-out infinite;
 }
 
@@ -131,33 +138,33 @@ const close = () => {
   margin: 0;
   font-size: 1.5rem;
   font-weight: 800;
-  color: var(--text-primary, #0f172a);
+  color: var(--text-primary);
   letter-spacing: 0.02em;
 }
 
 .term-summary {
   margin: 4px 0 0;
   font-size: 0.82rem;
-  color: var(--text-secondary, #64748b);
+  color: var(--text-secondary);
 }
 
 .card-greeting {
-  background: var(--primary-light, #e0e7ff);
-  color: var(--primary-dark, #4338ca);
+  background: var(--primary-light);
+  color: var(--primary-dark);
   padding: 12px 16px;
   border-radius: 12px;
   font-size: 0.88rem;
   font-weight: 500;
   line-height: 1.5;
   margin-bottom: 18px;
-  border-left: 4px solid var(--primary-color, #6366f1);
+  border-left: 3px solid var(--primary-color);
 }
 
 .card-tips h3 {
   margin: 0 0 10px;
   font-size: 0.92rem;
   font-weight: 700;
-  color: var(--text-primary, #0f172a);
+  color: var(--text-primary);
 }
 
 .card-tips ul {
@@ -170,7 +177,7 @@ const close = () => {
   position: relative;
   padding: 8px 8px 8px 24px;
   font-size: 0.85rem;
-  color: var(--text-primary, #0f172a);
+  color: var(--text-primary);
   line-height: 1.5;
 }
 
@@ -179,7 +186,7 @@ const close = () => {
   position: absolute;
   left: 6px;
   top: 8px;
-  color: var(--success-color, #10b981);
+  color: var(--success-color);
   font-weight: 700;
   font-size: 0.8rem;
 }
@@ -189,7 +196,7 @@ const close = () => {
   margin-top: 20px;
   padding: 13px;
   border-radius: 12px;
-  background: var(--button-primary-bg, #6366f1);
+  background: var(--button-primary-bg);
   color: white;
   font-size: 0.95rem;
   font-weight: 600;
@@ -199,7 +206,7 @@ const close = () => {
 }
 .got-it-btn:active {
   transform: scale(0.97);
-  background: var(--button-primary-hover-bg, #4f46e5);
+  background: var(--button-primary-hover-bg);
 }
 
 /* 弹窗动画 */

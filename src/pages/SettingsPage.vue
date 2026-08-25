@@ -279,7 +279,7 @@ onMounted(async () => {
 .settings-page {
   min-height: 100vh;
   min-height: 100dvh;
-  background: var(--page-background, #f5f5f5);
+  background: var(--background-color);
   padding: 20px;
   overflow-y: auto;
 }
@@ -304,14 +304,19 @@ onMounted(async () => {
 }
 
 .back-btn {
-  padding: 8px 16px;
-  border-radius: 8px;
-  background: var(--hover-color);
-  color: var(--text-primary);
+  padding: 8px 18px;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-secondary);
   font-size: 0.85rem;
   font-weight: 500;
-  border: none;
+  border: 1px solid var(--border-color);
   cursor: pointer;
+  transition: all 0.15s ease;
+}
+.back-btn:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
 }
 
 .access-denied {
@@ -415,8 +420,8 @@ onMounted(async () => {
 .form-textarea {
   width: 100%;
   padding: 10px 12px;
-  border: 1.5px solid var(--border-color);
-  border-radius: 10px;
+  border: 1px solid var(--form-input-border);
+  border-radius: 12px;
   font-size: 0.88rem;
   background: var(--card-background);
   color: var(--text-primary);
@@ -427,8 +432,8 @@ onMounted(async () => {
 .form-input:focus,
 .form-textarea:focus {
   outline: none;
-  border-color: var(--form-input-focus-border, var(--primary-color));
-  box-shadow: 0 0 0 3px var(--form-input-focus-shadow, rgba(79, 70, 229, 0.1));
+  border-color: var(--form-input-focus-border);
+  box-shadow: 0 0 0 3px var(--form-input-focus-shadow);
 }
 
 .form-textarea {
@@ -449,17 +454,17 @@ onMounted(async () => {
 
 .type-tag.wecom {
   background: rgba(7, 193, 96, 0.12);
-  color: #07c160;
+  color: #079455;
 }
 
 .type-tag.dingtalk {
-  background: rgba(0, 166, 255, 0.12);
-  color: #00a6ff;
+  background: rgba(37, 99, 235, 0.1);
+  color: var(--info-color);
 }
 
 .type-tag.slack {
-  background: rgba(74, 21, 75, 0.12);
-  color: #4a154b;
+  background: rgba(90, 74, 120, 0.1);
+  color: #5a4a78;
 }
 
 .type-tag.generic {
@@ -514,8 +519,11 @@ onMounted(async () => {
 }
 
 .btn-primary {
-  background: var(--button-primary-bg, var(--primary-color));
-  color: white;
+  background: var(--button-primary-bg);
+  color: #fff;
+}
+.btn-primary:hover:not(:disabled) {
+  background: var(--button-primary-hover-bg);
 }
 
 .btn-secondary:disabled,
@@ -534,13 +542,13 @@ onMounted(async () => {
 }
 
 .result-message.success {
-  background: rgba(24, 160, 88, 0.1);
-  color: var(--success-color, #18a058);
+  background: color-mix(in srgb, var(--success-color) 10%, transparent);
+  color: var(--success-color);
 }
 
 .result-message.error {
-  background: rgba(231, 76, 60, 0.1);
-  color: var(--danger-color, #e74c3c);
+  background: color-mix(in srgb, var(--danger-color) 10%, transparent);
+  color: var(--danger-color);
 }
 
 .preview-section h2 {
@@ -548,7 +556,7 @@ onMounted(async () => {
 }
 
 .preview-box {
-  background: var(--page-background, #f5f5f5);
+  background: var(--background-color);
   border-radius: 10px;
   padding: 16px;
   min-height: 120px;

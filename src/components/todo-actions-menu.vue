@@ -60,20 +60,20 @@ defineEmits(['complete', 'delete']);
 }
 
 .complete-btn .action-icon {
-  background: #f0fdf4;
+  background: color-mix(in srgb, var(--success-color) 12%, transparent);
   color: var(--success-color);
 }
 .complete-btn:hover {
-  background: #f0fdf4;
+  background: color-mix(in srgb, var(--success-color) 10%, transparent);
   color: var(--success-color);
 }
 
 .delete-btn .action-icon {
-  background: #fef2f2;
+  background: color-mix(in srgb, var(--danger-color) 10%, transparent);
   color: var(--danger-color);
 }
 .delete-btn:hover {
-  background: #fef2f2;
+  background: color-mix(in srgb, var(--danger-color) 9%, transparent);
   color: var(--danger-color);
 }
 

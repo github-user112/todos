@@ -331,8 +331,8 @@ function getHolidayName(holiday) {
 <style scoped>
 .calendar-day {
   border: 1px solid var(--calendar-day-border);
-  padding: 6px;
-  border-radius: 12px;
+  padding: 6px 7px;
+  border-radius: 14px;
   display: flex;
   flex-direction: column;
   background: var(--calendar-day-bg);
@@ -342,70 +342,94 @@ function getHolidayName(holiday) {
   backdrop-filter: var(--glass-day-backdrop, none);
   -webkit-backdrop-filter: var(--glass-day-backdrop, none);
   transition:
-    box-shadow 0.2s ease,
-    transform 0.2s ease,
-    border-color 0.2s ease;
+    box-shadow 0.18s ease,
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    background 0.18s ease;
   cursor: default;
   overflow: hidden;
   -webkit-tap-highlight-color: transparent;
 }
 
 .calendar-day:hover {
+  background: var(--calendar-day-hover-bg);
+  border-color: var(--primary-color);
   box-shadow: var(--shadow-md);
   transform: translateY(-1px);
-  border-color: var(--primary-color);
   z-index: 5;
 }
 
-.weekend-day {
-  background: var(--calendar-day-weekend-bg);
-  border-color: var(--calendar-day-weekend-border);
+/* ---- 周末：仅日期数字着红色，不再铺色块，保持画面安静 ---- */
+.weekend-day .day-number {
+  color: var(--danger-color);
 }
 
+/* ---- 法定休息日：恒定红色系（跨主题一致） ---- */
 .holiday-rest-day {
   background: var(--calendar-day-holiday-rest-bg);
   border-color: var(--calendar-day-holiday-rest-border);
 }
-.holiday-rest-day .day-number {
+.holiday-rest-day .day-number,
+.holiday-rest-day .day-lunar {
   color: var(--danger-color);
 }
 
+/* ---- 调休上班日：恒定琥珀色系（跨主题一致） ---- */
 .holiday-work-day {
   background: var(--calendar-day-holiday-work-bg);
   border-color: var(--calendar-day-holiday-work-border);
 }
+.holiday-work-day .work-badge {
+  background: var(--badge-work-bg);
+  color: var(--badge-work-text);
+}
 
+/* ---- 非当前月 ---- */
 .other-month {
   opacity: var(--calendar-day-other-month-opacity);
 }
 .other-month .day-number {
-  color: var(--other-month-text);
   font-size: 0.85em;
 }
 
+/* ---- 选中的日期 ---- */
 .selected-day {
   background: var(--primary-light);
-  border: 2px solid var(--primary-color);
-  box-shadow: 0 0 0 2px var(--form-input-focus-shadow);
+  border-color: var(--primary-color);
+  box-shadow: inset 0 0 0 1px var(--primary-color);
 }
 .selected-day .day-number {
-  color: var(--primary-color);
+  color: var(--primary-dark);
   font-weight: 700;
 }
 
+/* ---- 今天：强调色圆片日期 + 柔和光环（视觉锚点） ---- */
 .current-day {
   background: var(--calendar-day-current-bg);
-  border: 2px solid var(--calendar-day-current-border);
-  box-shadow:
-    0 0 0 3px var(--form-input-focus-shadow),
-    var(--shadow-sm);
+  border-color: var(--calendar-day-current-border);
+  box-shadow: 0 0 0 3px var(--form-input-focus-shadow), var(--shadow-sm);
 }
 .current-day .day-number {
-  color: var(--primary-color);
-  font-weight: 800;
-  font-size: 1.15em;
+  position: relative;
+  z-index: 0;
+  color: #fff;
+  font-weight: 700;
+}
+.current-day .day-number::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1.7em;
+  height: 1.7em;
+  transform: translate(-50%, -50%);
+  background: var(--primary-color);
+  border-radius: 999px;
+  z-index: -1;
+  box-shadow: 0 2px 8px -2px var(--form-input-focus-shadow);
 }
 
+/* ---- 单元格内部 ---- */
 .day-header {
   display: flex;
   justify-content: space-between;
@@ -417,7 +441,7 @@ function getHolidayName(holiday) {
 .day-number-wrap {
   display: flex;
   align-items: baseline;
-  gap: 3px;
+  gap: 4px;
   min-width: 0;
 }
 
@@ -427,6 +451,7 @@ function getHolidayName(holiday) {
   font-size: 0.9rem;
   line-height: 1;
   flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
 }
 
 .day-lunar {
@@ -438,10 +463,6 @@ function getHolidayName(holiday) {
   line-height: 1;
   font-weight: 400;
 }
-.holiday-rest-day .day-lunar {
-  color: var(--danger-color);
-  font-weight: 500;
-}
 
 .day-badges {
   display: flex;
@@ -452,9 +473,10 @@ function getHolidayName(holiday) {
 .holiday-badge {
   font-size: 0.6rem;
   font-weight: 700;
-  padding: 1px 6px;
-  border-radius: 8px;
-  line-height: 1.4;
+  padding: 1.5px 6px;
+  border-radius: 999px;
+  line-height: 1.3;
+  letter-spacing: 0.02em;
 }
 .rest-badge {
   background: var(--badge-rest-bg);
@@ -469,12 +491,13 @@ function getHolidayName(holiday) {
   font-size: 0.55rem;
   font-weight: 700;
   padding: 0 5px;
-  border-radius: 8px;
-  line-height: 1.5;
+  border-radius: 999px;
+  line-height: 1.6;
   background: var(--primary-light);
-  color: var(--primary-color);
+  color: var(--primary-dark);
 }
 
+/* ---- 待办胶囊芯片 ---- */
 .todo-list {
   flex: 1;
   overflow-y: auto;
@@ -487,38 +510,39 @@ function getHolidayName(holiday) {
 .todo-item {
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 3px 6px;
-  border-radius: 6px;
+  gap: 5px;
+  padding: 3px 7px;
+  border-radius: 7px;
   background: var(--todo-item-bg);
-  border-left: 3px solid var(--todo-item-border-left);
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.15s ease, box-shadow 0.15s ease;
   min-height: 0;
   -webkit-tap-highlight-color: transparent;
+}
+.todo-item:hover {
+  background: var(--todo-item-hover-bg);
 }
 .todo-item:active {
   background: var(--todo-item-hover-bg);
 }
 
 .todo-item.drag-over {
-  border-top: 2px solid var(--primary-color);
+  box-shadow: inset 0 2px 0 var(--primary-color);
 }
 
-.todo-item[draggable="true"] {
+.todo-item[draggable='true'] {
   cursor: grab;
 }
-
-.todo-item[draggable="true"]:active {
+.todo-item[draggable='true']:active {
   cursor: grabbing;
   opacity: 0.6;
 }
 
 .todo-dot {
   flex-shrink: 0;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
   background: var(--primary-color);
 }
 .todo-dot.done {
@@ -538,13 +562,16 @@ function getHolidayName(holiday) {
 .todo-reminder-icon {
   font-size: 0.6em;
   flex-shrink: 0;
-  margin-left: 2px;
+  margin-left: auto;
   opacity: 0.7;
 }
 
+/* 已完成：绿色系 + 删除线弱化 */
 .todo-item.completed {
-  border-left-color: var(--todo-item-completed-border-left);
   background: var(--todo-item-completed-bg);
+}
+.todo-item.completed .todo-dot {
+  background: var(--success-color);
 }
 .todo-item.completed .todo-text {
   text-decoration: line-through;
@@ -552,20 +579,27 @@ function getHolidayName(holiday) {
   color: var(--todo-item-completed-text);
 }
 
+/* ========== 移动端 ========== */
 @media (max-width: 768px) {
   .calendar-day {
-    padding: 3px 3px 2px;
-    border-radius: 8px;
-    border-width: 1px;
+    padding: 3px 4px 2px;
+    border-radius: 11px;
     transition: none;
   }
   .calendar-day:hover {
     transform: none;
-    box-shadow: none;
+    box-shadow: var(--shadow-sm);
     border-color: var(--calendar-day-border);
+    background: var(--calendar-day-bg);
   }
   .calendar-day:active {
     background: var(--hover-color);
+  }
+  .current-day {
+    box-shadow: 0 0 0 2px var(--form-input-focus-shadow);
+  }
+  .current-day .day-number::before {
+    box-shadow: none;
   }
   .day-header {
     margin-bottom: 1px;
@@ -580,10 +614,9 @@ function getHolidayName(holiday) {
     gap: 2px;
   }
   .todo-item {
-    padding: 3px 4px;
-    border-left-width: 2px;
-    border-radius: 4px;
-    gap: 3px;
+    padding: 3px 5px;
+    border-radius: 5px;
+    gap: 4px;
     min-height: 22px;
   }
   .todo-dot {
@@ -597,27 +630,20 @@ function getHolidayName(holiday) {
   .holiday-badge {
     font-size: 0.55rem;
     padding: 1px 4px;
-    border-radius: 5px;
-    line-height: 1.4;
   }
   .todo-count-badge {
     font-size: 0.52rem;
     padding: 0 4px;
-    border-radius: 5px;
-    line-height: 1.5;
   }
   .todo-list {
     gap: 2px;
-  }
-  .current-day {
-    box-shadow: 0 0 0 2px var(--form-input-focus-shadow);
   }
 }
 
 @media (max-width: 380px) {
   .calendar-day {
-    padding: 2px 2px 1px;
-    border-radius: 6px;
+    padding: 2px 3px 1px;
+    border-radius: 9px;
   }
   .day-number {
     font-size: 0.75rem;
@@ -634,8 +660,7 @@ function getHolidayName(holiday) {
     line-height: 1.2;
   }
   .todo-item {
-    padding: 2px 3px;
-    border-radius: 3px;
+    padding: 2px 4px;
     min-height: 18px;
   }
   .todo-count-badge {

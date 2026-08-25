@@ -15,7 +15,10 @@
           <polyline points="15 18 9 12 15 6" />
         </svg>
       </button>
-      <h2 class="header-title">{{ currentYear }}年{{ currentMonth + 1 }}月</h2>
+      <h2 class="header-title">
+        <span class="title-main">{{ currentMonth + 1 }}<i class="title-unit">月</i></span>
+        <span class="title-sub">{{ currentYear }}</span>
+      </h2>
       <button class="nav-btn" @click="$emit('nextMonth')" aria-label="下一月">
         <svg
           width="20"
@@ -547,14 +550,15 @@ const copyUrlToClipboard = () => {
 </script>
 
 <style scoped>
+/* ---- 头部容器：悬浮卡片 ---- */
 .calendar-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 14px;
-  margin-bottom: 6px;
+  padding: 10px 16px;
+  margin-bottom: 8px;
   background: var(--card-background);
-  border-radius: 14px;
+  border-radius: 18px;
   box-shadow: var(--shadow-sm);
   border: 1px solid var(--border-color);
   gap: 8px;
@@ -573,74 +577,112 @@ const copyUrlToClipboard = () => {
   gap: 4px;
 }
 
+/* ---- 导航按钮：幽灵圆角方块，悬停浮现 ---- */
 .nav-btn {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 36px;
   height: 36px;
-  border-radius: 10px;
+  border-radius: 12px;
   color: var(--text-secondary);
-  background: var(--hover-color);
+  background: transparent;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
   -webkit-tap-highlight-color: transparent;
+}
+.nav-btn:hover {
+  background: var(--hover-color);
+  color: var(--primary-color);
 }
 .nav-btn:active {
   transform: scale(0.9);
-  background: var(--primary-light);
-  color: var(--primary-color);
 }
 
+/* ---- 标题：大月份 + 小年份，现代日历排版 ---- */
 .header-title {
   margin: 0;
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  min-width: 105px;
+  min-width: 108px;
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
   text-align: center;
-  letter-spacing: -0.02em;
   user-select: none;
 }
-
-.today-btn {
-  padding: 7px 14px;
-  border-radius: 9px;
-  font-size: 0.8rem;
+.title-main {
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.title-unit {
+  font-style: normal;
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-left: 1px;
+}
+.title-sub {
+  font-size: 0.82rem;
   font-weight: 600;
-  color: white;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- 今天按钮：强调色胶囊 ---- */
+.today-btn {
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #fff;
   background: var(--button-primary-bg);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 3px 10px -3px var(--form-input-focus-shadow);
+  transition: background 0.15s ease, box-shadow 0.2s ease, transform 0.1s ease;
   -webkit-tap-highlight-color: transparent;
 }
-.today-btn:active {
+.today-btn:hover {
   background: var(--button-primary-hover-bg);
+  box-shadow: 0 5px 16px -4px var(--form-input-focus-shadow);
+  transform: translateY(-1px);
+}
+.today-btn:active {
   transform: scale(0.95);
+  box-shadow: none;
 }
 
+/* ---- 图标按钮 ---- */
 .icon-btn {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 36px;
   height: 36px;
-  border-radius: 10px;
+  border-radius: 12px;
   color: var(--text-secondary);
+  background: transparent;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
   -webkit-tap-highlight-color: transparent;
 }
-.icon-btn:active {
+.icon-btn:hover {
   background: var(--hover-color);
   color: var(--primary-color);
+}
+.icon-btn:active {
   transform: scale(0.9);
 }
 .icon-btn.active {
   background: var(--primary-light);
-  color: var(--primary-color);
+  color: var(--primary-dark);
 }
 
-/* ---- 设置抽屉 ---- */
+/* ==============================
+   设置抽屉
+   ============================== */
 .drawer-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(23, 28, 45, 0.4);
   backdrop-filter: blur(4px);
   z-index: 3000;
   display: flex;
@@ -648,9 +690,10 @@ const copyUrlToClipboard = () => {
 }
 
 .drawer-panel {
-  width: 280px;
+  width: 300px;
   height: 100%;
   background: var(--card-background);
+  border-left: 1px solid var(--border-color);
   box-shadow: var(--shadow-xl);
   display: flex;
   flex-direction: column;
@@ -664,41 +707,47 @@ const copyUrlToClipboard = () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 18px;
+  padding: 18px 20px;
   border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  background: var(--card-background);
+  z-index: 2;
 }
 
 .drawer-title {
-  font-size: 1.05rem;
+  font-size: 1rem;
   font-weight: 700;
   color: var(--text-primary);
 }
 
 .drawer-close {
-  width: 34px;
-  height: 34px;
-  border-radius: 8px;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--text-secondary);
-  font-size: 1rem;
+  font-size: 0.9rem;
+  transition: background 0.15s ease, color 0.15s ease;
   -webkit-tap-highlight-color: transparent;
 }
-.drawer-close:active {
+.drawer-close:hover {
   background: var(--hover-color);
+  color: var(--text-primary);
 }
 
 .drawer-body {
   flex: 1;
-  padding: 18px;
+  padding: 16px 20px;
   display: flex;
   flex-direction: column;
-  gap: 22px;
+  gap: 14px;
 }
 
 .drawer-footer {
-  padding: 14px 18px;
+  padding: 14px 20px;
   border-top: 1px solid var(--border-color);
 }
 
@@ -707,55 +756,77 @@ const copyUrlToClipboard = () => {
   color: var(--text-secondary);
   text-decoration: none;
 }
+.contact-link:hover {
+  color: var(--primary-color);
+}
 
+/* ---- 设置分组卡片 ---- */
 .setting-group {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  background: var(--card-background);
+  transition: border-color 0.2s ease;
+}
+.setting-group:hover {
+  border-color: var(--form-input-border);
 }
 
 .setting-label {
-  font-size: 0.85rem;
+  font-size: 0.84rem;
   font-weight: 600;
   color: var(--text-primary);
 }
 
+/* ---- 下拉选择 ---- */
 .setting-select {
-  padding: 10px 12px;
-  border: 1px solid var(--border-color);
-  border-radius: 10px;
-  background: var(--card-background);
+  padding: 9px 34px 9px 12px;
+  border: 1px solid var(--form-input-border);
+  border-radius: 11px;
+  background-color: var(--card-background);
   color: var(--text-primary);
-  font-size: 0.88rem;
+  font-size: 0.86rem;
   cursor: pointer;
   -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%235d6a84' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.setting-select:hover {
+  border-color: var(--primary-color);
 }
 .setting-select:focus {
+  outline: none;
   border-color: var(--form-input-focus-border);
   box-shadow: 0 0 0 3px var(--form-input-focus-shadow);
-  outline: none;
 }
 
+/* ---- 视图模式胶囊 ---- */
 .view-mode-chips {
   display: flex;
-  gap: 10px;
-}
-
-.theme-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
   gap: 8px;
 }
 
 .theme-chip {
-  padding: 11px 6px;
-  border-radius: 10px;
-  border: 2px solid var(--border-color);
-  background: var(--hover-color);
-  color: var(--text-primary);
-  font-size: 0.8rem;
+  flex: 1;
+  padding: 9px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
   font-weight: 500;
+  transition: all 0.15s ease;
   -webkit-tap-highlight-color: transparent;
+}
+.theme-chip:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-dark);
 }
 .theme-chip:active {
   transform: scale(0.96);
@@ -768,6 +839,7 @@ const copyUrlToClipboard = () => {
   box-shadow: 0 0 0 3px var(--form-input-focus-shadow);
 }
 
+/* ---- 开关 ---- */
 .toggle-row {
   display: flex;
   align-items: center;
@@ -776,17 +848,18 @@ const copyUrlToClipboard = () => {
 }
 
 .toggle-desc {
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   color: var(--text-secondary);
+  line-height: 1.4;
 }
 
 .toggle-btn {
   position: relative;
-  width: 44px;
+  width: 42px;
   height: 24px;
-  border-radius: 12px;
+  border-radius: 999px;
   background: var(--border-color);
-  transition: background 0.25s ease;
+  transition: background 0.22s ease;
   flex-shrink: 0;
   -webkit-tap-highlight-color: transparent;
 }
@@ -801,26 +874,27 @@ const copyUrlToClipboard = () => {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: white;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-  transition: transform 0.25s ease;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(23, 28, 45, 0.25);
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .toggle-btn.active .toggle-thumb {
-  transform: translateX(20px);
+  transform: translateX(18px);
 }
 
-/* 城市输入 */
+/* ---- 城市输入 ---- */
 .city-input-row {
-  margin-top: 8px;
-  padding-top: 8px;
+  margin-top: 2px;
+  padding-top: 10px;
   border-top: 1px dashed var(--border-color);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .city-desc {
   font-size: 0.72rem;
   color: var(--text-secondary);
-  display: block;
-  margin-bottom: 6px;
 }
 
 .city-input-wrap {
@@ -830,82 +904,84 @@ const copyUrlToClipboard = () => {
 
 .city-input {
   flex: 1;
-  padding: 8px 10px;
-  border: 1.5px solid var(--border-color);
-  border-radius: 8px;
+  min-width: 0;
+  padding: 8px 11px;
+  border: 1px solid var(--form-input-border);
+  border-radius: 10px;
   font-size: 0.8rem;
   background: var(--card-background);
   color: var(--text-primary);
   -webkit-appearance: none;
+  appearance: none;
   box-sizing: border-box;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
-
+.city-input::placeholder {
+  color: var(--other-month-text);
+}
 .city-input:focus {
   outline: none;
   border-color: var(--form-input-focus-border);
   box-shadow: 0 0 0 3px var(--form-input-focus-shadow);
 }
 
-.city-input::placeholder {
-  color: var(--other-month-text);
-}
-
 .city-save-btn {
   padding: 8px 14px;
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 0.78rem;
   font-weight: 600;
   background: var(--button-primary-bg);
-  color: white;
+  color: #fff;
   flex-shrink: 0;
+  transition: background 0.15s ease, transform 0.1s ease;
   -webkit-tap-highlight-color: transparent;
 }
-
+.city-save-btn:hover {
+  background: var(--button-primary-hover-bg);
+}
 .city-save-btn:active {
   transform: scale(0.95);
 }
 
+/* ---- Webhook ---- */
 .webhook-desc {
   font-size: 0.72rem;
   color: var(--text-secondary);
-  margin: 0 0 4px;
-  line-height: 1.4;
+  margin: 0;
+  line-height: 1.5;
 }
 
 .webhook-formats {
   font-size: 0.68rem;
   color: var(--other-month-text);
-  margin: 0 0 8px;
-  line-height: 1.4;
+  margin: 0;
+  line-height: 1.5;
 }
 
 .webhook-type-badge {
-  margin-top: 6px;
+  margin-top: 2px;
 }
 
 .type-tag {
   display: inline-block;
-  padding: 2px 8px;
-  border-radius: 4px;
+  padding: 2px 9px;
+  border-radius: 999px;
   font-size: 0.68rem;
   font-weight: 600;
 }
 
 .type-tag.wecom {
   background: rgba(7, 193, 96, 0.12);
-  color: #07c160;
+  color: #07a35a;
 }
-
 .type-tag.dingtalk {
-  background: rgba(0, 166, 255, 0.12);
-  color: #00a6ff;
+  background: rgba(37, 99, 235, 0.1);
+  color: var(--info-color);
 }
-
 .type-tag.slack {
-  background: rgba(74, 21, 75, 0.12);
-  color: #4a154b;
+  background: rgba(90, 74, 120, 0.1);
+  color: #5a4a78;
 }
-
 .type-tag.generic {
   background: var(--hover-color);
   color: var(--text-secondary);
@@ -914,47 +990,50 @@ const copyUrlToClipboard = () => {
 .webhook-input {
   width: 100%;
   padding: 9px 12px;
-  border: 1.5px solid var(--border-color);
-  border-radius: 8px;
-  font-size: 0.82rem;
+  border: 1px solid var(--form-input-border);
+  border-radius: 10px;
+  font-size: 0.8rem;
   background: var(--card-background);
   color: var(--text-primary);
   -webkit-appearance: none;
+  appearance: none;
   box-sizing: border-box;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
-
+.webhook-input::placeholder {
+  color: var(--other-month-text);
+}
 .webhook-input:focus {
   outline: none;
   border-color: var(--form-input-focus-border);
   box-shadow: 0 0 0 3px var(--form-input-focus-shadow);
 }
 
-.webhook-input::placeholder {
-  color: var(--other-month-text);
-}
-
 .webhook-actions {
   display: flex;
   gap: 8px;
-  margin-top: 8px;
 }
 
 .webhook-test-btn,
 .webhook-save-btn {
   flex: 1;
   padding: 8px 12px;
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 0.78rem;
   font-weight: 600;
+  transition: all 0.15s ease;
   -webkit-tap-highlight-color: transparent;
 }
 
 .webhook-test-btn {
-  background: var(--hover-color);
-  color: var(--text-primary);
+  background: transparent;
+  color: var(--text-secondary);
   border: 1px solid var(--border-color);
 }
-
+.webhook-test-btn:hover:not(:disabled) {
+  border-color: var(--primary-color);
+  color: var(--primary-dark);
+}
 .webhook-test-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
@@ -962,54 +1041,62 @@ const copyUrlToClipboard = () => {
 
 .webhook-save-btn {
   background: var(--button-primary-bg);
-  color: white;
+  color: #fff;
 }
-
+.webhook-save-btn:hover:not(:disabled) {
+  background: var(--button-primary-hover-bg);
+}
 .webhook-save-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
 .webhook-result {
-  margin: 6px 0 0;
+  margin: 2px 0 0;
   font-size: 0.72rem;
-  line-height: 1.4;
+  line-height: 1.5;
 }
-
 .webhook-result.success {
-  color: var(--success-color, #18a058);
+  color: var(--success-color);
 }
-
 .webhook-result.error {
-  color: var(--danger-color, #e74c3c);
+  color: var(--danger-color);
 }
 
+/* ---- 数据管理 ---- */
 .data-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  margin-top: 4px;
 }
 
 .data-btn {
-  padding: 7px 12px;
-  border-radius: 8px;
+  padding: 7px 13px;
+  border-radius: 10px;
   font-size: 0.75rem;
   font-weight: 500;
-  background: var(--hover-color);
-  color: var(--text-primary);
+  background: transparent;
+  color: var(--text-secondary);
   border: 1px solid var(--border-color);
+  transition: all 0.15s ease;
   -webkit-tap-highlight-color: transparent;
 }
-
+.data-btn:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-dark);
+}
 .data-btn:active {
   transform: scale(0.96);
 }
 
 .data-btn.import-btn {
   background: var(--button-primary-bg);
-  color: white;
+  color: #fff;
   border-color: transparent;
+}
+.data-btn.import-btn:hover {
+  background: var(--button-primary-hover-bg);
+  color: #fff;
 }
 
 /* ---- 抽屉动画 ---- */
@@ -1035,51 +1122,62 @@ const copyUrlToClipboard = () => {
 /* ========== 移动端 ========== */
 @media (max-width: 768px) {
   .calendar-header {
-    padding: 6px 10px;
-    border-radius: 12px;
-    margin-bottom: 4px;
+    padding: 7px 10px;
+    border-radius: 15px;
+    margin-bottom: 6px;
   }
   .header-left {
-    gap: 4px;
-  }
-  .header-right {
-    gap: 4px;
+    gap: 3px;
   }
   .header-title {
-    font-size: 1rem;
-    min-width: 90px;
+    min-width: 92px;
+    gap: 5px;
+  }
+  .title-main {
+    font-size: 1.15rem;
+  }
+  .title-unit {
+    font-size: 0.85rem;
+  }
+  .title-sub {
+    font-size: 0.75rem;
   }
   .today-btn {
-    padding: 8px 12px;
+    padding: 8px 13px;
     font-size: 0.78rem;
-    border-radius: 8px;
     min-height: 36px;
   }
   .nav-btn,
   .icon-btn {
     width: 36px;
     height: 36px;
-    border-radius: 10px;
   }
   .nav-btn svg,
   .icon-btn svg {
     width: 18px;
     height: 18px;
   }
+  .nav-btn:hover,
+  .icon-btn:hover {
+    background: transparent;
+    color: inherit;
+  }
 }
 
 @media (max-width: 380px) {
   .calendar-header {
-    padding: 5px 6px;
-    border-radius: 10px;
+    padding: 6px 6px;
+    border-radius: 13px;
     gap: 2px;
   }
   .header-title {
-    font-size: 0.95rem;
-    min-width: 82px;
+    min-width: 84px;
+  }
+  .title-main {
+    font-size: 1.05rem;
   }
   .today-btn {
-    padding: 6px 10px;
+    padding: 6px 11px;
     font-size: 0.75rem;
     min-height: 34px;
   }
@@ -1087,7 +1185,7 @@ const copyUrlToClipboard = () => {
   .icon-btn {
     width: 34px;
     height: 34px;
-    border-radius: 8px;
+    border-radius: 10px;
   }
   .nav-btn svg,
   .icon-btn svg {

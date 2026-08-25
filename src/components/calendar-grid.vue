@@ -96,16 +96,15 @@ onUnmounted(() => window.removeEventListener('resize', onResize));
 <style scoped>
 .calendar-grid {
   display: grid;
-  grid-template-columns: 36px repeat(7, 1fr);
+  grid-template-columns: 40px repeat(7, 1fr);
   grid-template-rows: 34px repeat(var(--week-count, 5), 1fr);
-  gap: 4px;
+  gap: 5px;
   flex: 1;
   min-height: 0;
-  padding: 0 2px;
+  padding: 2px 2px 4px;
   position: relative;
   backdrop-filter: var(--glass-grid-backdrop, none);
   -webkit-backdrop-filter: var(--glass-grid-backdrop, none);
-  border-radius: 8px;
 }
 
 .empty-corner {
@@ -113,41 +112,38 @@ onUnmounted(() => window.removeEventListener('resize', onResize));
   grid-row: 1;
 }
 
+/* ---- 星期标题：安静的文字标签，不与格子争抢视觉 ---- */
 .calendar-weekday {
-  text-align: center;
-  font-weight: 600;
-  padding: 6px 0;
-  background: var(--hover-color);
-  border-radius: 8px;
-  color: var(--text-secondary);
-  font-size: 0.82rem;
-  letter-spacing: 0.05em;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: var(--shadow-sm);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  letter-spacing: 0.08em;
+  user-select: none;
+  background: transparent;
   z-index: 10;
   position: relative;
-  user-select: none;
 }
 
 .weekend-header {
   color: var(--danger-color);
-  background: var(--calendar-day-holiday-rest-bg);
 }
 
+/* ---- 周号列：弱化的辅助信息 ---- */
 .week-number {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 600;
+  font-size: 0.72rem;
+  font-weight: 500;
   color: var(--other-month-text);
-  background: var(--hover-color);
-  border-radius: 8px;
-  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  user-select: none;
+  background: transparent;
   z-index: 10;
   position: relative;
-  user-select: none;
 }
 
 .empty-day {
@@ -160,8 +156,8 @@ onUnmounted(() => window.removeEventListener('resize', onResize));
   .calendar-grid {
     gap: 3px;
     grid-template-columns: repeat(7, 1fr);
-    grid-template-rows: 30px repeat(var(--week-count, 5), 1fr);
-    padding: 0 2px;
+    grid-template-rows: 26px repeat(var(--week-count, 5), 1fr);
+    padding: 0 2px 2px;
   }
   .empty-corner,
   .week-number {
@@ -169,27 +165,18 @@ onUnmounted(() => window.removeEventListener('resize', onResize));
   }
   .calendar-weekday {
     font-size: 0.75rem;
-    padding: 5px 0;
-    border-radius: 6px;
+    letter-spacing: 0.04em;
     font-weight: 700;
   }
 }
 
 @media (max-width: 380px) {
   .calendar-grid {
-    grid-template-columns: repeat(7, 1fr);
     gap: 2px;
-    padding: 0 1px;
-  }
-  .empty-corner,
-  .week-number {
-    display: none;
+    padding: 0 1px 2px;
   }
   .calendar-weekday {
     font-size: 0.7rem;
-    border-radius: 5px;
-    padding: 4px 0;
-    font-weight: 700;
   }
 }
 </style>

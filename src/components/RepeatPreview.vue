@@ -118,9 +118,9 @@ const getWeekday = (date) => {
 <style scoped>
 .repeat-preview {
   background: var(--card-background);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--preview-border);
+  border-radius: 14px;
+  box-shadow: var(--shadow-lg);
   z-index: 1001;
   margin-top: 8px;
   max-height: 300px;
@@ -132,15 +132,15 @@ const getWeekday = (date) => {
   justify-content: space-between;
   align-items: center;
   padding: 12px 15px;
-  background: var(--background-color);
-  border-bottom: 1px solid var(--border-color);
-  border-radius: 8px 8px 0 0;
+  background: var(--preview-bg);
+  border-bottom: 1px solid var(--preview-border);
+  border-radius: 13px 13px 0 0;
 }
 
 .preview-header h4 {
   margin: 0;
   font-size: 14px;
-  color: var(--text-primary);
+  color: var(--preview-text);
 }
 
 .close-btn {

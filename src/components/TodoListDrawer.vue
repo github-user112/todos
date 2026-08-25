@@ -725,7 +725,7 @@ watch(
   bottom: 0;
   width: 340px;
   background: var(--card-background);
-  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-lg);
   border-left: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
@@ -749,13 +749,17 @@ watch(
 }
 .today-jump-btn {
   padding: 5px 12px;
-  border-radius: 8px;
+  border-radius: 999px;
+  border: none;
   font-size: 0.75rem;
   font-weight: 600;
-  color: white;
+  color: #fff;
   background: var(--button-primary-bg);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+}
+.today-jump-btn:hover {
+  background: var(--button-primary-hover-bg);
 }
 .today-jump-btn:active {
   background: var(--button-primary-hover-bg);
@@ -764,7 +768,8 @@ watch(
 .drawer-close {
   width: 32px;
   height: 32px;
-  border-radius: 8px;
+  border-radius: 10px;
+  border: none;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -794,8 +799,9 @@ watch(
 
 /* 每日宜忌卡片 - 固定区域，不随列表滚动 */
 .almanac-card {
-  background: linear-gradient(135deg, var(--primary-light, #e0e7ff), var(--card-background, #fff));
-  border-bottom: 1px solid var(--border-color, #e2e8f0);
+  background: var(--card-background);
+  border-bottom: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
   padding: 10px 14px;
   flex-shrink: 0;
 }
@@ -803,7 +809,7 @@ watch(
 .almanac-title {
   font-size: 0.82rem;
   font-weight: 700;
-  color: var(--text-primary, #0f172a);
+  color: var(--text-primary);
   margin-bottom: 8px;
   display: flex;
   align-items: center;
@@ -821,27 +827,27 @@ watch(
   flex-shrink: 0;
   width: 22px;
   height: 22px;
-  border-radius: 6px;
+  border-radius: 999px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 0.72rem;
   font-weight: 700;
-  color: white;
+  color: #fff;
   line-height: 1;
 }
 
 .almanac-yi-label {
-  background: var(--success-color, #10b981);
+  background: var(--success-color);
 }
 
 .almanac-ji-label {
-  background: var(--danger-color, #ef4444);
+  background: var(--danger-color);
 }
 
 .almanac-content {
   font-size: 0.78rem;
-  color: var(--text-primary, #0f172a);
+  color: var(--text-primary);
   line-height: 1.5;
   flex: 1;
   padding-top: 1px;
@@ -850,12 +856,12 @@ watch(
 .almanac-footer {
   margin-top: 8px;
   padding-top: 8px;
-  border-top: 1px dashed var(--border-color, #e2e8f0);
+  border-top: 1px dashed var(--border-color);
 }
 
 .almanac-lucky {
   font-size: 0.74rem;
-  color: var(--text-secondary, #64748b);
+  color: var(--text-secondary);
   font-weight: 500;
 }
 .load-zone {
@@ -883,7 +889,7 @@ watch(
   border-radius: 10px;
   background: var(--todo-item-bg);
   border-left: 3px solid var(--todo-item-border-left);
-  transition: background 0.15s;
+  transition: background 0.15s ease;
   cursor: default;
 }
 .todo-row:hover {
@@ -909,11 +915,11 @@ watch(
   font-size: 0.68rem;
   font-weight: 600;
   padding: 2px 6px;
-  border-radius: 6px;
+  border-radius: 999px;
   line-height: 1.3;
 }
 .todo-date-tag.past {
-  background: var(--calendar-day-holiday-rest-bg);
+  background: color-mix(in srgb, var(--danger-color) 12%, transparent);
   color: var(--danger-color);
 }
 .todo-date-tag.future {
@@ -946,13 +952,14 @@ watch(
   justify-content: center;
   width: 32px;
   height: 32px;
-  border-radius: 8px;
+  border-radius: 10px;
+  border: none;
   color: var(--text-secondary);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transition:
-    color 0.15s,
-    background 0.15s;
+    color 0.15s ease,
+    background 0.15s ease;
 }
 .row-action-btn:hover {
   background: var(--hover-color);

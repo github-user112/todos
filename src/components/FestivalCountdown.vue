@@ -102,12 +102,12 @@ onMounted(() => {
   align-items: center;
   gap: 4px;
   padding: 5px 10px;
-  border-radius: 9px;
-  background: linear-gradient(135deg, var(--primary-light, #e0e7ff), var(--card-background, #fff));
-  border: 1px solid var(--primary-color, #6366f1);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--primary-color) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--primary-color) 30%, transparent);
   font-size: 0.75rem;
   font-weight: 600;
-  color: var(--text-primary, #0f172a);
+  color: var(--text-secondary);
   cursor: pointer;
   white-space: nowrap;
   flex-shrink: 0;
@@ -117,14 +117,14 @@ onMounted(() => {
 }
 
 @keyframes chip-glow {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(99,102,241,0); }
-  50% { box-shadow: 0 0 8px 1px rgba(99,102,241,0.18); }
+  0%, 100% { box-shadow: 0 0 0 0 transparent; }
+  50% { box-shadow: 0 2px 10px -2px var(--form-input-focus-shadow); }
 }
 
 .festival-chip.is-today {
-  background: linear-gradient(135deg, rgba(244,63,94,0.12), rgba(244,63,94,0.04));
-  border-color: var(--danger-color, #ef4444);
-  color: var(--danger-color, #e11d48);
+  background: color-mix(in srgb, var(--danger-color) 10%, transparent);
+  border-color: color-mix(in srgb, var(--danger-color) 40%, transparent);
+  color: var(--danger-color);
 }
 
 .chip-emoji {
@@ -139,7 +139,7 @@ onMounted(() => {
 }
 
 .chip-text strong {
-  color: var(--danger-color, #e11d48);
+  color: var(--danger-color);
   font-size: 0.9rem;
   margin: 0 1px;
 }

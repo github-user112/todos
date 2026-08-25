@@ -71,7 +71,7 @@ defineProps({
   left: 0;
   width: 100%;
   height: 100%;
-  background: var(--loading-overlay-bg, rgba(248, 250, 252, 0.95));
+  background: var(--loading-overlay-bg);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -97,7 +97,7 @@ defineProps({
   align-items: center;
 }
 
-/* 外围旋转光环 */
+/* 外围旋转光环 —— 双色雅致方案，全部取自主题令牌 */
 .calendar-ring {
   position: absolute;
   border-radius: 50%;
@@ -108,28 +108,28 @@ defineProps({
 .ring-1 {
   width: 120px;
   height: 120px;
-  border-top-color: var(--primary-color, #6366f1);
-  border-right-color: var(--primary-color, #6366f1);
-  opacity: 0.3;
+  border-top-color: var(--loading-spinner-border-top);
+  border-right-color: var(--loading-spinner-border-top);
+  opacity: 0.35;
 }
 
 .ring-2 {
   width: 100px;
   height: 100px;
-  border-top-color: var(--primary-light, #e0e7ff);
-  border-bottom-color: var(--primary-light, #e0e7ff);
+  border-top-color: var(--loading-spinner-border);
+  border-bottom-color: var(--loading-spinner-border);
   animation-direction: reverse;
   animation-duration: 2s;
-  opacity: 0.5;
+  opacity: 0.6;
 }
 
 .ring-3 {
   width: 80px;
   height: 80px;
-  border-left-color: var(--primary-dark, #4338ca);
-  border-bottom-color: var(--primary-dark, #4338ca);
+  border-left-color: var(--primary-dark);
+  border-bottom-color: var(--primary-dark);
   animation-duration: 1.5s;
-  opacity: 0.7;
+  opacity: 0.75;
 }
 
 @keyframes ring-spin {
@@ -145,26 +145,26 @@ defineProps({
   display: flex;
   justify-content: center;
   align-items: center;
-  background: var(--card-background, #ffffff);
-  border-radius: 14px;
-  box-shadow: 
-    0 4px 20px rgba(99, 102, 241, 0.15),
-    0 0 0 1px var(--border-color, #e2e8f0);
+  background: var(--card-background);
+  border-radius: 16px;
+  box-shadow:
+    0 8px 24px -8px var(--form-input-focus-shadow),
+    inset 0 0 0 1px var(--border-color);
   animation: core-pulse 2s ease-in-out infinite;
 }
 
 @keyframes core-pulse {
-  0%, 100% { 
+  0%, 100% {
     transform: scale(1);
-    box-shadow: 
-      0 4px 20px rgba(99, 102, 241, 0.15),
-      0 0 0 1px var(--border-color, #e2e8f0);
+    box-shadow:
+      0 8px 24px -8px var(--form-input-focus-shadow),
+      inset 0 0 0 1px var(--border-color);
   }
-  50% { 
+  50% {
     transform: scale(1.05);
-    box-shadow: 
-      0 8px 30px rgba(99, 102, 241, 0.25),
-      0 0 0 2px var(--primary-color, #6366f1);
+    box-shadow:
+      0 12px 32px -8px var(--form-input-focus-shadow),
+      inset 0 0 0 1px var(--primary-color);
   }
 }
 
@@ -172,7 +172,7 @@ defineProps({
 .calendar-icon {
   width: 32px;
   height: 32px;
-  color: var(--primary-color, #6366f1);
+  color: var(--primary-color);
 }
 
 .calendar-icon svg {
@@ -193,9 +193,9 @@ defineProps({
   position: absolute;
   width: 24px;
   height: 24px;
-  background: var(--primary-color, #6366f1);
-  color: white;
-  border-radius: 6px;
+  background: var(--primary-color);
+  color: #fff;
+  border-radius: 7px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -204,7 +204,7 @@ defineProps({
   animation: page-flip 1.5s ease-in-out infinite;
   backface-visibility: hidden;
   opacity: 0;
-  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
+  box-shadow: 0 4px 10px -3px var(--form-input-focus-shadow);
 }
 
 .page-1 { animation-delay: 0s; }
@@ -212,20 +212,20 @@ defineProps({
 .page-3 { animation-delay: 1s; }
 
 @keyframes page-flip {
-  0% { 
-    opacity: 0; 
+  0% {
+    opacity: 0;
     transform: rotateX(-90deg) scale(0.8);
   }
-  20% { 
-    opacity: 1; 
+  20% {
+    opacity: 1;
     transform: rotateX(0deg) scale(1);
   }
-  80% { 
-    opacity: 1; 
+  80% {
+    opacity: 1;
     transform: rotateX(0deg) scale(1);
   }
-  100% { 
-    opacity: 0; 
+  100% {
+    opacity: 0;
     transform: rotateX(90deg) scale(0.8);
   }
 }
@@ -237,16 +237,16 @@ defineProps({
   gap: 2px;
   font-size: 15px;
   font-weight: 500;
-  color: var(--loading-text, #0f172a);
+  color: var(--loading-text);
   letter-spacing: 0.5px;
 }
 
 .loading-text {
   background: linear-gradient(
     90deg,
-    var(--text-primary, #0f172a) 0%,
-    var(--primary-color, #6366f1) 50%,
-    var(--text-primary, #0f172a) 100%
+    var(--text-primary) 0%,
+    var(--primary-color) 50%,
+    var(--text-primary) 100%
   );
   background-size: 200% 100%;
   -webkit-background-clip: text;
@@ -267,7 +267,7 @@ defineProps({
 .dot {
   animation: dot-bounce 1.4s ease-in-out infinite;
   opacity: 0;
-  color: var(--primary-color, #6366f1);
+  color: var(--primary-color);
 }
 
 .dot:nth-child(1) { animation-delay: 0s; }
@@ -275,11 +275,11 @@ defineProps({
 .dot:nth-child(3) { animation-delay: 0.4s; }
 
 @keyframes dot-bounce {
-  0%, 80%, 100% { 
+  0%, 80%, 100% {
     opacity: 0;
     transform: translateY(0);
   }
-  40% { 
+  40% {
     opacity: 1;
     transform: translateY(-4px);
   }
@@ -291,58 +291,24 @@ defineProps({
     width: 100px;
     height: 100px;
   }
-  
+
   .ring-1 { width: 100px; height: 100px; }
   .ring-2 { width: 84px; height: 84px; }
   .ring-3 { width: 68px; height: 68px; }
-  
+
   .calendar-core {
     width: 48px;
     height: 48px;
-    border-radius: 12px;
+    border-radius: 13px;
   }
-  
+
   .calendar-icon {
     width: 26px;
     height: 26px;
   }
-  
+
   .loading-text-wrapper {
     font-size: 14px;
-  }
-}
-
-/* ============ 深色模式适配 ============ */
-:root.dark-mode .loading-overlay,
-.dark-mode .loading-overlay {
-  background: var(--loading-overlay-bg, rgba(15, 23, 42, 0.95));
-}
-
-:root.dark-mode .calendar-core,
-.dark-mode .calendar-core {
-  background: var(--card-background, #1e293b);
-  box-shadow: 
-    0 4px 20px rgba(99, 102, 241, 0.2),
-    0 0 0 1px var(--border-color, #334155);
-}
-
-:root.dark-mode .calendar-core,
-.dark-mode .calendar-core {
-  animation-name: core-pulse-dark;
-}
-
-@keyframes core-pulse-dark {
-  0%, 100% { 
-    transform: scale(1);
-    box-shadow: 
-      0 4px 20px rgba(99, 102, 241, 0.2),
-      0 0 0 1px var(--border-color, #334155);
-  }
-  50% { 
-    transform: scale(1.05);
-    box-shadow: 
-      0 8px 30px rgba(99, 102, 241, 0.35),
-      0 0 0 2px var(--primary-color, #6366f1);
   }
 }
 </style>
