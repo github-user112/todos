@@ -415,6 +415,7 @@ const applyTheme = (theme) => {
     'glass-theme',
     'ios-glass-theme',
     'liquid-glass-theme',
+    'ios26-glass-theme',
     'dark-mode',
   );
 
@@ -431,6 +432,9 @@ const applyTheme = (theme) => {
     glass: 'glass-theme',
     'ios-glass': 'ios-glass-theme',
     'liquid-glass': 'liquid-glass-theme',
+    'ios26-glass': 'ios26-glass-theme',
+    // 深色变体 = 玻璃主题类 + dark-mode（naive-ui 弹层随之切深色基底）
+    'ios26-glass-dark': 'ios26-glass-theme dark-mode',
     dark: 'dark-mode',
   };
 
@@ -438,7 +442,8 @@ const applyTheme = (theme) => {
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     if (prefersDark) root.classList.add('dark-mode');
   } else if (map[theme]) {
-    root.classList.add(map[theme]);
+    // 值可能携带空格分隔的多个类（如 ios26-glass-dark）
+    map[theme].split(/\s+/).forEach((cls) => cls && root.classList.add(cls));
   }
 };
 

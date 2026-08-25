@@ -80,15 +80,20 @@ describe('颜色工具', () => {
 
 /* ---------------- 主题清单 ---------------- */
 describe('主题清单', () => {
-  it('共 13 套主题且 id 唯一', () => {
-    assert.equal(THEMES.length, 13);
-    assert.equal(new Set(THEMES.map((t) => t.id)).size, 13);
+  it('共 15 套主题且 id 唯一', () => {
+    assert.equal(THEMES.length, 15);
+    assert.equal(new Set(THEMES.map((t) => t.id)).size, 15);
   });
 
-  it('包含默认主题、深色模式与三套玻璃主题', () => {
+  it('包含默认主题、深色模式与四套玻璃主题（液态玻璃 26 含浅色/深色两个配方块）', () => {
     assert.ok(THEMES.some((t) => t.cls === null), '缺少 :root 默认主题');
     assert.ok(darkTheme, '缺少 dark-mode');
-    assert.equal(glassThemes.length, 3, '应有三套玻璃主题');
+    assert.equal(glassThemes.length, 5, '应有四套玻璃主题（液态玻璃 26 占浅色+深色两块）');
+    assert.ok(
+      THEMES.some((t) => t.id === 'ios26-glass-theme') &&
+        THEMES.some((t) => t.id === 'ios26-glass-theme-dark'),
+      '缺少液态玻璃 26 的浅色/深色配方',
+    );
   });
 });
 
@@ -185,6 +190,41 @@ describe('玻璃主题配方', () => {
       const vars = t.build();
       assert.equal(vars['glass-day-backdrop'], 'none', `${t.id} 应显式关闭 day backdrop`);
     }
+  });
+});
+
+/* ---------------- 液态玻璃 26 · 深色配方 ---------------- */
+/** 把 rgba 前景叠到不透明背景上，返回合成后的 hex（用于玻璃面可读性检查） */
+function composite(fgRgba, bgHex) {
+  const m = fgRgba.match(/rgba\((\d+), (\d+), (\d+), ([\d.]+)\)/);
+  assert.ok(m, `非法 rgba 字符串: ${fgRgba}`);
+  const [, r, g, b, a] = m;
+  const bg = hexToRgb(bgHex);
+  const t = parseFloat(a);
+  return rgbToHex([r, g, b].map((c, i) => c * t + bg[i] * (1 - t)));
+}
+
+describe('液态玻璃 26 深色配方', () => {
+  const darkGlass = THEMES.find((t) => t.id === 'ios26-glass-theme-dark');
+  const vars = darkGlass.build();
+
+  it('正文文字对深色壁纸上的玻璃卡片底对比度 ≥ 7:1', () => {
+    // 卡片是低透明度白雾，先叠到近似壁纸中调再算对比度
+    const cardOnWallpaper = composite(vars['card-background'], '#141a2e');
+    assert.ok(
+      contrast(vars['text-primary'], cardOnWallpaper) >= 7,
+      `实际 ${contrast(vars['text-primary'], cardOnWallpaper).toFixed(2)}:1（合成底 ${cardOnWallpaper}）`,
+    );
+  });
+
+  it('primary-dark 在暗底上是更亮的强调变体（而非更暗）', () => {
+    assert.ok(luminance(vars['primary-dark']) > luminance(vars['primary-color']));
+  });
+
+  it('浅色/深色共用同一强调色，跨模式品牌一致', () => {
+    const light = THEMES.find((t) => t.id === 'ios26-glass-theme').build();
+    assert.equal(light['primary-color'], vars['primary-color']);
+    assert.notEqual(vars['text-primary'], light['text-primary'], '深色配方必须换浅色文字');
   });
 });
 

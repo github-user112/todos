@@ -1271,3 +1271,197 @@
   --shadow-xl: 0 8px 16px -4px rgba(23, 28, 45, 0.07), 0 28px 64px -12px rgba(23, 28, 45, 0.2);
 }
 
+/* ==============================
+   液态玻璃 26 · 浅色 Liquid Glass 26 Light
+   ============================== */
+.ios26-glass-theme {
+  /* ---- 主色 ---- */
+  --primary-color: #5856d6;
+  --primary-dark: #4643cf;
+  --primary-light: rgba(88, 86, 214, 0.14);
+
+  /* ---- 语义色（跨主题恒定） ---- */
+  --success-color: #16a34a;
+  --danger-color: #dc2626;
+  --warning-color: #d97706;
+  --info-color: #2563eb;
+
+  /* ---- 表面 · 文字 · 边框 ---- */
+  --background-color: rgba(255, 255, 255, 0.06);
+  --card-background: rgba(255, 255, 255, 0.56);
+  --text-primary: #1d2433;
+  --text-secondary: #5d6a84;
+  --border-color: rgba(255, 255, 255, 0.6);
+  --hover-color: rgba(255, 255, 255, 0.42);
+
+  /* ---- 月份区分 ---- */
+  --current-month-bg: rgba(255, 255, 255, 0.55);
+  --current-month-border: rgba(255, 255, 255, 0.68);
+  --other-month-bg: transparent;
+  --other-month-border: transparent;
+  --other-month-text: rgba(29, 36, 51, 0.34);
+  --calendar-day-other-month-opacity: 0.45;
+
+  /* ---- 按钮 ---- */
+  --button-primary-bg: #5856d6;
+  --button-primary-hover-bg: #4643cf;
+  --button-secondary-bg: rgba(255, 255, 255, 0.5);
+  --button-secondary-hover-bg: rgba(255, 255, 255, 0.66);
+  --button-success-bg: #16a34a;
+  --button-success-hover-bg: #15803d;
+  --button-danger-bg: #dc2626;
+  --button-danger-hover-bg: #b91c1c;
+
+  /* ---- 日历格子 ---- */
+  --calendar-day-bg: rgba(255, 255, 255, 0.52);
+  --calendar-day-border: rgba(255, 255, 255, 0.6);
+  --calendar-day-hover-bg: rgba(255, 255, 255, 0.68);
+  --calendar-day-current-bg: rgba(88, 86, 214, 0.13);
+  --calendar-day-current-border: rgba(88, 86, 214, 0.75);
+  --calendar-day-weekend-bg: transparent;
+  --calendar-day-weekend-border: transparent;
+  --calendar-day-holiday-rest-bg: rgba(220, 38, 38, 0.08);
+  --calendar-day-holiday-rest-border: rgba(220, 38, 38, 0.3);
+  --calendar-day-holiday-work-bg: rgba(217, 119, 6, 0.1);
+  --calendar-day-holiday-work-border: rgba(217, 119, 6, 0.34);
+
+  /* ---- 待办事项 ---- */
+  --todo-item-bg: rgba(255, 255, 255, 0.48);
+  --todo-item-border-left: rgba(88, 86, 214, 0.85);
+  --todo-item-hover-bg: rgba(255, 255, 255, 0.64);
+  --todo-item-completed-bg: rgba(22, 163, 74, 0.1);
+  --todo-item-completed-border-left: #16a34a;
+  --todo-item-completed-text: rgba(29, 36, 51, 0.45);
+
+  /* ---- 重复预览 ---- */
+  --preview-bg: rgba(88, 86, 214, 0.1);
+  --preview-border: rgba(88, 86, 214, 0.28);
+  --preview-text: #4643cf;
+  --preview-hover-bg: rgba(88, 86, 214, 0.18);
+  --preview-hover-border: #b9b8ee;
+
+  /* ---- 节日徽章 ---- */
+  --badge-rest-bg: #dc2626;
+  --badge-rest-text: #ffffff;
+  --badge-work-bg: #d97706;
+  --badge-work-text: #ffffff;
+
+  /* ---- 加载 ---- */
+  --loading-overlay-bg: rgba(240, 245, 252, 0.6);
+  --loading-spinner-border: #caccec;
+  --loading-spinner-border-top: #5856d6;
+  --loading-text: #1d2433;
+
+  /* ---- 表单 ---- */
+  --form-input-border: #c2c5e9;
+  --form-input-focus-border: #5856d6;
+  --form-input-focus-shadow: rgba(88, 86, 214, 0.16);
+
+  /* ---- 玻璃专属 ---- */
+  --glass-day-backdrop: blur(28px) saturate(190%);
+  --glass-grid-backdrop: none;
+
+  /* ---- 阴影 ---- */
+  --shadow-sm: 0 1px 2px rgba(23, 28, 45, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  --shadow-md: 0 2px 6px -1px rgba(23, 28, 45, 0.06), 0 8px 24px -6px rgba(23, 28, 45, 0.1);
+  --shadow-lg: 0 4px 8px -2px rgba(23, 28, 45, 0.05), 0 16px 40px -10px rgba(23, 28, 45, 0.14);
+  --shadow-xl: 0 8px 16px -4px rgba(23, 28, 45, 0.07), 0 28px 64px -12px rgba(23, 28, 45, 0.2);
+}
+
+/* ==============================
+   液态玻璃 26 · 深色 Liquid Glass 26 Dark
+   ============================== */
+.ios26-glass-theme.dark-mode {
+  /* ---- 主色 ---- */
+  --primary-color: #5856d6;
+  --primary-dark: #c5c4f1;
+  --primary-light: rgba(88, 86, 214, 0.22);
+
+  /* ---- 语义色（跨主题恒定） ---- */
+  --success-color: #16a34a;
+  --danger-color: #dc2626;
+  --warning-color: #d97706;
+  --info-color: #2563eb;
+
+  /* ---- 表面 · 文字 · 边框 ---- */
+  --background-color: rgba(10, 14, 30, 0.32);
+  --card-background: rgba(255, 255, 255, 0.08);
+  --text-primary: #eef1fb;
+  --text-secondary: rgba(233, 237, 250, 0.68);
+  --border-color: rgba(255, 255, 255, 0.14);
+  --hover-color: rgba(255, 255, 255, 0.1);
+
+  /* ---- 月份区分 ---- */
+  --current-month-bg: rgba(255, 255, 255, 0.05);
+  --current-month-border: rgba(255, 255, 255, 0.14);
+  --other-month-bg: transparent;
+  --other-month-border: transparent;
+  --other-month-text: rgba(233, 237, 250, 0.35);
+  --calendar-day-other-month-opacity: 0.4;
+
+  /* ---- 按钮 ---- */
+  --button-primary-bg: #5856d6;
+  --button-primary-hover-bg: #e1e1f8;
+  --button-secondary-bg: rgba(255, 255, 255, 0.1);
+  --button-secondary-hover-bg: rgba(255, 255, 255, 0.18);
+  --button-success-bg: #16a34a;
+  --button-success-hover-bg: #15803d;
+  --button-danger-bg: #dc2626;
+  --button-danger-hover-bg: #b91c1c;
+
+  /* ---- 日历格子 ---- */
+  --calendar-day-bg: rgba(255, 255, 255, 0.07);
+  --calendar-day-border: rgba(255, 255, 255, 0.12);
+  --calendar-day-hover-bg: rgba(255, 255, 255, 0.14);
+  --calendar-day-current-bg: rgba(88, 86, 214, 0.26);
+  --calendar-day-current-border: rgba(88, 86, 214, 0.9);
+  --calendar-day-weekend-bg: transparent;
+  --calendar-day-weekend-border: transparent;
+  --calendar-day-holiday-rest-bg: rgba(248, 113, 113, 0.14);
+  --calendar-day-holiday-rest-border: rgba(248, 113, 113, 0.38);
+  --calendar-day-holiday-work-bg: rgba(251, 191, 36, 0.14);
+  --calendar-day-holiday-work-border: rgba(251, 191, 36, 0.4);
+
+  /* ---- 待办事项 ---- */
+  --todo-item-bg: rgba(255, 255, 255, 0.08);
+  --todo-item-border-left: rgba(88, 86, 214, 0.95);
+  --todo-item-hover-bg: rgba(255, 255, 255, 0.15);
+  --todo-item-completed-bg: rgba(22, 163, 74, 0.14);
+  --todo-item-completed-border-left: #4ade80;
+  --todo-item-completed-text: rgba(238, 241, 251, 0.5);
+
+  /* ---- 重复预览 ---- */
+  --preview-bg: rgba(88, 86, 214, 0.2);
+  --preview-border: rgba(88, 86, 214, 0.42);
+  --preview-text: #b4b3ed;
+  --preview-hover-bg: rgba(88, 86, 214, 0.3);
+  --preview-hover-border: rgba(88, 86, 214, 0.6);
+
+  /* ---- 节日徽章 ---- */
+  --badge-rest-bg: #dc2626;
+  --badge-rest-text: #ffffff;
+  --badge-work-bg: #d97706;
+  --badge-work-text: #ffffff;
+
+  /* ---- 加载 ---- */
+  --loading-overlay-bg: rgba(8, 11, 24, 0.72);
+  --loading-spinner-border: rgba(255, 255, 255, 0.18);
+  --loading-spinner-border-top: #d5d5f5;
+  --loading-text: #eef1fb;
+
+  /* ---- 表单 ---- */
+  --form-input-border: rgba(255, 255, 255, 0.22);
+  --form-input-focus-border: #5856d6;
+  --form-input-focus-shadow: rgba(88, 86, 214, 0.35);
+
+  /* ---- 玻璃专属 ---- */
+  --glass-day-backdrop: blur(28px) saturate(190%);
+  --glass-grid-backdrop: none;
+
+  /* ---- 阴影 ---- */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  --shadow-md: 0 2px 6px -1px rgba(0, 0, 0, 0.4), 0 8px 24px -6px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 4px 8px -2px rgba(0, 0, 0, 0.4), 0 16px 40px -10px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 8px 16px -4px rgba(0, 0, 0, 0.45), 0 28px 64px -12px rgba(0, 0, 0, 0.6);
+}
+

@@ -420,6 +420,8 @@ const themeOptions = [
   { value: 'glass', label: '🪟 液态玻璃' },
   { value: 'ios-glass', label: '🍎 iOS 玻璃' },
   { value: 'liquid-glass', label: '💧 流动玻璃' },
+  { value: 'ios26-glass', label: '🫧 液态玻璃 26' },
+  { value: 'ios26-glass-dark', label: '🌑 液态玻璃 26 · 深色' },
   { value: 'auto', label: '🔄 跟随系统' },
 ];
 

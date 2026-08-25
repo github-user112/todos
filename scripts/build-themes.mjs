@@ -238,6 +238,95 @@ function buildDark({ accent }) {
   };
 }
 
+/* ---------------- 深色玻璃配方（液态玻璃 26 · 深色专用） ----------------
+ * 与 buildGlass 同构，但表面换成深烟玻璃：暗底壁纸上的低透明度白雾 +
+ * 白色发丝线。语义色保持恒定基色，文字换浅色系保证对比度。
+ */
+function buildGlassDark({ accent, accentStrong }) {
+  const ink = '#eef1fb';
+  return {
+    /* 主色 */
+    'primary-color': accent,
+    'primary-dark': mix(accent, NEUTRAL.white, 0.35),
+    'primary-light': alpha(accent, 0.22),
+    /* 语义色（恒定） */
+    'success-color': SEMANTIC.success,
+    'info-color': SEMANTIC.info,
+    'warning-color': SEMANTIC.warning,
+    'danger-color': SEMANTIC.danger,
+    /* 表面与文字：暗色磨砂面，卡片为低透明度白雾（烟熏玻璃） */
+    'background-color': 'rgba(10, 14, 30, 0.32)',
+    'card-background': 'rgba(255, 255, 255, 0.08)',
+    'text-primary': ink,
+    'text-secondary': 'rgba(233, 237, 250, 0.68)',
+    'border-color': 'rgba(255, 255, 255, 0.14)',
+    'hover-color': 'rgba(255, 255, 255, 0.1)',
+    /* 其他月份 */
+    'other-month-bg': 'transparent',
+    'other-month-border': 'transparent',
+    'other-month-text': 'rgba(233, 237, 250, 0.35)',
+    'current-month-bg': 'rgba(255, 255, 255, 0.05)',
+    'current-month-border': 'rgba(255, 255, 255, 0.14)',
+    /* 按钮 */
+    'button-primary-bg': accent,
+    'button-primary-hover-bg': mix(accent, NEUTRAL.white, 0.18),
+    'button-secondary-bg': 'rgba(255, 255, 255, 0.1)',
+    'button-secondary-hover-bg': 'rgba(255, 255, 255, 0.18)',
+    'button-success-bg': SEMANTIC.success,
+    'button-success-hover-bg': '#15803d',
+    'button-danger-bg': SEMANTIC.danger,
+    'button-danger-hover-bg': '#b91c1c',
+    /* 日历格子 */
+    'calendar-day-bg': 'rgba(255, 255, 255, 0.07)',
+    'calendar-day-border': 'rgba(255, 255, 255, 0.12)',
+    'calendar-day-hover-bg': 'rgba(255, 255, 255, 0.14)',
+    'calendar-day-current-bg': alpha(accent, 0.26),
+    'calendar-day-current-border': alpha(accent, 0.9),
+    'calendar-day-other-month-opacity': '0.4',
+    'calendar-day-weekend-bg': 'transparent',
+    'calendar-day-weekend-border': 'transparent',
+    'calendar-day-holiday-rest-bg': alpha('#f87171', 0.14),
+    'calendar-day-holiday-rest-border': alpha('#f87171', 0.38),
+    'calendar-day-holiday-work-bg': alpha('#fbbf24', 0.14),
+    'calendar-day-holiday-work-border': alpha('#fbbf24', 0.4),
+    /* 待办事项 */
+    'todo-item-bg': 'rgba(255, 255, 255, 0.08)',
+    'todo-item-border-left': alpha(accent, 0.95),
+    'todo-item-hover-bg': 'rgba(255, 255, 255, 0.15)',
+    'todo-item-completed-bg': alpha(SEMANTIC.success, 0.14),
+    'todo-item-completed-border-left': '#4ade80',
+    'todo-item-completed-text': 'rgba(238, 241, 251, 0.5)',
+    /* 重复预览 */
+    'preview-bg': alpha(accent, 0.2),
+    'preview-border': alpha(accent, 0.42),
+    'preview-text': mix(accent, NEUTRAL.white, 0.45),
+    'preview-hover-bg': alpha(accent, 0.3),
+    'preview-hover-border': alpha(accent, 0.6),
+    /* 节日徽章 */
+    'badge-rest-bg': SEMANTIC.danger,
+    'badge-rest-text': NEUTRAL.white,
+    'badge-work-bg': SEMANTIC.warning,
+    'badge-work-text': NEUTRAL.white,
+    /* 加载 */
+    'loading-overlay-bg': 'rgba(8, 11, 24, 0.72)',
+    'loading-spinner-border': 'rgba(255, 255, 255, 0.18)',
+    'loading-spinner-border-top': mix(accent, NEUTRAL.white, 0.25),
+    'loading-text': ink,
+    /* 表单 */
+    'form-input-border': 'rgba(255, 255, 255, 0.22)',
+    'form-input-focus-border': accent,
+    'form-input-focus-shadow': alpha(accent, 0.35),
+    /* 玻璃专属 */
+    'glass-day-backdrop': 'blur(28px) saturate(190%)',
+    'glass-grid-backdrop': 'none',
+    /* 阴影：深色玻璃更重一些，顶部高光改为弱白 */
+    'shadow-sm': '0 1px 2px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+    'shadow-md': '0 2px 6px -1px rgba(0, 0, 0, 0.4), 0 8px 24px -6px rgba(0, 0, 0, 0.45)',
+    'shadow-lg': '0 4px 8px -2px rgba(0, 0, 0, 0.4), 0 16px 40px -10px rgba(0, 0, 0, 0.5)',
+    'shadow-xl': '0 8px 16px -4px rgba(0, 0, 0, 0.45), 0 28px 64px -12px rgba(0, 0, 0, 0.6)',
+  };
+}
+
 /* ---------------- 玻璃主题配方（三套共用结构） ---------------- */
 function buildGlass({ accent, accentStrong }) {
   return {
@@ -279,6 +368,28 @@ function buildGlass({ accent, accentStrong }) {
   };
 }
 
+/* ---------------- 液态玻璃 26（iOS 26 风格 · 浅色） ---------------- */
+function buildIos26Glass({ accent, accentStrong }) {
+  return {
+    ...buildGlass({ accent, accentStrong }),
+    /* 表面比 v3 三套玻璃更通透，层次交给顶部镜面高光与多层落影 */
+    'background-color': 'rgba(255, 255, 255, 0.06)',
+    'card-background': 'rgba(255, 255, 255, 0.56)',
+    'border-color': 'rgba(255, 255, 255, 0.6)',
+    'hover-color': 'rgba(255, 255, 255, 0.42)',
+    'current-month-bg': 'rgba(255, 255, 255, 0.55)',
+    'current-month-border': 'rgba(255, 255, 255, 0.68)',
+    'button-secondary-bg': 'rgba(255, 255, 255, 0.5)',
+    'button-secondary-hover-bg': 'rgba(255, 255, 255, 0.66)',
+    'calendar-day-bg': 'rgba(255, 255, 255, 0.52)',
+    'calendar-day-border': 'rgba(255, 255, 255, 0.6)',
+    'calendar-day-hover-bg': 'rgba(255, 255, 255, 0.68)',
+    'todo-item-bg': 'rgba(255, 255, 255, 0.48)',
+    'todo-item-hover-bg': 'rgba(255, 255, 255, 0.64)',
+    'loading-overlay-bg': 'rgba(240, 245, 252, 0.6)',
+  };
+}
+
 /* ---------------- 主题清单 ---------------- */
 const THEMES = [
   { id: '',                     cls: null,               comment: '默认 · 极光紫 Aurora Violet', build: () => buildLight({ accent: '#6e56cf', accentStrong: '#5b41bd' }) },
@@ -294,6 +405,8 @@ const THEMES = [
   { id: 'glass-theme',          cls: '.glass-theme',     comment: '液态玻璃 Liquid Glass',      build: () => buildGlass({ accent: '#7c3aed', accentStrong: '#6d28d9' }) },
   { id: 'ios-glass-theme',      cls: '.ios-glass-theme', comment: 'iOS 玻璃 iOS Glass',         build: () => buildGlass({ accent: '#0071e3', accentStrong: '#0051d5' }) },
   { id: 'liquid-glass-theme',   cls: '.liquid-glass-theme', comment: '流动玻璃 Flowing Glass',  build: () => buildGlass({ accent: '#9333ea', accentStrong: '#7e22ce' }) },
+  { id: 'ios26-glass-theme',      cls: '.ios26-glass-theme',        comment: '液态玻璃 26 · 浅色 Liquid Glass 26 Light', build: () => buildIos26Glass({ accent: '#5856d6', accentStrong: '#4643cf' }) },
+  { id: 'ios26-glass-theme-dark', cls: '.ios26-glass-theme.dark-mode', comment: '液态玻璃 26 · 深色 Liquid Glass 26 Dark', build: () => buildGlassDark({ accent: '#5856d6', accentStrong: '#4643cf' }) },
 ];
 
 /* ---------------- 序列化 ---------------- */
@@ -343,6 +456,8 @@ export {
   buildLight,
   buildDark,
   buildGlass,
+  buildGlassDark,
+  buildIos26Glass,
   THEMES,
   GROUPS,
   serialize,
