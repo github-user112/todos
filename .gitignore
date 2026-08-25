@@ -8,3 +8,4 @@ dist/
 node_modules
 /.trae
 /package-lock.json
+dist-shots/

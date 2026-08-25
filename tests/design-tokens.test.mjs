@@ -236,8 +236,8 @@ describe('生成产物回归（src/assets/theme.css）', () => {
     const runtimeVars = new Set([
       'week-count', 'dx', 'dy', 'rot', 'scale', 'direction',
       'dynamic-bg', 'dynamic-overlay', 'i',
-      // 玻璃主题的舞台配色，仅定义在 html.<glass> 选择器上（theme-glass.css）
-      'orb-rgb-1', 'orb-rgb-2', 'orb-rgb-3', 'stage',
+      // 玻璃主题的壁纸舞台配色，仅定义在 html.<glass> 选择器上（theme-glass.css）
+      'orb-rgb-1', 'orb-rgb-2', 'orb-rgb-3', 'stage-a', 'stage-b',
     ]);
 
     const rootBlock = onDisk.slice(onDisk.indexOf(':root {'), onDisk.indexOf('}', onDisk.indexOf(':root {')));

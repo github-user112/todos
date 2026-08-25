@@ -996,7 +996,7 @@
   --info-color: #2563eb;
 
   /* ---- 表面 · 文字 · 边框 ---- */
-  --background-color: rgba(255, 255, 255, 0.28);
+  --background-color: rgba(255, 255, 255, 0.1);
   --card-background: rgba(255, 255, 255, 0.62);
   --text-primary: #1d2433;
   --text-secondary: #5d6a84;
@@ -1093,7 +1093,7 @@
   --info-color: #2563eb;
 
   /* ---- 表面 · 文字 · 边框 ---- */
-  --background-color: rgba(255, 255, 255, 0.28);
+  --background-color: rgba(255, 255, 255, 0.1);
   --card-background: rgba(255, 255, 255, 0.62);
   --text-primary: #1d2433;
   --text-secondary: #5d6a84;
@@ -1190,7 +1190,7 @@
   --info-color: #2563eb;
 
   /* ---- 表面 · 文字 · 边框 ---- */
-  --background-color: rgba(255, 255, 255, 0.28);
+  --background-color: rgba(255, 255, 255, 0.1);
   --card-background: rgba(255, 255, 255, 0.62);
   --text-primary: #1d2433;
   --text-secondary: #5d6a84;

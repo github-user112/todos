@@ -242,8 +242,8 @@ function buildDark({ accent }) {
 function buildGlass({ accent, accentStrong }) {
   return {
     ...buildLight({ accent, accentStrong }),
-    /* 表面改为半透明玻璃面 */
-    'background-color': 'rgba(255, 255, 255, 0.28)',
+    /* 表面改为半透明玻璃面（容器白雾要薄，让壁纸色透出来） */
+    'background-color': 'rgba(255, 255, 255, 0.1)',
     'card-background': 'rgba(255, 255, 255, 0.62)',
     'border-color': 'rgba(255, 255, 255, 0.66)',
     'hover-color': 'rgba(255, 255, 255, 0.46)',
