@@ -1,82 +1,110 @@
 /* ============================================================
-   玻璃拟态主题 · 统一表面处理
+   玻璃拟态主题 · Liquid Glass v2「极光玻璃」
    ------------------------------------------------------------
-   三套玻璃主题（liquid-glass / ios-glass / liquid-glass）共用
-   同一套玻璃配方，只保留各自的强调色与动态背景差异；
-   所有颜色均取自 theme.css 设计令牌，保证与整体协调。
+   设计思路：玻璃的惊艳来自「有物可透」——
+   1. 舞台：深色饱和极光底 + 双层反向漂移光球 + 胶片颗粒，
+      让磨砂玻璃后面始终有流动的色彩；
+   2. 玻璃面：对角渐变白雾 + 顶部高光线 + 底部沉影，模拟真实折射；
+   3. 微交互：悬停时虹彩描边亮起、一道流光扫过格面；
+   4. 今天：强调色圆片外叠加呼吸光环（尊重减弱动效偏好）。
+   三套玻璃主题只差舞台配色（--stage / --orb*），配方完全共享。
    ============================================================ */
 
-/* ---- 玻璃主题的页面底色（动态渐变） ---- */
+/* ---- 各主题舞台配色 ---- */
 html.glass-theme {
-  background: #f3f0fb;
+  --stage: #151031;
+  --orb-rgb-1: 139, 92, 246;  /* 紫 */
+  --orb-rgb-2: 217, 70, 239;  /* 品红 */
+  --orb-rgb-3: 34, 211, 238;  /* 青 */
 }
-html.glass-theme body {
-  background: linear-gradient(135deg, #f5f0fc, #eef2fd, #fdf1f7, #f5f0fc);
-  background-size: 300% 300%;
-  animation: glass-bg-shift 14s ease infinite;
-}
-
 html.ios-glass-theme {
-  background: #f2f4fa;
+  --stage: #0c1631;
+  --orb-rgb-1: 56, 189, 248;  /* 湖蓝 */
+  --orb-rgb-2: 45, 212, 191;  /* 薄荷 */
+  --orb-rgb-3: 244, 114, 182; /* 海棠粉 */
 }
-html.ios-glass-theme body {
-  background:
-    radial-gradient(ellipse at 18% 22%, rgba(255, 182, 210, 0.26) 0%, transparent 52%),
-    radial-gradient(ellipse at 82% 28%, rgba(170, 215, 250, 0.28) 0%, transparent 52%),
-    radial-gradient(ellipse at 62% 82%, rgba(205, 185, 245, 0.24) 0%, transparent 52%),
-    linear-gradient(135deg, #f7f8fe 0%, #f2f6ff 50%, #faf4fe 100%);
+html.liquid-glass-theme {
+  --stage: #201136;
+  --orb-rgb-1: 232, 121, 249; /* 兰紫 */
+  --orb-rgb-2: 96, 165, 250;  /* 天蓝 */
+  --orb-rgb-3: 251, 146, 60;  /* 暖橙 */
 }
 
-html.liquid-glass-theme {
-  background: #f4f0fb;
-}
+/* ---- 静态极光底：高饱和光斑直接烙进背景 ---- */
+html.glass-theme body,
+html.ios-glass-theme body,
 html.liquid-glass-theme body {
   background:
-    radial-gradient(ellipse at 12% 12%, rgba(255, 190, 214, 0.3) 0%, transparent 46%),
-    radial-gradient(ellipse at 88% 20%, rgba(206, 182, 250, 0.3) 0%, transparent 46%),
-    radial-gradient(ellipse at 78% 82%, rgba(178, 216, 248, 0.26) 0%, transparent 46%),
-    radial-gradient(ellipse at 22% 72%, rgba(255, 222, 190, 0.24) 0%, transparent 46%),
-    linear-gradient(135deg, #fbf4fb 0%, #f5f2fe 50%, #eff5fd 100%);
-  background-size: 100% 100%;
+    radial-gradient(ellipse 65% 55% at 18% 12%, rgba(var(--orb-rgb-1), 0.5) 0%, transparent 62%),
+    radial-gradient(ellipse 60% 50% at 85% 22%, rgba(var(--orb-rgb-2), 0.42) 0%, transparent 60%),
+    radial-gradient(ellipse 75% 60% at 50% 95%, rgba(var(--orb-rgb-3), 0.4) 0%, transparent 62%),
+    var(--stage);
+  background-attachment: fixed;
+  min-height: 100vh;
 }
 
-@keyframes glass-bg-shift {
-  0% { background-position: 0% 50%; }
-  25% { background-position: 100% 0%; }
-  50% { background-position: 100% 100%; }
-  75% { background-position: 0% 100%; }
-  100% { background-position: 0% 50%; }
-}
-
-/* 缓慢漂移的柔光色斑 —— 低饱和，不干扰内容 */
-.glass-theme body::after,
-.ios-glass-theme body::after,
-.liquid-glass-theme body::after {
+/* ---- 远景光球：缓慢呼吸、轻微旋转 ---- */
+html.glass-theme::before,
+html.ios-glass-theme::before,
+html.liquid-glass-theme::before {
   content: '';
   position: fixed;
-  inset: -25%;
-  pointer-events: none;
+  inset: -22%;
   z-index: 0;
+  pointer-events: none;
   background:
-    radial-gradient(circle at 30% 35%, rgba(255, 150, 190, 0.16) 0%, transparent 45%),
-    radial-gradient(circle at 70% 60%, rgba(140, 200, 250, 0.16) 0%, transparent 45%),
-    radial-gradient(circle at 48% 80%, rgba(190, 165, 250, 0.14) 0%, transparent 45%);
-  filter: blur(70px);
-  animation: glass-blob-drift 26s ease-in-out infinite;
+    radial-gradient(circle at 28% 32%, rgba(var(--orb-rgb-1), 0.5) 0%, transparent 44%),
+    radial-gradient(circle at 74% 68%, rgba(var(--orb-rgb-2), 0.42) 0%, transparent 46%);
+  filter: blur(72px);
+  animation: glass-orb-far 36s ease-in-out infinite alternate;
   will-change: transform;
 }
 
-@keyframes glass-blob-drift {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(3%, -2%) scale(1.05); }
-  66% { transform: translate(-2%, 3%) scale(0.96); }
+/* ---- 近景光球：反向漂移，制造视差纵深 ---- */
+html.glass-theme body::after,
+html.ios-glass-theme body::after,
+html.liquid-glass-theme body::after {
+  content: '';
+  position: fixed;
+  inset: -18%;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 26% 70%, rgba(var(--orb-rgb-3), 0.46) 0%, transparent 40%),
+    radial-gradient(circle at 78% 26%, rgba(var(--orb-rgb-2), 0.38) 0%, transparent 42%);
+  filter: blur(56px);
+  animation: glass-orb-near 26s ease-in-out infinite alternate-reverse;
+  will-change: transform;
+}
+
+@keyframes glass-orb-far {
+  0% { transform: translate(-2%, -2%) rotate(0deg) scale(1); }
+  100% { transform: translate(3%, 4%) rotate(6deg) scale(1.14); }
+}
+@keyframes glass-orb-near {
+  0% { transform: translate(2%, 3%) scale(1.08); }
+  100% { transform: translate(-3%, -3%) scale(0.94); }
+}
+
+/* ---- 胶片颗粒：细噪点让玻璃产生真实磨砂质感 ---- */
+html.glass-theme body::before,
+html.ios-glass-theme body::before,
+html.liquid-glass-theme body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.055;
+  mix-blend-mode: soft-light;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 384px 384px;
 }
 
 /* ============================================================
-   共用玻璃表面 —— 全部走设计令牌
+   共用玻璃表面
    ============================================================ */
 
-/* ---- 日历容器浮起 ---- */
 .glass-theme .calendar-container,
 .ios-glass-theme .calendar-container,
 .liquid-glass-theme .calendar-container {
@@ -84,92 +112,225 @@ html.liquid-glass-theme body {
   z-index: 1;
 }
 
-/* ---- 日期格：液态玻璃面 ---- */
+/* ---- 日期格：对角渐变玻璃 + 顶部高光 + 底部沉影 ---- */
 .glass-theme .calendar-day,
 .ios-glass-theme .calendar-day,
 .liquid-glass-theme .calendar-day {
+  border-radius: 15px !important;
+  background: linear-gradient(
+    148deg,
+    rgba(255, 255, 255, 0.7) 0%,
+    rgba(255, 255, 255, 0.46) 55%,
+    rgba(255, 255, 255, 0.58) 100%
+  ) !important;
+  border-color: rgba(255, 255, 255, 0.72) !important;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.6),
-    var(--shadow-sm) !important;
-  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
-    background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease !important;
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    inset 0 -10px 18px -14px rgba(31, 38, 63, 0.35),
+    0 6px 20px -10px rgba(31, 38, 63, 0.35) !important;
+  transition:
+    transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.3s ease,
+    border-color 0.3s ease !important;
+}
+
+/* 流光：悬停时一道斜向光带扫过格面 */
+.glass-theme .calendar-day::before,
+.ios-glass-theme .calendar-day::before,
+.liquid-glass-theme .calendar-day::before {
+  content: '';
+  position: absolute;
+  inset: -30%;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    115deg,
+    transparent 42%,
+    rgba(255, 255, 255, 0.5) 50%,
+    transparent 58%
+  );
+  transform: translateX(-130%) skewX(-8deg);
+  transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* 虹彩描边：悬停时边缘亮起细彩虹环 */
+.glass-theme .calendar-day::after,
+.ios-glass-theme .calendar-day::after,
+.liquid-glass-theme .calendar-day::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  padding: 1px;
+  pointer-events: none;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.95),
+    rgba(var(--orb-rgb-3), 0.55),
+    rgba(var(--orb-rgb-2), 0.55),
+    rgba(255, 255, 255, 0.95)
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.35s ease;
 }
 
 .glass-theme .calendar-day:hover,
 .ios-glass-theme .calendar-day:hover,
 .liquid-glass-theme .calendar-day:hover {
-  background: rgba(255, 255, 255, 0.8) !important;
-  border-color: var(--primary-color) !important;
+  background: linear-gradient(
+    148deg,
+    rgba(255, 255, 255, 0.82) 0%,
+    rgba(255, 255, 255, 0.6) 100%
+  ) !important;
+  border-color: rgba(255, 255, 255, 0.85) !important;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.7),
-    0 10px 26px -8px var(--form-input-focus-shadow) !important;
-  transform: translateY(-2px) !important;
-  z-index: 5;
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -10px 18px -14px rgba(31, 38, 63, 0.3),
+    0 14px 36px -12px rgba(31, 38, 63, 0.45) !important;
+  transform: translateY(-3px) scale(1.015) !important;
+  z-index: 6;
+}
+
+.glass-theme .calendar-day:hover::before,
+.ios-glass-theme .calendar-day:hover::before,
+.liquid-glass-theme .calendar-day:hover::before {
+  transform: translateX(130%) skewX(-8deg);
+}
+
+.glass-theme .calendar-day:hover::after,
+.ios-glass-theme .calendar-day:hover::after,
+.liquid-glass-theme .calendar-day:hover::after {
+  opacity: 1;
 }
 
 .glass-theme .calendar-day:hover .day-number,
 .ios-glass-theme .calendar-day:hover .day-number,
 .liquid-glass-theme .calendar-day:hover .day-number {
-  color: var(--primary-color) !important;
+  color: var(--primary-dark) !important;
 }
 
-/* 今天：玻璃面上叠加强调色光环 */
+/* ---- 今天：强调色光环 + 呼吸 ---- */
 .glass-theme .current-day,
 .ios-glass-theme .current-day,
 .liquid-glass-theme .current-day {
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.55),
-    0 0 0 2px var(--calendar-day-current-border),
-    0 6px 18px -6px var(--form-input-focus-shadow) !important;
+  animation: glass-today-breathe 4.5s ease-in-out infinite;
 }
+.glass-theme .current-day .day-number::before,
+.ios-glass-theme .current-day .day-number::before,
+.liquid-glass-theme .current-day .day-number::before {
+  box-shadow: 0 2px 10px -2px var(--form-input-focus-shadow);
+}
+
+@keyframes glass-today-breathe {
+  0%, 100% {
+    box-shadow:
+      0 0 0 2px var(--calendar-day-current-border),
+      0 6px 22px -8px var(--form-input-focus-shadow) !important;
+  }
+  50% {
+    box-shadow:
+      0 0 0 2px var(--calendar-day-current-border),
+      0 6px 22px -8px var(--form-input-focus-shadow),
+      0 0 34px -6px var(--form-input-focus-shadow) !important;
+  }
+}
+
+/* ---- 选中的日期：强调色玻璃晕 ---- */
 .glass-theme .selected-day,
 .ios-glass-theme .selected-day,
 .liquid-glass-theme .selected-day {
+  background:
+    linear-gradient(148deg, var(--primary-light), rgba(255, 255, 255, 0.5)) !important;
+  border-color: var(--primary-color) !important;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.55),
-    0 0 0 2px var(--primary-color) !important;
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    0 8px 26px -10px var(--form-input-focus-shadow) !important;
 }
 
-/* 星期标题 / 周号：轻玻璃条 */
+/* ---- 星期标题 / 周号：悬浮玻璃小胶囊（保证深舞台上文字可读） ---- */
 .glass-theme .calendar-weekday,
 .ios-glass-theme .calendar-weekday,
 .liquid-glass-theme .calendar-weekday {
-  backdrop-filter: blur(12px) saturate(160%);
-  -webkit-backdrop-filter: blur(12px) saturate(160%);
-  background: rgba(255, 255, 255, 0.34) !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(14px) saturate(170%);
+  -webkit-backdrop-filter: blur(14px) saturate(170%);
+  background: rgba(255, 255, 255, 0.52) !important;
+  border-radius: 999px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    0 2px 8px -4px rgba(31, 38, 63, 0.3);
 }
+.glass-theme .weekend-header,
+.ios-glass-theme .weekend-header,
+.liquid-glass-theme .weekend-header {
+  color: var(--danger-color) !important;
+}
+
 .glass-theme .week-number,
 .ios-glass-theme .week-number,
 .liquid-glass-theme .week-number {
-  backdrop-filter: blur(8px) saturate(150%);
-  -webkit-backdrop-filter: blur(8px) saturate(150%);
-  background: rgba(255, 255, 255, 0.26) !important;
+  backdrop-filter: blur(10px) saturate(150%);
+  -webkit-backdrop-filter: blur(10px) saturate(150%);
+  background: rgba(255, 255, 255, 0.34) !important;
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.85) !important;
 }
 
-/* ---- 头部：悬浮玻璃导航条 ---- */
+/* ---- 头部：悬浮玻璃导航条 + 顶部流光发丝线 ---- */
 .glass-theme .calendar-header,
 .ios-glass-theme .calendar-header,
 .liquid-glass-theme .calendar-header {
-  backdrop-filter: blur(28px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
-  background: var(--card-background) !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), var(--shadow-md) !important;
   position: relative;
   z-index: 2;
+  overflow: hidden;
+  backdrop-filter: blur(32px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(32px) saturate(190%) !important;
+  background: linear-gradient(
+    120deg,
+    rgba(255, 255, 255, 0.66),
+    rgba(255, 255, 255, 0.48)
+  ) !important;
+  border-color: rgba(255, 255, 255, 0.75) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    0 12px 36px -16px rgba(31, 38, 63, 0.45) !important;
 }
 
-/* ---- 按钮 ---- */
+.glass-theme .calendar-header::before,
+.ios-glass-theme .calendar-header::before,
+.liquid-glass-theme .calendar-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 16px;
+  right: 16px;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.98),
+    transparent
+  );
+}
+
+/* ---- 按钮：玻璃圆钮 / 光泽主色胶囊 ---- */
 .glass-theme .nav-btn,
 .glass-theme .icon-btn,
 .ios-glass-theme .nav-btn,
 .ios-glass-theme .icon-btn,
 .liquid-glass-theme .nav-btn,
 .liquid-glass-theme .icon-btn {
-  backdrop-filter: blur(10px) saturate(160%);
-  -webkit-backdrop-filter: blur(10px) saturate(160%);
-  background: rgba(255, 255, 255, 0.42) !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(12px) saturate(170%);
+  -webkit-backdrop-filter: blur(12px) saturate(170%);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0.34)) !important;
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    0 3px 10px -5px rgba(31, 38, 63, 0.35);
 }
 .glass-theme .nav-btn:hover,
 .glass-theme .icon-btn:hover,
@@ -177,73 +338,123 @@ html.liquid-glass-theme body {
 .ios-glass-theme .icon-btn:hover,
 .liquid-glass-theme .nav-btn:hover,
 .liquid-glass-theme .icon-btn:hover {
-  background: rgba(255, 255, 255, 0.62) !important;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.52)) !important;
 }
+
 .glass-theme .today-btn,
 .ios-glass-theme .today-btn,
 .liquid-glass-theme .today-btn {
-  backdrop-filter: blur(10px) saturate(170%);
-  -webkit-backdrop-filter: blur(10px) saturate(170%);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 4px 14px -4px var(--form-input-focus-shadow) !important;
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    0 6px 20px -6px var(--form-input-focus-shadow) !important;
+}
+.glass-theme .today-btn:hover,
+.ios-glass-theme .today-btn:hover,
+.liquid-glass-theme .today-btn:hover {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    0 10px 28px -8px var(--form-input-focus-shadow) !important;
 }
 
-/* ---- 设置抽屉 / 弹窗 ---- */
+/* ---- 抽屉：厚玻璃侧板 + 左缘流光 ---- */
 .glass-theme .drawer-panel,
 .ios-glass-theme .drawer-panel,
 .liquid-glass-theme .drawer-panel {
-  backdrop-filter: blur(36px) saturate(190%) !important;
-  -webkit-backdrop-filter: blur(36px) saturate(190%) !important;
-  background: rgba(255, 255, 255, 0.78) !important;
-  border-left: 1px solid rgba(255, 255, 255, 0.7) !important;
+  backdrop-filter: blur(44px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(44px) saturate(200%) !important;
+  background: linear-gradient(
+    165deg,
+    rgba(255, 255, 255, 0.86),
+    rgba(255, 255, 255, 0.72)
+  ) !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.8) !important;
+  box-shadow:
+    inset 1px 0 0 rgba(255, 255, 255, 0.6),
+    -24px 0 64px -24px rgba(31, 38, 63, 0.5) !important;
 }
 
 .glass-theme .drawer-overlay,
 .ios-glass-theme .drawer-overlay,
 .liquid-glass-theme .drawer-overlay {
-  background: rgba(29, 36, 51, 0.28) !important;
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  background: rgba(12, 16, 33, 0.35) !important;
+  backdrop-filter: blur(10px) saturate(120%);
+  -webkit-backdrop-filter: blur(10px) saturate(120%);
 }
 
+/* ---- 弹窗 / 提醒 / 操作菜单：加厚的雾面玻璃 ---- */
 .glass-theme .add-todo-popup,
 .ios-glass-theme .add-todo-popup,
 .liquid-glass-theme .add-todo-popup {
-  backdrop-filter: blur(36px) saturate(190%) !important;
-  -webkit-backdrop-filter: blur(36px) saturate(190%) !important;
-  background: rgba(255, 255, 255, 0.82) !important;
+  backdrop-filter: blur(40px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(40px) saturate(190%) !important;
+  background: rgba(255, 255, 255, 0.86) !important;
+  border: 1px solid rgba(255, 255, 255, 0.8) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 24px 64px -20px rgba(12, 16, 33, 0.6) !important;
 }
 
 .glass-theme .reminder-toast,
 .ios-glass-theme .reminder-toast,
 .liquid-glass-theme .reminder-toast {
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  background: rgba(255, 255, 255, 0.84) !important;
+}
+
+.glass-theme .todo-actions,
+.ios-glass-theme .todo-actions,
+.liquid-glass-theme .todo-actions {
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
+  background: rgba(255, 255, 255, 0.88) !important;
 }
 
 .glass-theme .pc-panel,
 .ios-glass-theme .pc-panel,
-.liquid-glass-theme .pc-panel,
 .glass-theme .mobile-panel,
 .ios-glass-theme .mobile-panel,
+.liquid-glass-theme .pc-panel,
 .liquid-glass-theme .mobile-panel {
-  backdrop-filter: blur(32px) saturate(185%);
-  -webkit-backdrop-filter: blur(32px) saturate(185%);
-  background: rgba(255, 255, 255, 0.74);
+  backdrop-filter: blur(40px) saturate(195%);
+  -webkit-backdrop-filter: blur(40px) saturate(195%);
+  background: rgba(255, 255, 255, 0.8);
 }
 
-/* ---- 待办事项玻璃片 ---- */
 .glass-theme .todo-item,
 .ios-glass-theme .todo-item,
 .liquid-glass-theme .todo-item {
-  backdrop-filter: blur(8px) saturate(150%);
-  -webkit-backdrop-filter: blur(8px) saturate(150%);
+  backdrop-filter: blur(10px) saturate(160%);
+  -webkit-backdrop-filter: blur(10px) saturate(160%);
 }
 
-/* ---- 动态背景开启时提高玻璃面不透明度，保证可读性 ---- */
+/* ---- 节日倒计时芯片：实底玻璃胶囊（深舞台上保持可读） ---- */
+.glass-theme .festival-chip,
+.ios-glass-theme .festival-chip,
+.liquid-glass-theme .festival-chip {
+  background: rgba(255, 255, 255, 0.62) !important;
+  border-color: rgba(255, 255, 255, 0.75) !important;
+  color: var(--text-primary) !important;
+  backdrop-filter: blur(12px) saturate(170%);
+  -webkit-backdrop-filter: blur(12px) saturate(170%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 3px 10px -5px rgba(31, 38, 63, 0.35);
+}
+
+/* ---- 动态背景开启时：隐藏极光光球，让天气渐变干净透出 ---- */
+html.glass-theme:has(body.dynamic-background)::before,
+html.ios-glass-theme:has(body.dynamic-background)::before,
+html.liquid-glass-theme:has(body.dynamic-background)::before,
+html.glass-theme body.dynamic-background::after,
+html.ios-glass-theme body.dynamic-background::after,
+html.liquid-glass-theme body.dynamic-background::after {
+  display: none;
+}
+
+/* ---- 动态背景开启时：提高玻璃面不透明度保证可读性 ---- */
 body.dynamic-background.glass-theme .calendar-day,
 body.dynamic-background.ios-glass-theme .calendar-day,
 body.dynamic-background.liquid-glass-theme .calendar-day {
-  background: rgba(255, 255, 255, 0.72) !important;
+  background: linear-gradient(148deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.66)) !important;
 }
 body.dynamic-background.glass-theme .calendar-header,
 body.dynamic-background.ios-glass-theme .calendar-header,
@@ -254,46 +465,74 @@ body.dynamic-background.liquid-glass-theme .drawer-panel,
 body.dynamic-background.glass-theme .add-todo-popup,
 body.dynamic-background.ios-glass-theme .add-todo-popup,
 body.dynamic-background.liquid-glass-theme .add-todo-popup {
-  background: rgba(255, 255, 255, 0.84) !important;
+  background: rgba(255, 255, 255, 0.88) !important;
 }
 
-/* ---- 移动端：收敛动效，避免抖动 ---- */
+/* ---- 移动端：收敛动效与模糊半径，避免抖动与耗电 ---- */
 @media (max-width: 768px) {
-  html.glass-theme body {
-    background: linear-gradient(180deg, #f5f0fc, #eef2fd, #fdf1f7);
-    background-size: 100% 200%;
-    animation: glass-bg-shift-mobile 10s ease infinite;
+  html.glass-theme::before,
+  html.ios-glass-theme::before,
+  html.liquid-glass-theme::before {
+    filter: blur(48px);
   }
-  @keyframes glass-bg-shift-mobile {
-    0%, 100% { background-position: 50% 0%; }
-    50% { background-position: 50% 100%; }
+  html.glass-theme body::after,
+  html.ios-glass-theme body::after,
+  html.liquid-glass-theme body::after {
+    filter: blur(40px);
   }
 
-  .glass-theme body::after,
-  .ios-glass-theme body::after,
-  .liquid-glass-theme body::after {
-    filter: blur(44px);
+  .glass-theme .calendar-day,
+  .ios-glass-theme .calendar-day,
+  .liquid-glass-theme .calendar-day {
+    border-radius: 12px !important;
   }
 
   .glass-theme .calendar-day:hover,
   .ios-glass-theme .calendar-day:hover,
   .liquid-glass-theme .calendar-day:hover {
     transform: none !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.92),
+      0 6px 20px -10px rgba(31, 38, 63, 0.4) !important;
+  }
+
+  .glass-theme .calendar-weekday,
+  .ios-glass-theme .calendar-weekday,
+  .liquid-glass-theme .calendar-weekday {
+    background: rgba(255, 255, 255, 0.6) !important;
+    border-radius: 10px;
+  }
+
+  .glass-theme .drawer-panel,
+  .ios-glass-theme .drawer-panel,
+  .liquid-glass-theme .drawer-panel {
+    width: 100%;
   }
 }
 
 /* ---- 尊重系统减弱动效偏好 ---- */
 @media (prefers-reduced-motion: reduce) {
-  html.glass-theme body,
-  html.ios-glass-theme body,
-  html.liquid-glass-theme body {
+  html.glass-theme::before,
+  html.ios-glass-theme::before,
+  html.liquid-glass-theme::before,
+  html.glass-theme body::after,
+  html.ios-glass-theme body::after,
+  html.liquid-glass-theme body::after {
     animation: none !important;
   }
-  .glass-theme body::after,
-  .ios-glass-theme body::after,
-  .liquid-glass-theme body::after {
+
+  .glass-theme .current-day,
+  .ios-glass-theme .current-day,
+  .liquid-glass-theme .current-day {
     animation: none !important;
   }
+
+  .glass-theme .calendar-day::before,
+  .ios-glass-theme .calendar-day::before,
+  .liquid-glass-theme .calendar-day::before {
+    display: none !important;
+  }
+
   .glass-theme .calendar-day,
   .ios-glass-theme .calendar-day,
   .liquid-glass-theme .calendar-day {

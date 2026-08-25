@@ -1067,7 +1067,7 @@
   --form-input-focus-shadow: rgba(124, 58, 237, 0.16);
 
   /* ---- 玻璃专属 ---- */
-  --glass-day-backdrop: blur(24px) saturate(180%);
+  --glass-day-backdrop: blur(28px) saturate(190%);
   --glass-grid-backdrop: none;
 
   /* ---- 阴影 ---- */
@@ -1164,7 +1164,7 @@
   --form-input-focus-shadow: rgba(0, 113, 227, 0.16);
 
   /* ---- 玻璃专属 ---- */
-  --glass-day-backdrop: blur(24px) saturate(180%);
+  --glass-day-backdrop: blur(28px) saturate(190%);
   --glass-grid-backdrop: none;
 
   /* ---- 阴影 ---- */
@@ -1261,7 +1261,7 @@
   --form-input-focus-shadow: rgba(147, 51, 234, 0.16);
 
   /* ---- 玻璃专属 ---- */
-  --glass-day-backdrop: blur(24px) saturate(180%);
+  --glass-day-backdrop: blur(28px) saturate(190%);
   --glass-grid-backdrop: none;
 
   /* ---- 阴影 ---- */

@@ -269,7 +269,7 @@ function buildGlass({ accent, accentStrong }) {
     'preview-border': alpha(accent, 0.28),
     'loading-overlay-bg': 'rgba(255, 255, 255, 0.55)',
     /* 玻璃主题的模糊量由 theme-glass.css 与下方覆盖控制 */
-    'glass-day-backdrop': 'blur(24px) saturate(180%)',
+    'glass-day-backdrop': 'blur(28px) saturate(190%)',
     'glass-grid-backdrop': 'none',
     /* 玻璃阴影更轻盈 */
     'shadow-sm': '0 1px 2px rgba(23, 28, 45, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.55)',
