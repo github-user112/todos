@@ -1,6 +1,10 @@
 <template>
-  <n-dialog-provider
-    ><n-message-provider>
+  <n-config-provider
+    :theme="naiveDark ? darkTheme : undefined"
+    :theme-overrides="naiveOverrides"
+  >
+    <n-dialog-provider
+      ><n-message-provider>
       <calendar-container
         :todos="todos"
         :completedInstances="completedInstances"
@@ -22,6 +26,7 @@
     />
     </n-message-provider>
   </n-dialog-provider>
+  </n-config-provider>
 </template>
 
 <script setup>
@@ -29,8 +34,33 @@ import { ref, onMounted, onUnmounted, provide } from 'vue';
 import CalendarContainer from '../components/calendar-container.vue';
 import SolarTermPopup from '../components/SolarTermPopup.vue';
 import { formatDate } from '../utils/dateUtils';
-import { NDialogProvider, NMessageProvider } from 'naive-ui';
+import {
+  NConfigProvider,
+  NDialogProvider,
+  NMessageProvider,
+  darkTheme,
+} from 'naive-ui';
+import { buildNaiveThemeOverrides } from '../utils/naiveTheme';
 import { apiRequest, getUserId } from '../utils/api';
+
+// ---- naive-ui 弹层跟随主题（Dialog / Message 等） ----
+const naiveDark = ref(false);
+const naiveOverrides = ref(buildNaiveThemeOverrides());
+const refreshNaiveTheme = () => {
+  naiveDark.value = document.documentElement.classList.contains('dark-mode');
+  naiveOverrides.value = buildNaiveThemeOverrides();
+};
+let naiveThemeObserver;
+onMounted(() => {
+  refreshNaiveTheme();
+  // html 根类的 class 变化即主题切换（applyTheme 切换 theme class / dark-mode）
+  naiveThemeObserver = new MutationObserver(refreshNaiveTheme);
+  naiveThemeObserver.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['class'],
+  });
+});
+onUnmounted(() => naiveThemeObserver?.disconnect());
 import { loading, setLoading } from '../utils/loading';
 import {
   initReminderManager,

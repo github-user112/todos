@@ -35,9 +35,9 @@ html.glass-theme body,
 html.ios-glass-theme body,
 html.liquid-glass-theme body {
   background:
-    radial-gradient(ellipse 65% 55% at 18% 12%, rgba(var(--orb-rgb-1), 0.5) 0%, transparent 62%),
-    radial-gradient(ellipse 60% 50% at 85% 22%, rgba(var(--orb-rgb-2), 0.42) 0%, transparent 60%),
-    radial-gradient(ellipse 75% 60% at 50% 95%, rgba(var(--orb-rgb-3), 0.4) 0%, transparent 62%),
+    radial-gradient(ellipse 65% 55% at 18% 12%, rgba(var(--orb-rgb-1), 0.44) 0%, transparent 62%),
+    radial-gradient(ellipse 60% 50% at 85% 22%, rgba(var(--orb-rgb-2), 0.36) 0%, transparent 60%),
+    radial-gradient(ellipse 75% 60% at 50% 95%, rgba(var(--orb-rgb-3), 0.34) 0%, transparent 62%),
     var(--stage);
   background-attachment: fixed;
   min-height: 100vh;
@@ -53,8 +53,8 @@ html.liquid-glass-theme::before {
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(circle at 28% 32%, rgba(var(--orb-rgb-1), 0.5) 0%, transparent 44%),
-    radial-gradient(circle at 74% 68%, rgba(var(--orb-rgb-2), 0.42) 0%, transparent 46%);
+    radial-gradient(circle at 28% 32%, rgba(var(--orb-rgb-1), 0.42) 0%, transparent 44%),
+    radial-gradient(circle at 74% 68%, rgba(var(--orb-rgb-2), 0.34) 0%, transparent 46%);
   filter: blur(72px);
   animation: glass-orb-far 36s ease-in-out infinite alternate;
   will-change: transform;
