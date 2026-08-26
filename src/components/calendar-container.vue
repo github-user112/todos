@@ -416,6 +416,9 @@ const applyTheme = (theme) => {
     'ios-glass-theme',
     'liquid-glass-theme',
     'ios26-glass-theme',
+    'persimmon-glass-theme',
+    'moonlight-glass-theme',
+    'bamboo-glass-theme',
     'dark-mode',
   );
 
@@ -435,6 +438,10 @@ const applyTheme = (theme) => {
     'ios26-glass': 'ios26-glass-theme',
     // 深色变体 = 玻璃主题类 + dark-mode（naive-ui 弹层随之切深色基底）
     'ios26-glass-dark': 'ios26-glass-theme dark-mode',
+    // 节气玻璃三套：霜柿 / 月白 / 竹青
+    'persimmon-glass': 'persimmon-glass-theme',
+    'moonlight-glass': 'moonlight-glass-theme',
+    'bamboo-glass': 'bamboo-glass-theme',
     dark: 'dark-mode',
   };
 

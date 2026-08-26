@@ -8,9 +8,11 @@
    3. 可读性：玻璃上的文字一律实色，保证对比度；
    4. 纵深：顶部镜面高光 + 柔和环境阴影，配合大圆角同心几何；
    5. 动效：只保留状态切换的短过渡，无装饰性循环动画。
-   三套主题仅壁纸色调不同（--stage / --orb-rgb-*），配方共享；
-   文件末尾的「液态玻璃 26」为独立的第四套（浅色 + 深色双模式、
-   按压动效、backdrop-filter 兼容兜底），不影响以上三套。
+   七套玻璃家族仅壁纸色调不同（--stage / --orb-rgb-*），配方共享：
+   v3 三套（glass / ios-glass / liquid-glass）+ 节气三套
+   （persimmon 霜柿 / moonlight 月白 / bamboo 竹青）+
+   文件末尾独立的「液态玻璃 26」（浅色 + 深色双模式、按压动效、
+   backdrop-filter 兼容兜底），各家族互不影响。
    ============================================================ */
 
 /* ---- 各主题壁纸色调：柔和的「虚化壁纸」网格渐变 ---- */
@@ -35,10 +37,35 @@ html.liquid-glass-theme {
   --orb-rgb-2: 166, 192, 235; /* 长春花蓝 */
   --orb-rgb-3: 240, 187, 158; /* 珊瑚杏 */
 }
+/* ---- 三套节气玻璃：取景自农历一年的三段风景，壁纸即签名 ---- */
+html.persimmon-glass-theme {
+  --stage-a: #f5e6d3;
+  --stage-b: #efd9cf;
+  --orb-rgb-1: 236, 126, 64;  /* 柿橙 */
+  --orb-rgb-2: 242, 186, 102; /* 蜜桂黄 */
+  --orb-rgb-3: 168, 178, 120; /* 柿叶绿 */
+}
+html.moonlight-glass-theme {
+  --stage-a: #dde5f2;
+  --stage-b: #e4e2ef;
+  --orb-rgb-1: 116, 150, 214; /* 夜空蓝 */
+  --orb-rgb-2: 205, 214, 238; /* 月银 */
+  --orb-rgb-3: 96, 128, 176;  /* 远山黛 */
+}
+html.bamboo-glass-theme {
+  --stage-a: #e2ecdd;
+  --stage-b: #eef0dc;
+  --orb-rgb-1: 132, 196, 142; /* 竹绿 */
+  --orb-rgb-2: 158, 208, 118; /* 梅青 */
+  --orb-rgb-3: 150, 190, 170; /* 烟柳 */
+}
 
 /* ---- 壁纸底：静态柔焦网格渐变，模拟 iOS 主屏壁纸的虚化观感 ---- */
 html.glass-theme body,
 html.ios-glass-theme body,
+html.persimmon-glass-theme body ,
+html.moonlight-glass-theme body ,
+html.bamboo-glass-theme body ,
 html.liquid-glass-theme body {
   background:
     radial-gradient(ellipse 70% 60% at 16% 14%, rgba(var(--orb-rgb-1), 0.55) 0%, transparent 64%),
@@ -56,6 +83,9 @@ html.liquid-glass-theme body {
 
 .glass-theme .calendar-container,
 .ios-glass-theme .calendar-container,
+.persimmon-glass-theme .calendar-container ,
+.moonlight-glass-theme .calendar-container ,
+.bamboo-glass-theme .calendar-container ,
 .liquid-glass-theme .calendar-container {
   position: relative;
   z-index: 1;
@@ -64,6 +94,9 @@ html.liquid-glass-theme body {
 /* ---- 日期格：均匀白雾玻璃 + 顶缘镜面高光 + 柔和落影 ---- */
 .glass-theme .calendar-day,
 .ios-glass-theme .calendar-day,
+.persimmon-glass-theme .calendar-day ,
+.moonlight-glass-theme .calendar-day ,
+.bamboo-glass-theme .calendar-day ,
 .liquid-glass-theme .calendar-day {
   border-radius: 16px !important;
   background: rgba(255, 255, 255, 0.56) !important;
@@ -81,6 +114,9 @@ html.liquid-glass-theme body {
 
 .glass-theme .calendar-day:hover,
 .ios-glass-theme .calendar-day:hover,
+.persimmon-glass-theme .calendar-day:hover ,
+.moonlight-glass-theme .calendar-day:hover ,
+.bamboo-glass-theme .calendar-day:hover ,
 .liquid-glass-theme .calendar-day:hover {
   background: rgba(255, 255, 255, 0.72) !important;
   border-color: rgba(255, 255, 255, 0.82) !important;
@@ -94,6 +130,9 @@ html.liquid-glass-theme body {
 
 .glass-theme .calendar-day:hover .day-number,
 .ios-glass-theme .calendar-day:hover .day-number,
+.persimmon-glass-theme .calendar-day:hover .day-number ,
+.moonlight-glass-theme .calendar-day:hover .day-number ,
+.bamboo-glass-theme .calendar-day:hover .day-number ,
 .liquid-glass-theme .calendar-day:hover .day-number {
   color: var(--primary-dark) !important;
 }
@@ -103,6 +142,9 @@ html.liquid-glass-theme body {
 /* ---- 星期标题：安静的实色文字（壁纸已足够浅） ---- */
 .glass-theme .calendar-weekday,
 .ios-glass-theme .calendar-weekday,
+.persimmon-glass-theme .calendar-weekday ,
+.moonlight-glass-theme .calendar-weekday ,
+.bamboo-glass-theme .calendar-weekday ,
 .liquid-glass-theme .calendar-weekday {
   background: transparent !important;
   box-shadow: none;
@@ -110,6 +152,9 @@ html.liquid-glass-theme body {
 
 .glass-theme .week-number,
 .ios-glass-theme .week-number,
+.persimmon-glass-theme .week-number ,
+.moonlight-glass-theme .week-number ,
+.bamboo-glass-theme .week-number ,
 .liquid-glass-theme .week-number {
   background: transparent !important;
 }
@@ -117,6 +162,9 @@ html.liquid-glass-theme body {
 /* ---- 头部：悬浮玻璃导航条（Liquid Glass 的典型用法） ---- */
 .glass-theme .calendar-header,
 .ios-glass-theme .calendar-header,
+.persimmon-glass-theme .calendar-header ,
+.moonlight-glass-theme .calendar-header ,
+.bamboo-glass-theme .calendar-header ,
 .liquid-glass-theme .calendar-header {
   position: relative;
   z-index: 2;
@@ -134,7 +182,13 @@ html.liquid-glass-theme body {
 .glass-theme .icon-btn,
 .ios-glass-theme .nav-btn,
 .ios-glass-theme .icon-btn,
+.persimmon-glass-theme .nav-btn,
+.moonlight-glass-theme .nav-btn,
+.bamboo-glass-theme .nav-btn,
 .liquid-glass-theme .nav-btn,
+.persimmon-glass-theme .icon-btn ,
+.moonlight-glass-theme .icon-btn ,
+.bamboo-glass-theme .icon-btn ,
 .liquid-glass-theme .icon-btn {
   backdrop-filter: blur(14px) saturate(180%);
   -webkit-backdrop-filter: blur(14px) saturate(180%);
@@ -146,13 +200,22 @@ html.liquid-glass-theme body {
 .glass-theme .icon-btn:hover,
 .ios-glass-theme .nav-btn:hover,
 .ios-glass-theme .icon-btn:hover,
+.persimmon-glass-theme .nav-btn:hover,
+.moonlight-glass-theme .nav-btn:hover,
+.bamboo-glass-theme .nav-btn:hover,
 .liquid-glass-theme .nav-btn:hover,
+.persimmon-glass-theme .icon-btn:hover ,
+.moonlight-glass-theme .icon-btn:hover ,
+.bamboo-glass-theme .icon-btn:hover ,
 .liquid-glass-theme .icon-btn:hover {
   background: rgba(255, 255, 255, 0.62) !important;
 }
 
 .glass-theme .today-btn,
 .ios-glass-theme .today-btn,
+.persimmon-glass-theme .today-btn ,
+.moonlight-glass-theme .today-btn ,
+.bamboo-glass-theme .today-btn ,
 .liquid-glass-theme .today-btn {
   backdrop-filter: blur(14px) saturate(180%);
   -webkit-backdrop-filter: blur(14px) saturate(180%);
@@ -164,6 +227,9 @@ html.liquid-glass-theme body {
 /* ---- 抽屉：厚玻璃侧板 ---- */
 .glass-theme .drawer-panel,
 .ios-glass-theme .drawer-panel,
+.persimmon-glass-theme .drawer-panel ,
+.moonlight-glass-theme .drawer-panel ,
+.bamboo-glass-theme .drawer-panel ,
 .liquid-glass-theme .drawer-panel {
   backdrop-filter: blur(44px) saturate(200%) !important;
   -webkit-backdrop-filter: blur(44px) saturate(200%) !important;
@@ -174,6 +240,9 @@ html.liquid-glass-theme body {
 
 .glass-theme .drawer-overlay,
 .ios-glass-theme .drawer-overlay,
+.persimmon-glass-theme .drawer-overlay ,
+.moonlight-glass-theme .drawer-overlay ,
+.bamboo-glass-theme .drawer-overlay ,
 .liquid-glass-theme .drawer-overlay {
   background: rgba(15, 20, 40, 0.24) !important;
   backdrop-filter: blur(8px) saturate(120%);
@@ -183,6 +252,9 @@ html.liquid-glass-theme body {
 /* ---- 弹窗 / 提醒 / 操作菜单 / 待办列表 ---- */
 .glass-theme .add-todo-popup,
 .ios-glass-theme .add-todo-popup,
+.persimmon-glass-theme .add-todo-popup ,
+.moonlight-glass-theme .add-todo-popup ,
+.bamboo-glass-theme .add-todo-popup ,
 .liquid-glass-theme .add-todo-popup {
   backdrop-filter: blur(44px) saturate(200%) !important;
   -webkit-backdrop-filter: blur(44px) saturate(200%) !important;
@@ -193,6 +265,9 @@ html.liquid-glass-theme body {
 
 .glass-theme .reminder-toast,
 .ios-glass-theme .reminder-toast,
+.persimmon-glass-theme .reminder-toast ,
+.moonlight-glass-theme .reminder-toast ,
+.bamboo-glass-theme .reminder-toast ,
 .liquid-glass-theme .reminder-toast {
   backdrop-filter: blur(28px) saturate(190%);
   -webkit-backdrop-filter: blur(28px) saturate(190%);
@@ -201,6 +276,9 @@ html.liquid-glass-theme body {
 
 .glass-theme .todo-actions,
 .ios-glass-theme .todo-actions,
+.persimmon-glass-theme .todo-actions ,
+.moonlight-glass-theme .todo-actions ,
+.bamboo-glass-theme .todo-actions ,
 .liquid-glass-theme .todo-actions {
   backdrop-filter: blur(28px) saturate(190%);
   -webkit-backdrop-filter: blur(28px) saturate(190%);
@@ -211,7 +289,13 @@ html.liquid-glass-theme body {
 .ios-glass-theme .pc-panel,
 .glass-theme .mobile-panel,
 .ios-glass-theme .mobile-panel,
+.persimmon-glass-theme .pc-panel,
+.moonlight-glass-theme .pc-panel,
+.bamboo-glass-theme .pc-panel,
 .liquid-glass-theme .pc-panel,
+.persimmon-glass-theme .mobile-panel ,
+.moonlight-glass-theme .mobile-panel ,
+.bamboo-glass-theme .mobile-panel ,
 .liquid-glass-theme .mobile-panel {
   backdrop-filter: blur(40px) saturate(195%);
   -webkit-backdrop-filter: blur(40px) saturate(195%);
@@ -220,6 +304,9 @@ html.liquid-glass-theme body {
 
 .glass-theme .todo-item,
 .ios-glass-theme .todo-item,
+.persimmon-glass-theme .todo-item ,
+.moonlight-glass-theme .todo-item ,
+.bamboo-glass-theme .todo-item ,
 .liquid-glass-theme .todo-item {
   backdrop-filter: blur(10px) saturate(160%);
   -webkit-backdrop-filter: blur(10px) saturate(160%);
@@ -228,6 +315,9 @@ html.liquid-glass-theme body {
 /* ---- 节日倒计时芯片：轻玻璃胶囊 ---- */
 .glass-theme .festival-chip,
 .ios-glass-theme .festival-chip,
+.persimmon-glass-theme .festival-chip ,
+.moonlight-glass-theme .festival-chip ,
+.bamboo-glass-theme .festival-chip ,
 .liquid-glass-theme .festival-chip {
   background: rgba(255, 255, 255, 0.55) !important;
   border-color: rgba(255, 255, 255, 0.72) !important;
@@ -241,17 +331,29 @@ html.liquid-glass-theme body {
 /* ---- 动态背景开启时：提高玻璃面不透明度保证可读性 ---- */
 body.dynamic-background.glass-theme .calendar-day,
 body.dynamic-background.ios-glass-theme .calendar-day,
+body.dynamic-background.persimmon-glass-theme .calendar-day ,
+body.dynamic-background.moonlight-glass-theme .calendar-day ,
+body.dynamic-background.bamboo-glass-theme .calendar-day ,
 body.dynamic-background.liquid-glass-theme .calendar-day {
   background: rgba(255, 255, 255, 0.72) !important;
 }
 body.dynamic-background.glass-theme .calendar-header,
 body.dynamic-background.ios-glass-theme .calendar-header,
+body.dynamic-background.persimmon-glass-theme .calendar-header,
+body.dynamic-background.moonlight-glass-theme .calendar-header,
+body.dynamic-background.bamboo-glass-theme .calendar-header,
 body.dynamic-background.liquid-glass-theme .calendar-header,
 body.dynamic-background.glass-theme .drawer-panel,
 body.dynamic-background.ios-glass-theme .drawer-panel,
+body.dynamic-background.persimmon-glass-theme .drawer-panel,
+body.dynamic-background.moonlight-glass-theme .drawer-panel,
+body.dynamic-background.bamboo-glass-theme .drawer-panel,
 body.dynamic-background.liquid-glass-theme .drawer-panel,
 body.dynamic-background.glass-theme .add-todo-popup,
 body.dynamic-background.ios-glass-theme .add-todo-popup,
+body.dynamic-background.persimmon-glass-theme .add-todo-popup ,
+body.dynamic-background.moonlight-glass-theme .add-todo-popup ,
+body.dynamic-background.bamboo-glass-theme .add-todo-popup ,
 body.dynamic-background.liquid-glass-theme .add-todo-popup {
   background: rgba(255, 255, 255, 0.86) !important;
 }
@@ -260,18 +362,27 @@ body.dynamic-background.liquid-glass-theme .add-todo-popup {
 @media (max-width: 768px) {
   .glass-theme .calendar-day,
   .ios-glass-theme .calendar-day,
+  .persimmon-glass-theme .calendar-day ,
+  .moonlight-glass-theme .calendar-day ,
+  .bamboo-glass-theme .calendar-day ,
   .liquid-glass-theme .calendar-day {
     border-radius: 13px !important;
   }
 
   .glass-theme .calendar-day:hover,
   .ios-glass-theme .calendar-day:hover,
+  .persimmon-glass-theme .calendar-day:hover ,
+  .moonlight-glass-theme .calendar-day:hover ,
+  .bamboo-glass-theme .calendar-day:hover ,
   .liquid-glass-theme .calendar-day:hover {
     transform: none;
   }
 
   .glass-theme .drawer-panel,
   .ios-glass-theme .drawer-panel,
+  .persimmon-glass-theme .drawer-panel ,
+  .moonlight-glass-theme .drawer-panel ,
+  .bamboo-glass-theme .drawer-panel ,
   .liquid-glass-theme .drawer-panel {
     width: 100%;
   }
@@ -281,6 +392,9 @@ body.dynamic-background.liquid-glass-theme .add-todo-popup {
 @media (prefers-reduced-motion: reduce) {
   .glass-theme .calendar-day,
   .ios-glass-theme .calendar-day,
+  .persimmon-glass-theme .calendar-day ,
+  .moonlight-glass-theme .calendar-day ,
+  .bamboo-glass-theme .calendar-day ,
   .liquid-glass-theme .calendar-day {
     transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease !important;
     transform: none !important;
@@ -625,43 +739,169 @@ body.dynamic-background.ios26-glass-theme.dark-mode .add-todo-popup {
 }
 
 /* ============================================================
+   节气玻璃三套（霜柿 / 月白 / 竹青）：与「液态玻璃 26」同款的
+   按压回弹动效与开关玻璃质感，全家族手感一致
+   ============================================================ */
+.persimmon-glass-theme .nav-btn,
+.persimmon-glass-theme .icon-btn,
+.persimmon-glass-theme .today-btn,
+.persimmon-glass-theme .drawer-close,
+.persimmon-glass-theme .toggle-btn,
+.moonlight-glass-theme .nav-btn,
+.moonlight-glass-theme .icon-btn,
+.moonlight-glass-theme .today-btn,
+.moonlight-glass-theme .drawer-close,
+.moonlight-glass-theme .toggle-btn,
+.bamboo-glass-theme .nav-btn,
+.bamboo-glass-theme .icon-btn,
+.bamboo-glass-theme .today-btn,
+.bamboo-glass-theme .drawer-close,
+.bamboo-glass-theme .toggle-btn {
+  transition:
+    transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    background 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+.persimmon-glass-theme .nav-btn:active,
+.persimmon-glass-theme .icon-btn:active,
+.persimmon-glass-theme .today-btn:active,
+.persimmon-glass-theme .drawer-close:active,
+.persimmon-glass-theme .toggle-btn:active,
+.moonlight-glass-theme .nav-btn:active,
+.moonlight-glass-theme .icon-btn:active,
+.moonlight-glass-theme .today-btn:active,
+.moonlight-glass-theme .drawer-close:active,
+.moonlight-glass-theme .toggle-btn:active,
+.bamboo-glass-theme .nav-btn:active,
+.bamboo-glass-theme .icon-btn:active,
+.bamboo-glass-theme .today-btn:active,
+.bamboo-glass-theme .drawer-close:active,
+.bamboo-glass-theme .toggle-btn:active {
+  transform: scale(0.92);
+  transition-duration: 0.08s;
+}
+
+/* ---- 开关：玻璃轨道 + 强调色激活态 ---- */
+.persimmon-glass-theme .toggle-btn,
+.moonlight-glass-theme .toggle-btn,
+.bamboo-glass-theme .toggle-btn {
+  background: rgba(255, 255, 255, 0.45);
+  box-shadow:
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.9),
+    inset 0 0 0 0.5px rgba(31, 38, 63, 0.06);
+}
+.persimmon-glass-theme .toggle-btn.active,
+.moonlight-glass-theme .toggle-btn.active,
+.bamboo-glass-theme .toggle-btn.active {
+  background: var(--button-primary-bg);
+  box-shadow:
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.35),
+    0 4px 14px -6px var(--form-input-focus-shadow);
+}
+
+/* ---- 尊重系统减弱动效偏好（按钮层） ---- */
+@media (prefers-reduced-motion: reduce) {
+  .persimmon-glass-theme .nav-btn,
+  .persimmon-glass-theme .icon-btn,
+  .persimmon-glass-theme .today-btn,
+  .persimmon-glass-theme .drawer-close,
+  .persimmon-glass-theme .toggle-btn,
+  .moonlight-glass-theme .nav-btn,
+  .moonlight-glass-theme .icon-btn,
+  .moonlight-glass-theme .today-btn,
+  .moonlight-glass-theme .drawer-close,
+  .moonlight-glass-theme .toggle-btn,
+  .bamboo-glass-theme .nav-btn,
+  .bamboo-glass-theme .icon-btn,
+  .bamboo-glass-theme .today-btn,
+  .bamboo-glass-theme .drawer-close,
+  .bamboo-glass-theme .toggle-btn {
+    transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease !important;
+    transform: none !important;
+  }
+}
+
+/* ============================================================
    兼容降级：不支持 backdrop-filter 时用高不透明度纯色兜底
    （老版 Firefox / 部分安卓 WebView），保证文字对比度不塌陷
    ============================================================ */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  persimmon-glass-theme,
+  moonlight-glass-theme,
+  bamboo-glass-theme,
   .ios26-glass-theme .calendar-day {
     background: rgba(255, 255, 255, 0.92) !important;
   }
+  persimmon-glass-theme,
+  moonlight-glass-theme,
+  bamboo-glass-theme,
   .ios26-glass-theme .calendar-header {
     background: rgba(247, 248, 253, 0.97) !important;
   }
+  persimmon-glass-theme,
+  moonlight-glass-theme,
+  bamboo-glass-theme,
   .ios26-glass-theme .nav-btn,
+  persimmon-glass-theme,
+  moonlight-glass-theme,
+  bamboo-glass-theme,
   .ios26-glass-theme .icon-btn,
+  persimmon-glass-theme,
+  moonlight-glass-theme,
+  bamboo-glass-theme,
   .ios26-glass-theme .today-btn {
     background: rgba(238, 241, 248, 0.95) !important;
   }
+  persimmon-glass-theme,
+  moonlight-glass-theme,
+  bamboo-glass-theme,
   .ios26-glass-theme .pc-panel,
+  persimmon-glass-theme,
+  moonlight-glass-theme,
+  bamboo-glass-theme,
   .ios26-glass-theme .mobile-panel {
     background: rgba(245, 247, 252, 0.97);
   }
+  persimmon-glass-theme,
+  moonlight-glass-theme,
+  bamboo-glass-theme,
   .ios26-glass-theme .drawer-panel {
     background: rgba(248, 250, 254, 0.98) !important;
   }
+  persimmon-glass-theme,
+  moonlight-glass-theme,
+  bamboo-glass-theme,
   .ios26-glass-theme .drawer-overlay {
     background: rgba(15, 20, 40, 0.45) !important;
   }
+  persimmon-glass-theme,
+  moonlight-glass-theme,
+  bamboo-glass-theme,
   .ios26-glass-theme .add-todo-popup,
+  persimmon-glass-theme,
+  moonlight-glass-theme,
+  bamboo-glass-theme,
   .ios26-glass-theme .reminder-toast {
     background: rgba(249, 250, 254, 0.98) !important;
   }
+  persimmon-glass-theme,
+  moonlight-glass-theme,
+  bamboo-glass-theme,
   .ios26-glass-theme .todo-actions {
     background: rgba(250, 251, 255, 0.98) !important;
   }
+  persimmon-glass-theme,
+  moonlight-glass-theme,
+  bamboo-glass-theme,
   .ios26-glass-theme .todo-item {
     background: none;
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
   }
+  persimmon-glass-theme,
+  moonlight-glass-theme,
+  bamboo-glass-theme,
   .ios26-glass-theme .festival-chip {
     background: rgba(245, 247, 252, 0.97) !important;
   }
@@ -698,17 +938,53 @@ body.dynamic-background.ios26-glass-theme.dark-mode .add-todo-popup {
     background: rgba(19, 25, 46, 0.97) !important;
   }
 
+  persimmon-glass-theme,
+  moonlight-glass-theme,
+  bamboo-glass-theme,
   .ios26-glass-theme .calendar-header,
+  persimmon-glass-theme,
+  moonlight-glass-theme,
+  bamboo-glass-theme,
   .ios26-glass-theme .pc-panel,
+  persimmon-glass-theme,
+  moonlight-glass-theme,
+  bamboo-glass-theme,
   .ios26-glass-theme .mobile-panel,
+  persimmon-glass-theme,
+  moonlight-glass-theme,
+  bamboo-glass-theme,
   .ios26-glass-theme .drawer-panel,
+  persimmon-glass-theme,
+  moonlight-glass-theme,
+  bamboo-glass-theme,
   .ios26-glass-theme .drawer-overlay,
+  persimmon-glass-theme,
+  moonlight-glass-theme,
+  bamboo-glass-theme,
   .ios26-glass-theme .add-todo-popup,
+  persimmon-glass-theme,
+  moonlight-glass-theme,
+  bamboo-glass-theme,
   .ios26-glass-theme .reminder-toast,
+  persimmon-glass-theme,
+  moonlight-glass-theme,
+  bamboo-glass-theme,
   .ios26-glass-theme .todo-actions,
+  persimmon-glass-theme,
+  moonlight-glass-theme,
+  bamboo-glass-theme,
   .ios26-glass-theme .festival-chip,
+  persimmon-glass-theme,
+  moonlight-glass-theme,
+  bamboo-glass-theme,
   .ios26-glass-theme .nav-btn,
+  persimmon-glass-theme,
+  moonlight-glass-theme,
+  bamboo-glass-theme,
   .ios26-glass-theme .icon-btn,
+  persimmon-glass-theme,
+  moonlight-glass-theme,
+  bamboo-glass-theme,
   .ios26-glass-theme .today-btn {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;

@@ -80,20 +80,24 @@ describe('颜色工具', () => {
 
 /* ---------------- 主题清单 ---------------- */
 describe('主题清单', () => {
-  it('共 15 套主题且 id 唯一', () => {
-    assert.equal(THEMES.length, 15);
-    assert.equal(new Set(THEMES.map((t) => t.id)).size, 15);
+  it('共 18 套主题且 id 唯一', () => {
+    assert.equal(THEMES.length, 18);
+    assert.equal(new Set(THEMES.map((t) => t.id)).size, 18);
   });
 
-  it('包含默认主题、深色模式与四套玻璃主题（液态玻璃 26 含浅色/深色两个配方块）', () => {
+  it('包含默认主题、深色模式与七套玻璃主题（液态玻璃 26 含浅色/深色两个配方块）', () => {
     assert.ok(THEMES.some((t) => t.cls === null), '缺少 :root 默认主题');
     assert.ok(darkTheme, '缺少 dark-mode');
-    assert.equal(glassThemes.length, 5, '应有四套玻璃主题（液态玻璃 26 占浅色+深色两块）');
+    assert.equal(glassThemes.length, 8, '应有七套玻璃主题（液态玻璃 26 占浅色+深色两块）');
     assert.ok(
       THEMES.some((t) => t.id === 'ios26-glass-theme') &&
         THEMES.some((t) => t.id === 'ios26-glass-theme-dark'),
       '缺少液态玻璃 26 的浅色/深色配方',
     );
+    // 节气玻璃三套：霜柿 / 月白 / 竹青
+    for (const id of ['persimmon-glass-theme', 'moonlight-glass-theme', 'bamboo-glass-theme']) {
+      assert.ok(THEMES.some((t) => t.id === id), `缺少节气玻璃 ${id}`);
+    }
   });
 });
 

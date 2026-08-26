@@ -407,6 +407,9 @@ const THEMES = [
   { id: 'liquid-glass-theme',   cls: '.liquid-glass-theme', comment: '流动玻璃 Flowing Glass',  build: () => buildGlass({ accent: '#9333ea', accentStrong: '#7e22ce' }) },
   { id: 'ios26-glass-theme',      cls: '.ios26-glass-theme',        comment: '液态玻璃 26 · 浅色 Liquid Glass 26 Light', build: () => buildIos26Glass({ accent: '#5856d6', accentStrong: '#4643cf' }) },
   { id: 'ios26-glass-theme-dark', cls: '.ios26-glass-theme.dark-mode', comment: '液态玻璃 26 · 深色 Liquid Glass 26 Dark', build: () => buildGlassDark({ accent: '#5856d6', accentStrong: '#4643cf' }) },
+  { id: 'persimmon-glass-theme',  cls: '.persimmon-glass-theme',       comment: '霜柿玻璃 Persimmon Glass',              build: () => buildGlass({ accent: '#d9480f', accentStrong: '#b83a0a' }) },
+  { id: 'moonlight-glass-theme',  cls: '.moonlight-glass-theme',       comment: '月白玻璃 Moonlight Glass',              build: () => buildGlass({ accent: '#3d52c7', accentStrong: '#3043a6' }) },
+  { id: 'bamboo-glass-theme',     cls: '.bamboo-glass-theme',          comment: '竹青玻璃 Bamboo Glass',                 build: () => buildGlass({ accent: '#4d7c0f', accentStrong: '#3f6212' }) },
 ];
 
 /* ---------------- 序列化 ---------------- */
