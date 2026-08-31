@@ -78,7 +78,14 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, nextTick } from 'vue';
+import {
+  ref,
+  computed,
+  watch,
+  onMounted,
+  onUnmounted,
+  nextTick,
+} from 'vue';
 import { useDialog, useMessage } from 'naive-ui';
 import CalendarHeader from './calendar-header.vue';
 import CalendarGrid from './calendar-grid.vue';
@@ -133,9 +140,42 @@ const resolvedAnimationType = computed(() => {
   return animationType.value;
 });
 const themeType = ref(localStorage.getItem('calendar_theme_type') || 'default');
+
+// 合法视图模式白名单（旧版本前端不识别 'auto' 时回退到默认值）
+const VIEW_MODE_WHITELIST = ['today-priority', 'full-month', 'auto'];
+const isValidViewMode = (v) => VIEW_MODE_WHITELIST.includes(v);
+
 const viewMode = ref(
-  localStorage.getItem('calendar_view_mode') || 'today-priority',
+  (() => {
+    const stored = localStorage.getItem('calendar_view_mode');
+    return stored && isValidViewMode(stored)
+      ? stored
+      : 'today-priority';
+  })(),
 );
+
+// 自动模式切换阈值：本月剩余天数（含今日）< 此值时切到「今日优先」
+const AUTO_SWITCH_REMAINING_DAYS = 14;
+
+// 响应式"今日"信号：页面常驻时按分钟刷新，确保跨零点/跨月后 effectiveViewMode 自动重算
+const todayTick = ref(Date.now());
+let todayTickTimer = null;
+
+// 实际生效的视图模式：'auto' 时按规则自动计算，否则直接透传用户选择
+// 注：auto 判定基于"真实今日"（todayTick），与正在浏览的月份（currentDate）无关
+const effectiveViewMode = computed(() => {
+  if (viewMode.value !== 'auto') return viewMode.value;
+  const today = new Date(todayTick.value);
+  const daysInMonth = new Date(
+    today.getFullYear(),
+    today.getMonth() + 1,
+    0,
+  ).getDate();
+  const remaining = daysInMonth - today.getDate() + 1;
+  return remaining < AUTO_SWITCH_REMAINING_DAYS
+    ? 'today-priority'
+    : 'full-month';
+});
 const showLunar = ref(localStorage.getItem('calendar_show_lunar') !== '0');
 const lunarReady = ref(isLunarLoaded());
 const webhookUrl = ref('');
@@ -152,7 +192,7 @@ const loadUserSettings = async () => {
       themeType.value = settings.theme_type;
       localStorage.setItem('calendar_theme_type', settings.theme_type);
     }
-    if (settings.view_mode) {
+    if (settings.view_mode && isValidViewMode(settings.view_mode)) {
       viewMode.value = settings.view_mode;
       localStorage.setItem('calendar_view_mode', settings.view_mode);
     }
@@ -250,14 +290,14 @@ let touchStartY = 0;
 const calendarWeekCount = computed(() => calendarRows.value.length);
 
 const calendarDays = computed(() => {
-  const today = new Date();
+  const today = new Date(todayTick.value);
   today.setHours(0, 0, 0, 0);
   const _ = lunarReady.value;
 
   let startDate;
   let totalDays;
 
-  if (viewMode.value === 'today-priority') {
+  if (effectiveViewMode.value === 'today-priority') {
     const viewDate = new Date(currentDate.value);
     const viewDayOfWeek = viewDate.getDay();
     const offsetToMonday = viewDayOfWeek === 0 ? 6 : viewDayOfWeek - 1;
@@ -309,7 +349,7 @@ const calendarRows = computed(() => {
   const flat = calendarDays.value;
   const rows = [];
 
-  if (viewMode.value === 'full-month') {
+  if (effectiveViewMode.value === 'full-month') {
     for (let i = 0; i < flat.length; i += 7) {
       rows.push(flat.slice(i, i + 7).map(d => d.isOtherMonth ? null : d));
     }
@@ -686,6 +726,15 @@ onMounted(() => {
     applyDynamicBackground();
     startDynamicBackgroundRefresh();
   }
+
+  // 每分钟刷新"今日"信号，确保 auto 视图模式跨零点/跨月后自动重算
+  todayTickTimer = setInterval(() => {
+    todayTick.value = Date.now();
+  }, 60_000);
+});
+
+onUnmounted(() => {
+  clearInterval(todayTickTimer);
 });
 </script>
 

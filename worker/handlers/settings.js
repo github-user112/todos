@@ -1,5 +1,8 @@
 import { jsonResponse } from '../utils.js';
 
+// 合法视图模式枚举（与前端 VIEW_MODE_WHITELIST 保持一致）
+const VALID_VIEW_MODES = ['today-priority', 'full-month', 'auto'];
+
 async function handleGetUserSettings(request, env, userId) {
   try {
     const settings = await env.DB.prepare(`SELECT * FROM user_settings WHERE user_id = ?`)
@@ -32,6 +35,15 @@ async function handleGetUserSettings(request, env, userId) {
 async function handleUpdateUserSettings(request, env, userId) {
   try {
     const data = await request.json();
+
+    // 校验 view_mode 枚举值，防止脏数据写入
+    if (
+      data.view_mode !== undefined &&
+      !VALID_VIEW_MODES.includes(data.view_mode)
+    ) {
+      return jsonResponse({ error: '无效的视图模式' }, 400);
+    }
+
     const allowedFields = [
       'animation_type',
       'theme_type',

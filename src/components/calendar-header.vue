@@ -404,6 +404,7 @@ const webhookTypeLabel = computed(() => {
 const viewModeOptions = [
   { value: 'today-priority', label: '📅 今日优先' },
   { value: 'full-month', label: '🗓️ 完整月' },
+  { value: 'auto', label: '🤖 自动' },
 ];
 
 const themeOptions = [
