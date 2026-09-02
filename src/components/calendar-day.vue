@@ -421,21 +421,26 @@ function getHolidayName(holiday) {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 1.7em;
-  height: 1.7em;
+  width: 1.4em;
+  height: 1.4em;
   transform: translate(-50%, -50%);
   background: var(--primary-color);
   border-radius: 999px;
   z-index: -1;
   box-shadow: 0 2px 8px -2px var(--form-input-focus-shadow);
 }
-/* 圆片溢出到农历文字区域：提升农历堆叠层级 + 添加半透明背板确保可读性 */
+/* 今天格子：拉大日期与农历间距 + 提升农历堆叠层级，圆片不再遮挡 */
+.current-day .day-number-wrap {
+  gap: 8px;
+}
 .current-day .day-lunar {
   position: relative;
   z-index: 1;
-  padding: 1px 3px;
-  background: color-mix(in srgb, var(--calendar-day-current-bg) 70%, transparent);
-  border-radius: 3px;
+  padding: 1px 4px;
+  color: var(--text-primary);
+  font-weight: 500;
+  background: color-mix(in srgb, var(--calendar-day-current-bg) 85%, transparent);
+  border-radius: 4px;
 }
 
 /* ---- 单元格内部 ---- */
