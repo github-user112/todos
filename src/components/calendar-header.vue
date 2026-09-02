@@ -1,7 +1,7 @@
 <template>
   <div class="calendar-header">
     <div class="header-left">
-      <button class="nav-btn" @click="$emit('prevMonth')" aria-label="上一月">
+      <button class="nav-btn" @click="$emit('prevMonth')" :aria-label="t('上一月')">
         <svg
           width="20"
           height="20"
@@ -16,10 +16,10 @@
         </svg>
       </button>
       <h2 class="header-title">
-        <span class="title-main">{{ currentMonth + 1 }}<i class="title-unit">月</i></span>
+        <span class="title-main">{{ tMonth(currentMonth) }}</span>
         <span class="title-sub">{{ currentYear }}</span>
       </h2>
-      <button class="nav-btn" @click="$emit('nextMonth')" aria-label="下一月">
+      <button class="nav-btn" @click="$emit('nextMonth')" :aria-label="t('下一月')">
         <svg
           width="20"
           height="20"
@@ -33,7 +33,7 @@
           <polyline points="9 18 15 12 9 6" />
         </svg>
       </button>
-      <button class="today-btn" @click="$emit('goToToday')">今天</button>
+      <button class="today-btn" @click="$emit('goToToday')">{{ t('今天') }}</button>
       <FestivalCountdown />
     </div>
 
@@ -41,7 +41,7 @@
       <button
         :class="['icon-btn', { active: showTodoList }]"
         @click="$emit('toggleTodoList')"
-        title="待办列表"
+        :title="t('待办列表')"
       >
         <svg
           width="18"
@@ -61,7 +61,7 @@
           <line x1="3" y1="18" x2="3.01" y2="18" />
         </svg>
       </button>
-      <button class="icon-btn" @click="copyUrlToClipboard" title="分享">
+      <button class="icon-btn" @click="copyUrlToClipboard" :title="t('分享')">
         <svg
           width="18"
           height="18"
@@ -77,7 +77,7 @@
           <line x1="12" y1="2" x2="12" y2="15" />
         </svg>
       </button>
-      <button class="icon-btn" @click="openDrawer" title="设置">
+      <button class="icon-btn" @click="openDrawer" :title="t('设置')">
         <svg
           width="18"
           height="18"
@@ -107,14 +107,25 @@
           <Transition name="drawer-panel">
             <div v-if="showDrawer" class="drawer-panel">
             <div class="drawer-header">
-              <span class="drawer-title">⚙️ 设置</span>
+              <span class="drawer-title">{{ t('⚙️ 设置') }}</span>
               <button class="drawer-close" @click="showDrawer = false">
                 ✕
               </button>
             </div>
             <div class="drawer-body">
               <div class="setting-group">
-                <label class="setting-label">👁️ 视图模式</label>
+                <label class="setting-label">{{ t('🌐 语言') }}</label>
+                <select
+                  class="setting-select"
+                  :value="locale"
+                  @change="setLocale($event.target.value)"
+                >
+                  <option value="zh">中文</option>
+                  <option value="en">English</option>
+                </select>
+              </div>
+              <div class="setting-group">
+                <label class="setting-label">{{ t('👁️ 视图模式') }}</label>
                 <div class="view-mode-chips">
                   <button
                     v-for="v in viewModeOptions"
@@ -122,65 +133,65 @@
                     :class="['theme-chip', { active: viewMode === v.value }]"
                     @click="$emit('changeViewMode', v.value)"
                   >
-                    {{ v.label }}
+                    {{ t(v.label) }}
                   </button>
                 </div>
               </div>
               <div class="setting-group">
-                <label class="setting-label">🎨 主题风格</label>
+                <label class="setting-label">{{ t('🎨 主题风格') }}</label>
                 <select
                   class="setting-select"
                   :value="themeType"
                   @change="$emit('changeTheme', $event.target.value)"
                 >
-                  <option v-for="t in themeOptions" :key="t.value" :value="t.value">
-                    {{ t.label }}
+                  <option v-for="opt in themeOptions" :key="opt.value" :value="opt.value">
+                    {{ t(opt.label) }}
                   </option>
                 </select>
               </div>
               <div class="setting-group">
-                <label class="setting-label">🎬 切换动画</label>
+                <label class="setting-label">{{ t('🎬 切换动画') }}</label>
                 <select
                   class="setting-select"
                   :value="animationType"
                   @change="$emit('changeAnimation', $event.target.value)"
                 >
-                  <option value="slide-left">← 滑动</option>
-                  <option value="default">淡入淡出</option>
-                  <option value="animate__bounce">弹跳</option>
-                  <option value="animate__tada">抖动</option>
-                  <option value="fade-up">✨ 浮入</option>
-                  <option value="flip">🌀 翻转</option>
-                  <option value="scale-pop">💥 缩放</option>
-                  <option value="skew">⚡ 倾斜</option>
-                  <option value="reveal">🌈 展开</option>
-                  <option value="cube">🧊 立方体</option>
-                  <option value="depth-zoom">🔍 景深缩放</option>
-                  <option value="glass-flip">🪟 玻璃翻转</option>
-                  <option value="split">🚪 分裂</option>
-                  <option value="ripple">🌊 波纹</option>
-                  <option value="stagger">🎯 错峰</option>
-                  <option value="random">随机</option>
+                  <option value="slide-left">{{ t('← 滑动') }}</option>
+                  <option value="default">{{ t('淡入淡出') }}</option>
+                  <option value="animate__bounce">{{ t('弹跳') }}</option>
+                  <option value="animate__tada">{{ t('抖动') }}</option>
+                  <option value="fade-up">{{ t('✨ 浮入') }}</option>
+                  <option value="flip">{{ t('🌀 翻转') }}</option>
+                  <option value="scale-pop">{{ t('💥 缩放') }}</option>
+                  <option value="skew">{{ t('⚡ 倾斜') }}</option>
+                  <option value="reveal">{{ t('🌈 展开') }}</option>
+                  <option value="cube">{{ t('🧊 立方体') }}</option>
+                  <option value="depth-zoom">{{ t('🔍 景深缩放') }}</option>
+                  <option value="glass-flip">{{ t('🪟 玻璃翻转') }}</option>
+                  <option value="split">{{ t('🚪 分裂') }}</option>
+                  <option value="ripple">{{ t('🌊 波纹') }}</option>
+                  <option value="stagger">{{ t('🎯 错峰') }}</option>
+                  <option value="random">{{ t('随机') }}</option>
                 </select>
               </div>
               <div class="setting-group">
-                <label class="setting-label">🎉 完成动效</label>
+                <label class="setting-label">{{ t('🎉 完成动效') }}</label>
                 <select
                   class="setting-select"
                   :value="celebrationEffect"
                   @change="changeCelebrationEffect($event.target.value)"
                 >
-                  <option value="confetti">🎊 彩色纸屑</option>
-                  <option value="stars">✨ 星星粒子</option>
-                  <option value="rainbow">🌈 彩虹光波</option>
-                  <option value="all">🎉 全部动效</option>
-                  <option value="none">🚫 关闭动效</option>
+                  <option value="confetti">{{ t('🎊 彩色纸屑') }}</option>
+                  <option value="stars">{{ t('✨ 星星粒子') }}</option>
+                  <option value="rainbow">{{ t('🌈 彩虹光波') }}</option>
+                  <option value="all">{{ t('🎉 全部动效') }}</option>
+                  <option value="none">{{ t('🚫 关闭动效') }}</option>
                 </select>
               </div>
               <div class="setting-group">
-                <label class="setting-label">🌙 农历显示</label>
+                <label class="setting-label">{{ t('🌙 农历显示') }}</label>
                 <div class="toggle-row">
-                  <span class="toggle-desc">在日期旁显示农历/节气</span>
+                  <span class="toggle-desc">{{ t('在日期旁显示农历/节气') }}</span>
                   <button
                     :class="['toggle-btn', { active: showLunar }]"
                     @click="$emit('changeShowLunar', !showLunar)"
@@ -190,9 +201,9 @@
                 </div>
               </div>
               <div class="setting-group">
-                <label class="setting-label">🌦️ 动态背景</label>
+                <label class="setting-label">{{ t('🌦️ 动态背景') }}</label>
                 <div class="toggle-row">
-                  <span class="toggle-desc">根据时间和天气自动切换背景</span>
+                  <span class="toggle-desc">{{ t('根据时间和天气自动切换背景') }}</span>
                   <button
                     :class="['toggle-btn', { active: dynamicBgEnabled }]"
                     @click="toggleDynamicBackground"
@@ -201,16 +212,16 @@
                   </button>
                 </div>
                 <div v-if="dynamicBgEnabled" class="city-input-row">
-                  <span class="city-desc">城市（未授权定位时使用）</span>
+                  <span class="city-desc">{{ t('城市（未授权定位时使用）') }}</span>
                   <div class="city-input-wrap">
                     <input
                       type="text"
                       class="city-input"
                       v-model="customCity"
-                      placeholder="如：北京、上海"
+                      :placeholder="t('如：北京、上海')"
                       @keyup.enter="saveCity"
                     />
-                    <button class="city-save-btn" @click="saveCity">确定</button>
+                    <button class="city-save-btn" @click="saveCity">{{ t('确定') }}</button>
                   </div>
                   <p v-if="cityMessage" :class="['webhook-result', cityMessage.success ? 'success' : 'error']">
                     {{ cityMessage.text }}
@@ -218,11 +229,11 @@
                 </div>
               </div>
               <div class="setting-group">
-                <label class="setting-label">💾 数据管理</label>
+                <label class="setting-label">{{ t('💾 数据管理') }}</label>
                 <div class="data-actions">
-                  <button class="data-btn" @click="exportJSON">📤 导出 JSON</button>
-                  <button class="data-btn" @click="exportCSV">📤 导出 CSV</button>
-                  <button class="data-btn import-btn" @click="triggerImport">📥 导入数据</button>
+                  <button class="data-btn" @click="exportJSON">{{ t('📤 导出 JSON') }}</button>
+                  <button class="data-btn" @click="exportCSV">{{ t('📤 导出 CSV') }}</button>
+                  <button class="data-btn import-btn" @click="triggerImport">{{ t('📥 导入数据') }}</button>
                   <input ref="importInput" type="file" accept=".json" style="display:none" @change="handleImport" />
                 </div>
                 <p v-if="dataMessage" :class="['webhook-result', dataMessage.success ? 'success' : 'error']">
@@ -231,12 +242,12 @@
               </div>
 
               <div class="setting-group">
-                <label class="setting-label">🔗 Webhook 推送</label>
+                <label class="setting-label">{{ t('🔗 Webhook 推送') }}</label>
                 <p class="webhook-desc">
-                  每天早上 8:00 将当日待办推送到指定 URL
+                  {{ t('每天早上 8:00 将当日待办推送到指定 URL') }}
                 </p>
                 <p class="webhook-formats">
-                  支持：企业微信 / 钉钉 / 通用 Webhook（自动识别）
+                  {{ t('支持：企业微信 / 钉钉 / 通用 Webhook（自动识别）') }}
                 </p>
                 <input
                   type="url"
@@ -255,14 +266,14 @@
                     :disabled="webhookTesting || !webhookUrl"
                     @click="testWebhook"
                   >
-                    {{ webhookTesting ? '测试中...' : '🧪 测试' }}
+                    {{ webhookTesting ? t('测试中...') : t('🧪 测试') }}
                   </button>
                   <button
                     class="webhook-save-btn"
                     :disabled="webhookSaving"
                     @click="saveWebhook"
                   >
-                    {{ webhookSaving ? '保存中...' : '💾 保存' }}
+                    {{ webhookSaving ? t('保存中...') : t('💾 保存') }}
                   </button>
                 </div>
                 <p
@@ -293,6 +304,7 @@
 
 <script setup>
 import { ref, computed } from 'vue';
+import { t, tf, tMonth, locale, setLocale } from '../utils/i18n.js';
 import { apiRequest } from '../utils/api';
 import FestivalCountdown from './FestivalCountdown.vue';
 import {
@@ -361,13 +373,13 @@ const saveCity = () => {
   const city = customCity.value.trim();
   setCustomCity(city);
   if (city) {
-    cityMessage.value = { success: true, text: `✅ 城市已设为「${city}」，将重新获取天气` };
+    cityMessage.value = { success: true, text: tf('✅ 城市已设为「{city}」，将重新获取天气', { city }) };
     // 重新应用动态背景
     if (dynamicBgEnabled.value) {
       applyDynamicBackground();
     }
   } else {
-    cityMessage.value = { success: true, text: '✅ 已清除自定义城市' };
+    cityMessage.value = { success: true, text: t('✅ 已清除自定义城市') };
   }
   setTimeout(() => { cityMessage.value = null; }, 3000);
 };
@@ -393,10 +405,10 @@ const webhookType = computed(() => {
 
 const webhookTypeLabel = computed(() => {
   const labels = {
-    wecom: '🏢 企业微信',
-    dingtalk: '📎 钉钉',
-    slack: '💬 Slack',
-    generic: '🌐 通用 Webhook',
+    wecom: t('🏢 企业微信'),
+    dingtalk: t('📎 钉钉'),
+    slack: t('💬 Slack'),
+    generic: t('🌐 通用 Webhook'),
   };
   return labels[webhookType.value] || '';
 });
@@ -438,18 +450,18 @@ const testWebhook = async () => {
     if (result.success) {
       webhookTestResult.value = {
         success: true,
-        message: `✅ 测试成功！推送了 ${result.todoCount} 条待办（HTTP ${result.status}）`,
+        message: tf('✅ 测试成功！推送了 {todoCount} 条待办（HTTP {status}）', { todoCount: result.todoCount, status: result.status }),
       };
     } else {
       webhookTestResult.value = {
         success: false,
-        message: `❌ 测试失败：${result.error || '未知错误'}`,
+        message: tf('❌ 测试失败：{error}', { error: result.error || t('未知错误') }),
       };
     }
   } catch (error) {
     webhookTestResult.value = {
       success: false,
-      message: `❌ 请求失败：${error.message}`,
+      message: tf('❌ 请求失败：{msg}', { msg: error.message }),
     };
   } finally {
     webhookTesting.value = false;
@@ -464,12 +476,12 @@ const saveWebhook = async () => {
     });
     webhookTestResult.value = {
       success: true,
-      message: '✅ Webhook URL 已保存',
+      message: t('✅ Webhook URL 已保存'),
     };
   } catch (error) {
     webhookTestResult.value = {
       success: false,
-      message: `❌ 保存失败：${error.message}`,
+      message: tf('❌ 保存失败：{msg}', { msg: error.message }),
     };
   } finally {
     webhookSaving.value = false;
@@ -486,9 +498,9 @@ const exportJSON = async () => {
     a.download = `todos-backup-${new Date().toISOString().split('T')[0]}.json`;
     a.click();
     URL.revokeObjectURL(url);
-    dataMessage.value = { success: true, text: `✅ 已导出 ${data.todos?.length || 0} 条待办` };
+    dataMessage.value = { success: true, text: tf('✅ 已导出 {n} 条待办', { n: data.todos?.length || 0 }) };
   } catch (error) {
-    dataMessage.value = { success: false, text: `❌ 导出失败：${error.message}` };
+    dataMessage.value = { success: false, text: tf('❌ 导出失败：{msg}', { msg: error.message }) };
   }
 };
 
@@ -508,9 +520,9 @@ const exportCSV = async () => {
     a.download = `todos-backup-${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
     URL.revokeObjectURL(url);
-    dataMessage.value = { success: true, text: `✅ 已导出 ${todos.length} 条待办` };
+    dataMessage.value = { success: true, text: tf('✅ 已导出 {n} 条待办', { n: todos.length }) };
   } catch (error) {
-    dataMessage.value = { success: false, text: `❌ 导出失败：${error.message}` };
+    dataMessage.value = { success: false, text: tf('❌ 导出失败：{msg}', { msg: error.message }) };
   }
 };
 
@@ -527,7 +539,7 @@ const handleImport = async (e) => {
     const data = JSON.parse(text);
 
     if (!data.todos || !Array.isArray(data.todos)) {
-      dataMessage.value = { success: false, text: '❌ 无效的备份文件格式' };
+      dataMessage.value = { success: false, text: t('❌ 无效的备份文件格式') };
       return;
     }
 
@@ -535,13 +547,13 @@ const handleImport = async (e) => {
     if (result.success) {
       dataMessage.value = {
         success: true,
-        text: `✅ 导入成功：${result.imported.todos} 条待办`,
+        text: tf('✅ 导入成功：{n} 条待办', { n: result.imported.todos }),
       };
     } else {
-      dataMessage.value = { success: false, text: `❌ 导入失败：${result.error}` };
+      dataMessage.value = { success: false, text: tf('❌ 导入失败：{err}', { err: result.error }) };
     }
   } catch (error) {
-    dataMessage.value = { success: false, text: `❌ 导入失败：${error.message}` };
+    dataMessage.value = { success: false, text: tf('❌ 导入失败：{msg}', { msg: error.message }) };
   } finally {
     e.target.value = '';
   }
@@ -550,8 +562,8 @@ const handleImport = async (e) => {
 const copyUrlToClipboard = () => {
   navigator.clipboard
     .writeText(window.location.href)
-    .then(() => alert('链接已复制到剪贴板'))
-    .catch(() => alert('复制失败'));
+    .then(() => alert(t('链接已复制到剪贴板')))
+    .catch(() => alert(t('复制失败')));
 };
 </script>
 

@@ -1,4 +1,5 @@
 import { setLoading } from './loading';
+import { t } from './i18n.js';
 
 export const getUserId = () => {
   const params = new URLSearchParams(window.location.search);
@@ -36,7 +37,7 @@ export const apiRequest = async (
     const result = await response.json();
 
     if (!response.ok) {
-      throw new Error(result.error || '请求失败');
+      throw new Error(result.error || t('请求失败'));
     }
 
     return result;

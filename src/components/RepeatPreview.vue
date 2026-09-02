@@ -2,26 +2,26 @@
 <template>
   <div class="repeat-preview" v-if="showPreview">
     <div class="preview-header">
-      <h4>重复预览</h4>
+      <h4>{{ t('重复预览') }}</h4>
       <button @click="$emit('close')" class="close-btn">&times;</button>
     </div>
     <div class="preview-content">
       <div class="original-date">
-        <strong>原始日期:</strong> {{ formatPreviewDate(baseDate) }}
+        <strong>{{ t('原始日期:') }}</strong> {{ formatPreviewDate(baseDate) }}
       </div>
       <div class="repeat-setting">
-        <strong>重复设置:</strong> {{ repeatDescription }}
+        <strong>{{ t('重复设置:') }}</strong> {{ repeatDescription }}
       </div>
       <div class="next-occurrences" v-if="nextDates.length > 0">
-        <strong>接下来几次重复:</strong>
+        <strong>{{ t('接下来几次重复:') }}</strong>
         <ul>
           <li v-for="(date, index) in nextDates" :key="index">
-            {{ formatPreviewDate(date) }} ({{ getWeekday(date) }})
+            {{ tf('{date} ({weekday})', { date: formatPreviewDate(date), weekday: getWeekday(date) }) }}
           </li>
         </ul>
       </div>
       <div class="no-preview" v-else>
-        <em>无重复或无法生成预览</em>
+        <em>{{ t('无重复或无法生成预览') }}</em>
       </div>
     </div>
   </div>
@@ -29,6 +29,7 @@
 
 <script setup>
 import { computed } from 'vue';
+import { t, tf } from '../utils/i18n.js';
 import { getNextRepeatDatesWithEndDate } from '../utils/repeatUtils';
 
 const props = defineProps({
@@ -59,18 +60,18 @@ const emit = defineEmits(['close']);
 // 计算重复描述
 const repeatDescription = computed(() => {
   if (props.repeatType === 'none') {
-    return '不重复';
+    return t('不重复');
   }
 
   const interval = props.repeatInterval;
   const typeMap = {
-    daily: interval === 1 ? '每天' : `每${interval}天`,
-    weekly: interval === 1 ? '每周' : `每${interval}周`,
-    monthly: interval === 1 ? '每月' : `每${interval}个月`,
-    yearly: interval === 1 ? '每年' : `每${interval}年`,
+    daily: interval === 1 ? t('每天') : tf('每{interval}天', { interval }),
+    weekly: interval === 1 ? t('每周') : tf('每{interval}周', { interval }),
+    monthly: interval === 1 ? t('每月') : tf('每{interval}个月', { interval }),
+    yearly: interval === 1 ? t('每年') : tf('每{interval}年', { interval }),
   };
 
-  return typeMap[props.repeatType] || '未知重复类型';
+  return typeMap[props.repeatType] || t('未知重复类型');
 });
 
 // 计算下次重复日期
@@ -97,19 +98,19 @@ const nextDates = computed(() => {
 const formatPreviewDate = (date) => {
   if (!date) return '';
   date = new Date(date);
-  return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+  return tf('{year}年{month}月{day}日', { year: date.getFullYear(), month: date.getMonth() + 1, day: date.getDate() });
 };
 
 // 获取星期几
 const getWeekday = (date) => {
   const weekdays = [
-    '星期日',
-    '星期一',
-    '星期二',
-    '星期三',
-    '星期四',
-    '星期五',
-    '星期六',
+    t('星期日'),
+    t('星期一'),
+    t('星期二'),
+    t('星期三'),
+    t('星期四'),
+    t('星期五'),
+    t('星期六'),
   ];
   return weekdays[date.getDay()];
 };

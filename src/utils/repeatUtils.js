@@ -1,3 +1,5 @@
+import { t, tf } from './i18n.js';
+
 /**
  * 重复事件计算工具函数
  * 支持自定义间隔的重复事件计算逻辑
@@ -183,21 +185,22 @@ export function validateRepeatInterval(repeatType, interval) {
   if (repeatType === 'none') {
     return { valid: true };
   }
-  
+
   const limit = limits[repeatType];
   if (!limit) {
-    return { valid: false, message: '不支持的重复类型' };
+    return { valid: false, message: t('不支持的重复类型') };
   }
-  
+
   if (!Number.isInteger(interval) || interval < limit.min || interval > limit.max) {
-    return { 
-      valid: false, 
-      message: `${repeatType === 'daily' ? '每日' : 
-                repeatType === 'weekly' ? '每周' : 
-                repeatType === 'monthly' ? '每月' : '每年'}间隔必须在${limit.min}-${limit.max}${limit.unit}之间` 
+    const typeDesc = repeatType === 'daily' ? t('每日') :
+      repeatType === 'weekly' ? t('每周') :
+        repeatType === 'monthly' ? t('每月') : t('每年');
+    return {
+      valid: false,
+      message: tf('{type}间隔必须在{min}-{max}{unit}之间', { type: typeDesc, min: limit.min, max: limit.max, unit: t(limit.unit) })
     };
   }
-  
+
   return { valid: true };
 }
 

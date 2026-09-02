@@ -2,25 +2,25 @@
   <div class="settings-page">
     <div class="settings-container">
       <div class="settings-header">
-        <h1>⚙️ 周报提醒设置</h1>
-        <button class="back-btn" @click="goBack">← 返回日历</button>
+        <h1>{{ t('⚙️ 周报提醒设置') }}</h1>
+        <button class="back-btn" @click="goBack">{{ t('← 返回日历') }}</button>
       </div>
 
       <div v-if="!isAdmin" class="access-denied">
-        <p>⚠️ 您没有权限访问此页面</p>
-        <button class="btn-primary" @click="goBack">返回日历</button>
+        <p>{{ t('⚠️ 您没有权限访问此页面') }}</p>
+        <button class="btn-primary" @click="goBack">{{ t('返回日历') }}</button>
       </div>
 
       <div v-else class="settings-content">
         <div class="setting-section">
-          <h2>📢 周末提醒配置</h2>
+          <h2>{{ t('📢 周末提醒配置') }}</h2>
           <p class="section-desc">
-            在本周最后 N 个工作日时，推送待办提醒到企业微信/钉钉
+            {{ t('在本周最后 N 个工作日时，推送待办提醒到企业微信/钉钉') }}
           </p>
 
           <div class="form-group">
             <label class="toggle-row">
-              <span class="toggle-desc">启用周末提醒</span>
+              <span class="toggle-desc">{{ t('启用周末提醒') }}</span>
               <button
                 :class="['toggle-btn', { active: settings.enabled }]"
                 @click="settings.enabled = !settings.enabled"
@@ -31,16 +31,16 @@
           </div>
 
           <div class="form-group">
-            <label>📅 提前触发</label>
+            <label>{{ t('📅 提前触发') }}</label>
             <select v-model.number="settings.days" class="form-select">
-              <option :value="1">最后 1 个工作日</option>
-              <option :value="2">最后 2 个工作日</option>
-              <option :value="3">最后 3 个工作日</option>
+              <option :value="1">{{ t('最后 1 个工作日') }}</option>
+              <option :value="2">{{ t('最后 2 个工作日') }}</option>
+              <option :value="3">{{ t('最后 3 个工作日') }}</option>
             </select>
           </div>
 
           <div class="form-group">
-            <label>🔗 Webhook URL</label>
+            <label>{{ t('🔗 Webhook URL') }}</label>
             <input
               type="url"
               class="form-input"
@@ -48,26 +48,26 @@
               placeholder="https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=..."
             />
             <span v-if="webhookType" :class="['type-tag', webhookType]">{{
-              webhookTypeLabel
+              t(webhookTypeLabel)
             }}</span>
           </div>
 
           <div class="form-group">
-            <label>📝 消息模板</label>
+            <label>{{ t('📝 消息模板') }}</label>
             <textarea
               class="form-textarea"
               v-model="settings.template"
               rows="10"
-              placeholder="输入自定义消息模板..."
+              :placeholder="t('输入自定义消息模板...')"
             ></textarea>
             <div class="template-hints">
-              <p>可用变量：</p>
-              <code>{date}</code> 日期、 <code>{weekday}</code> 星期、
-              <code>{week_num}</code> 第N个工作日、
-              <code>{total_workdays}</code> 总工作日数
+              <p>{{ t('可用变量：') }}</p>
+              <code>{date}</code> {{ t('日期') }}、 <code>{weekday}</code> {{ t('星期') }}、
+              <code>{week_num}</code> {{ t('第N个工作日') }}、
+              <code>{total_workdays}</code> {{ t('总工作日数') }}
               <br />
-              <code>{todo_count}</code> 待办数量、
-              <code>{todo_list}</code> 待办列表
+              <code>{todo_count}</code> {{ t('待办数量') }}、
+              <code>{todo_list}</code> {{ t('待办列表') }}
             </div>
           </div>
 
@@ -77,14 +77,14 @@
               :disabled="testing || !settings.webhook_url"
               @click="testSettings"
             >
-              {{ testing ? '测试中...' : '🧪 测试推送' }}
+              {{ testing ? t('测试中...') : t('🧪 测试推送') }}
             </button>
             <button
               class="btn-primary"
               :disabled="saving"
               @click="saveSettings"
             >
-              {{ saving ? '保存中...' : '💾 保存设置' }}
+              {{ saving ? t('保存中...') : t('💾 保存设置') }}
             </button>
           </div>
 
@@ -97,14 +97,14 @@
         </div>
 
         <div class="setting-section preview-section">
-          <h2>📋 模板预览</h2>
+          <h2>{{ t('📋 模板预览') }}</h2>
           <div class="preview-box">
             <div
               v-if="settings.template"
               class="markdown-preview"
               v-html="renderedPreview"
             ></div>
-            <p v-else class="preview-placeholder">填写模板后在此预览效果</p>
+            <p v-else class="preview-placeholder">{{ t('填写模板后在此预览效果') }}</p>
           </div>
         </div>
       </div>
@@ -122,6 +122,7 @@ import {
   checkAdminAccess,
 } from '../utils/settingsApi';
 import { getUserId } from '../utils/api';
+import { t, tf } from '../utils/i18n.js';
 const router = useRouter();
 const props = defineProps({
   userId: { type: String, required: true },
@@ -216,23 +217,23 @@ const testSettings = async () => {
     await updateWeeklySummarySettings(settings.value, props.userId);
     const result = await testWeeklySummary(props.userId);
     if (result.success) {
-      const dayLabel = result.isLastNWorkday
+      const dayLabel = t(result.isLastNWorkday
         ? '✅ 今天是本周最后N个工作日'
-        : 'ℹ️ 今天不是本周最后N个工作日';
+        : 'ℹ️ 今天不是本周最后N个工作日');
       message.value = {
         success: true,
-        text: `${dayLabel}，推送了 ${result.todoCount} 条待办`,
+        text: `${dayLabel}，${tf('推送了 {n} 条待办', { n: result.todoCount })}`,
       };
     } else {
       message.value = {
         success: false,
-        text: `❌ 测试失败：${result.error || '未知错误'}`,
+        text: tf('❌ 测试失败：{error}', { error: result.error || t('未知错误') }),
       };
     }
   } catch (error) {
     message.value = {
       success: false,
-      text: `❌ 请求失败：${error.message}`,
+      text: tf('❌ 请求失败：{error}', { error: error.message }),
     };
   } finally {
     testing.value = false;
@@ -246,12 +247,12 @@ const saveSettings = async () => {
     await updateWeeklySummarySettings(settings.value, getUserId());
     message.value = {
       success: true,
-      text: '✅ 设置已保存',
+      text: t('✅ 设置已保存'),
     };
   } catch (error) {
     message.value = {
       success: false,
-      text: `❌ 保存失败：${error.message}`,
+      text: tf('❌ 保存失败：{error}', { error: error.message }),
     };
   } finally {
     saving.value = false;

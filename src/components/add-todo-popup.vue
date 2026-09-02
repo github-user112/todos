@@ -5,7 +5,7 @@
         <div class="drag-bar"></div>
 
         <div class="popup-header">
-          <h2>添加待办</h2>
+          <h2>{{ t('添加待办') }}</h2>
           <button class="close-btn" @click="$emit('close')">✕</button>
         </div>
 
@@ -16,14 +16,14 @@
           type="text"
           :value="todoText"
           @input="$emit('update:todoText', $event.target.value)"
-          placeholder="输入待办事项..."
+          :placeholder="t('输入待办事项...')"
           class="todo-input"
           @keydown.enter="handleSave"
           enterkeyhint="done"
         />
 
         <div class="repeat-section">
-          <label class="section-label">🔄 重复</label>
+          <label class="section-label">{{ t('🔄 重复') }}</label>
           <div class="repeat-chips">
             <button
               v-for="opt in repeatOptions"
@@ -31,12 +31,12 @@
               :class="['repeat-chip', { active: todoRepeat === opt.value }]"
               @click="updateRepeatType(opt.value)"
             >
-              {{ opt.label }}
+              {{ t(opt.label) }}
             </button>
           </div>
 
           <div v-if="todoRepeat !== 'none'" class="interval-row">
-            <span class="interval-prefix">每</span>
+            <span class="interval-prefix">{{ t('每') }}</span>
             <input
               type="number"
               inputmode="numeric"
@@ -48,28 +48,28 @@
               @blur="validateInterval(todoRepeat)"
             />
             <span class="interval-suffix">{{
-              INTERVAL_LIMITS[todoRepeat]?.unit
+              t(INTERVAL_LIMITS[todoRepeat]?.unit)
             }}</span>
             <span class="interval-hint"
               >{{ INTERVAL_LIMITS[todoRepeat]?.min }}-{{
                 INTERVAL_LIMITS[todoRepeat]?.max
-              }}{{ INTERVAL_LIMITS[todoRepeat]?.unit }}</span
+              }}{{ t(INTERVAL_LIMITS[todoRepeat]?.unit) }}</span
             >
           </div>
 
           <div v-if="todoRepeat !== 'none'" class="interval-row">
-            <label class="interval-prefix" for="end-date">结束</label>
+            <label class="interval-prefix" for="end-date">{{ t('结束') }}</label>
             <input
               type="date"
               id="end-date"
               v-model="endDate"
               class="interval-input date-input"
             />
-            <span class="interval-hint">可选</span>
+            <span class="interval-hint">{{ t('可选') }}</span>
           </div>
 
           <div class="holiday-section">
-            <label class="section-label">⛔ 避开节假日</label>
+            <label class="section-label">{{ t('⛔ 避开节假日') }}</label>
             <label class="switch-label">
               <input
                 type="checkbox"
@@ -78,18 +78,18 @@
               />
               <span class="switch-slider"></span>
               <span class="switch-text">{{
-                skipHolidays ? '已开启' : '未开启'
+                skipHolidays ? t('已开启') : t('未开启')
               }}</span>
             </label>
             <p v-if="skipHolidays" class="holiday-hint">
-              节假日将自动调整至前一工作日，并提前一天提醒
+              {{ t('节假日将自动调整至前一工作日，并提前一天提醒') }}
             </p>
           </div>
 
           <div class="reminder-section">
-            <label class="section-label">🔔 提醒</label>
+            <label class="section-label">{{ t('🔔 提醒') }}</label>
             <div class="time-row" @click="showReminderOptions = true">
-              <span class="time-label">待办时间</span>
+              <span class="time-label">{{ t('待办时间') }}</span>
               <input
                 type="time"
                 v-model="todoTime"
@@ -105,25 +105,25 @@
                   :class="['repeat-chip', { active: reminder === opt.value }]"
                   @click="selectReminder(opt.value)"
                 >
-                  {{ opt.label }}
+                  {{ t(opt.label) }}
                 </button>
               </div>
               <div v-if="reminder > 0" class="reminder-detail">
                 <p class="reminder-hint">
-                  将在 {{ computedReminderTime }} 发送提醒通知
+                  {{ tf('将在 {time} 发送提醒通知', { time: computedReminderTime }) }}
                 </p>
                 <p
                   v-if="notificationPermission === 'denied'"
                   class="reminder-warning"
                 >
-                  ⚠️ 浏览器通知已被禁止，请在浏览器设置中允许通知
+                  {{ t('⚠️ 浏览器通知已被禁止，请在浏览器设置中允许通知') }}
                 </p>
                 <p
                   v-else-if="notificationPermission !== 'granted'"
                   class="reminder-action"
                   @click="requestNotifyPermission"
                 >
-                  👆 点击授权浏览器通知
+                  {{ t('👆 点击授权浏览器通知') }}
                 </p>
               </div>
             </template>
@@ -136,7 +136,7 @@
             @click="showPreview = !showPreview"
             class="preview-toggle"
           >
-            {{ showPreview ? '▲ 隐藏预览' : '▼ 显示未来日期' }}
+            {{ showPreview ? t('▲ 隐藏预览') : t('▼ 显示未来日期') }}
           </button>
           <RepeatPreview
             v-if="showPreview"
@@ -150,8 +150,8 @@
         </div>
 
         <div class="popup-actions">
-          <button class="btn-cancel" @click="$emit('close')">取消</button>
-          <button class="btn-save" @click="handleSave">保存</button>
+          <button class="btn-cancel" @click="$emit('close')">{{ t('取消') }}</button>
+          <button class="btn-save" @click="handleSave">{{ t('保存') }}</button>
         </div>
       </div>
     </div>
@@ -160,6 +160,7 @@
 
 <script setup>
 import { ref, computed, onMounted, nextTick, watch } from 'vue';
+import { t, tf } from '../utils/i18n.js';
 import RepeatPreview from './RepeatPreview.vue';
 
 const props = defineProps({
@@ -215,7 +216,7 @@ const computedReminderTime = computed(() => {
   const timeStr = `${String(displayHours).padStart(2, '0')}:${String(displayMinutes).padStart(2, '0')}`;
 
   if (isPreviousDay) {
-    return `前一天 ${timeStr}`;
+    return tf('前一天 {time}', { time: timeStr });
   }
   return timeStr;
 });

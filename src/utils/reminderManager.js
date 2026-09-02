@@ -1,5 +1,6 @@
 import { isHoliday, findLastWorkday } from './holidayAdjustment';
 import { shouldShowRepeatingTodo } from './repeatUtils';
+import { t, tf } from './i18n.js';
 
 const NOTIFICATION_TAG_PREFIX = 'todo-reminder-';
 const CHECK_INTERVAL = 30 * 1000;
@@ -172,15 +173,15 @@ function getTodoTime(todo) {
 }
 
 function formatReminderDesc(reminderMinutes) {
-  if (reminderMinutes < 60) return `${reminderMinutes}分钟前`;
+  if (reminderMinutes < 60) return tf('{n} 分钟前', { n: reminderMinutes });
   if (reminderMinutes < 1440) {
     const hours = Math.floor(reminderMinutes / 60);
     const mins = reminderMinutes % 60;
-    return mins > 0 ? `${hours}小时${mins}分钟前` : `${hours}小时前`;
+    return mins > 0 ? tf('{hours}小时{mins}分钟前', { hours, mins }) : tf('{hours} 小时前', { hours });
   }
   const days = Math.floor(reminderMinutes / 1440);
   const hours = Math.floor((reminderMinutes % 1440) / 60);
-  return hours > 0 ? `${days}天${hours}小时前` : `${days}天前`;
+  return hours > 0 ? tf('{days}天{hours}小时前', { days, hours }) : tf('{days} 天前', { days });
 }
 
 function checkReminders() {
@@ -244,14 +245,14 @@ function checkReminders() {
           const isToday = dateStr === todayStr;
           const isTomorrow = dateStr === tomorrowStr;
           let timeDesc = dateStr;
-          if (isToday) timeDesc = '今天';
-          else if (isTomorrow) timeDesc = '明天';
+          if (isToday) timeDesc = t('今天');
+          else if (isTomorrow) timeDesc = t('明天');
 
           const todoTimeStr = todoTime;
           const reminderDesc = formatReminderDesc(reminderMinutes);
 
           showNotification(
-            `📋 待办提醒`,
+            t('📋 待办提醒'),
             `${timeDesc} ${todoTimeStr}（${reminderDesc}）：${todo.text}`,
             `${NOTIFICATION_TAG_PREFIX}${notifyKey}`,
           );

@@ -9,19 +9,19 @@
       <Transition name="drawer-slide">
         <div v-if="show" class="mobile-panel">
           <div class="drawer-header">
-            <span class="drawer-title">📋 待办列表</span>
-            <button class="today-jump-btn" @click="jumpToToday">今天</button>
+            <span class="drawer-title">{{ t('📋 待办列表') }}</span>
+            <button class="today-jump-btn" @click="jumpToToday">{{ t('今天') }}</button>
             <button class="drawer-close" @click="$emit('close')">✕</button>
           </div>
           <!-- 每日宜忌 - 固定在顶部不随列表滚动 -->
           <div v-if="almanac" class="almanac-card">
-            <div class="almanac-title">📜 今日黄历</div>
+            <div class="almanac-title">{{ t('📜 今日黄历') }}</div>
             <div class="almanac-row">
-              <span class="almanac-label almanac-yi-label">宜</span>
+              <span class="almanac-label almanac-yi-label">{{ t('宜') }}</span>
               <span class="almanac-content">{{ almanac.yi.join('、') }}</span>
             </div>
             <div class="almanac-row">
-              <span class="almanac-label almanac-ji-label">忌</span>
+              <span class="almanac-label almanac-ji-label">{{ t('忌') }}</span>
               <span class="almanac-content">{{ almanac.ji.join('、') }}</span>
             </div>
             <div class="almanac-footer">
@@ -71,7 +71,7 @@
                   <button
                     class="row-action-btn complete"
                     @click="handleComplete(item, $event)"
-                    :title="item.isCompleted ? '撤销' : '完成'"
+                    :title="item.isCompleted ? t('撤销') : t('完成')"
                   >
                     <svg
                       width="16"
@@ -116,11 +116,11 @@
             <!-- <div class="load-zone" v-if="hasMoreFuture"></div> -->
             <div v-if="!groupedTodos.length" class="empty-state">
               <div class="empty-icon">🎉</div>
-              <div class="empty-text">暂无待办事项</div>
+              <div class="empty-text">{{ t('暂无待办事项') }}</div>
             </div>
           </div>
           <div class="drawer-footer">
-            <span class="todo-summary">共 {{ totalCount }} 项待办</span>
+            <span class="todo-summary">{{ tf('共 {n} 项待办', { n: totalCount }) }}</span>
           </div>
         </div>
       </Transition>
@@ -131,19 +131,19 @@
   <Transition name="pc-slide">
     <div v-if="show && !isMobile" class="pc-panel">
       <div class="drawer-header">
-        <span class="drawer-title">📋 待办列表</span>
-        <button class="today-jump-btn" @click="jumpToToday">今天</button>
+        <span class="drawer-title">{{ t('📋 待办列表') }}</span>
+        <button class="today-jump-btn" @click="jumpToToday">{{ t('今天') }}</button>
         <button class="drawer-close" @click="$emit('close')">✕</button>
       </div>
       <!-- 每日宜忌 - 固定在顶部不随列表滚动 -->
       <div v-if="almanac" class="almanac-card">
-        <div class="almanac-title">📜 今日黄历</div>
+        <div class="almanac-title">{{ t('📜 今日黄历') }}</div>
         <div class="almanac-row">
-          <span class="almanac-label almanac-yi-label">宜</span>
+          <span class="almanac-label almanac-yi-label">{{ t('宜') }}</span>
           <span class="almanac-content">{{ almanac.yi.join('、') }}</span>
         </div>
         <div class="almanac-row">
-          <span class="almanac-label almanac-ji-label">忌</span>
+          <span class="almanac-label almanac-ji-label">{{ t('忌') }}</span>
           <span class="almanac-content">{{ almanac.ji.join('、') }}</span>
         </div>
         <div class="almanac-footer">
@@ -193,7 +193,7 @@
               <button
                 class="row-action-btn complete"
                 @click="handleComplete(item, $event)"
-                :title="item.isCompleted ? '撤销' : '完成'"
+                :title="item.isCompleted ? t('撤销') : t('完成')"
               >
                 <svg
                   width="16"
@@ -233,11 +233,11 @@
         <!-- <div class="load-zone" v-if="hasMoreFuture"></div> -->
         <div v-if="!groupedTodos.length" class="empty-state">
           <div class="empty-icon">🎉</div>
-          <div class="empty-text">暂无待办事项</div>
+          <div class="empty-text">{{ t('暂无待办事项') }}</div>
         </div>
       </div>
       <div class="drawer-footer">
-        <span class="todo-summary">共 {{ totalCount }} 项待办</span>
+        <span class="todo-summary">{{ tf('共 {n} 项待办', { n: totalCount }) }}</span>
       </div>
     </div>
   </Transition>
@@ -246,6 +246,7 @@
 
 <script setup>
 import { computed, ref, watch, nextTick, inject, onMounted, onUnmounted } from 'vue';
+import { t, tf } from '../utils/i18n.js';
 import { useDialog, useMessage } from 'naive-ui';
 import { formatDate } from '../utils/dateUtils';
 import { shouldShowRepeatingTodo } from '../utils/repeatUtils';
@@ -506,13 +507,13 @@ const groupedTodos = computed(() => {
     const isBase = date === baseDate.value && !isToday;
     let label;
     if (isToday) {
-      label = `🌟 今天 ${todayStr.value}`;
+      label = tf('🌟 今天 {date}', { date: todayStr.value });
     } else if (isBase) {
       const p = date.split('-');
-      label = `📍 ${parseInt(p[1])}月${parseInt(p[2])}日`;
+      label = tf('📍 {month}月{day}日', { month: parseInt(p[1]), day: parseInt(p[2]) });
     } else {
       const p = date.split('-');
-      label = `${parseInt(p[1])}月${parseInt(p[2])}日`;
+      label = tf('{month}月{day}日', { month: parseInt(p[1]), day: parseInt(p[2]) });
     }
     groups.push({ date, label, items, isToday, isBase });
   }
@@ -537,7 +538,7 @@ function fmtShort(dateStr) {
 function getReminderTooltip(item) {
   const todoTime = item.todo_time || item.todoTime || '09:00';
   const reminderDesc = formatReminderDesc(item.reminder);
-  return `${todoTime} ${reminderDesc}提醒`;
+  return `${todoTime} ${reminderDesc} ${t('提醒')}`;
 }
 
 function handleComplete(item, event) {
@@ -566,7 +567,7 @@ function handleComplete(item, event) {
 }
 
 function showCompletionFeedback(todoText) {
-  let feedback = '🎉 完成一项待办！';
+  let feedback = t('🎉 完成一项待办！');
   try {
     feedback = getCompletionFeedback(todoText, almanac.value);
   } catch {}
@@ -577,17 +578,17 @@ function handleDelete(item) {
   const isRepeat = item.repeat_type && item.repeat_type !== 'none';
   if (isRepeat) {
     dialog.warning({
-      title: '删除重复事件',
-      content: `确定要删除「${item.text}」吗？请选择删除范围：`,
-      positiveText: '删除所有重复事件',
-      negativeText: '仅删除当前事件',
+      title: t('删除重复事件'),
+      content: tf('确定要删除「{text}」吗？请选择删除范围：', { text: item.text }),
+      positiveText: t('删除所有重复事件'),
+      negativeText: t('仅删除当前事件'),
       onPositiveClick: () => {
         emit('delete-todo', {
           todoId: item.id,
           date: item.date,
           allInstances: true,
         });
-        message.success('已删除所有重复事件');
+        message.success(t('已删除所有重复事件'));
       },
       onNegativeClick: () => {
         emit('delete-todo', {
@@ -595,22 +596,22 @@ function handleDelete(item) {
           date: item.date,
           allInstances: false,
         });
-        message.success('已删除当前事件');
+        message.success(t('已删除当前事件'));
       },
     });
   } else {
     dialog.warning({
-      title: '确认删除',
-      content: `确定要删除「${item.text}」吗？此操作不可撤销。`,
-      positiveText: '删除',
-      negativeText: '取消',
+      title: t('确认删除'),
+      content: tf('确定要删除「{text}」吗？此操作不可撤销。', { text: item.text }),
+      positiveText: t('删除'),
+      negativeText: t('取消'),
       onPositiveClick: () => {
         emit('delete-todo', {
           todoId: item.id,
           date: item.date,
           allInstances: false,
         });
-        message.success('已删除');
+        message.success(t('已删除'));
       },
     });
   }

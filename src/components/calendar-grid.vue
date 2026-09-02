@@ -9,7 +9,7 @@
       :key="day"
       :class="['calendar-weekday', { 'weekend-header': index >= 5 }]"
     >
-      {{ day }}
+      {{ t(day) }}
     </div>
 
     <!-- 周数 -->
@@ -65,6 +65,7 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
+import { t } from '../utils/i18n.js';
 import CalendarDay from './calendar-day.vue';
 
 const props = defineProps({

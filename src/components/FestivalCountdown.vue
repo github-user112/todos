@@ -5,15 +5,15 @@
       class="festival-chip"
       :class="{ 'is-today': festivalInfo.isToday }"
       @click="dismiss"
-      :title="festivalInfo.isToday ? festivalGreeting : `${festivalInfo.def.name} (${festivalDateStr})`"
+      :title="festivalInfo.isToday ? festivalGreeting : tf('{name} ({date})', { name: t(festivalInfo.def.name), date: festivalDateStr })"
     >
       <span class="chip-emoji">{{ festivalInfo.def.emoji }}</span>
       <template v-if="festivalInfo.isToday">
-        <span class="chip-text">今天是{{ festivalInfo.def.name }}</span>
+        <span class="chip-text">{{ tf('今天是{name}', { name: t(festivalInfo.def.name) }) }}</span>
       </template>
       <template v-else>
         <span class="chip-text">
-          距{{ festivalInfo.def.name }}<strong>{{ festivalInfo.daysLeft }}</strong>天
+          {{ tf('距{name}还有 {days} 天', { name: t(festivalInfo.def.name), days: festivalInfo.daysLeft }) }}
         </span>
       </template>
     </span>
@@ -22,6 +22,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { t, tf } from '../utils/i18n.js';
 import { ensureLunarLoaded } from '../utils/lunarUtils';
 import { getUpcomingFestival } from '../utils/festivalUtils';
 
@@ -44,13 +45,13 @@ const festivalGreeting = computed(() => {
     national_day: '国庆快乐！繁荣昌盛 🇨🇳',
     christmas: '圣诞快乐！🎄',
   };
-  return greetings[festivalInfo.value.def.key] || '节日快乐！';
+  return t(greetings[festivalInfo.value.def.key] || '节日快乐！');
 });
 
 const festivalDateStr = computed(() => {
   if (!festivalInfo.value) return '';
   const d = festivalInfo.value.date;
-  return `${d.getMonth() + 1}月${d.getDate()}日`;
+  return tf('{month}月{day}日', { month: d.getMonth() + 1, day: d.getDate() });
 });
 
 const checkFestival = async () => {

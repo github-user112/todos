@@ -27,7 +27,7 @@
         
         <!-- 加载文字 -->
         <div class="loading-text-wrapper">
-          <span class="loading-text">{{ text || '加载中' }}</span>
+          <span class="loading-text">{{ text || t('加载中') }}</span>
           <span class="loading-dots">
             <span class="dot">.</span>
             <span class="dot">.</span>
@@ -40,6 +40,7 @@
 </template>
 
 <script setup>
+import { t } from '../utils/i18n.js';
 defineProps({
   show: {
     type: Boolean,
@@ -48,7 +49,7 @@ defineProps({
   },
   text: {
     type: String,
-    default: '加载中'
+    default: ''
   }
 })
 </script>

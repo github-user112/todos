@@ -107,6 +107,7 @@ import {
   isLunarLoaded,
 } from '../utils/lunarUtils';
 import { apiRequest } from '../utils/api';
+import { t, tf } from '../utils/i18n.js';
 const dialog = useDialog();
 const message = useMessage();
 
@@ -594,17 +595,17 @@ const deleteTodo = async () => {
 
   if (todo.repeat_type && todo.repeat_type !== 'none') {
     dialog.warning({
-      title: '删除重复事件',
-      content: '请选择操作范围',
-      positiveText: '删除所有重复事件',
-      negativeText: '仅删除当前事件',
+      title: t('删除重复事件'),
+      content: t('请选择操作范围'),
+      positiveText: t('删除所有重复事件'),
+      negativeText: t('仅删除当前事件'),
       onPositiveClick: async () => {
         await emit('delete-todo', {
           todoId: selectedTodo.value,
           date: selectedTodoDate.value,
           allInstances: true,
         });
-        message.success('已删除所有重复事件');
+        message.success(t('已删除所有重复事件'));
         showTodoActions.value = false;
       },
       onNegativeClick: async () => {
@@ -613,7 +614,7 @@ const deleteTodo = async () => {
           date: selectedTodoDate.value,
           allInstances: false,
         });
-        message.success('已删除当前事件');
+        message.success(t('已删除当前事件'));
         showTodoActions.value = false;
       },
     });

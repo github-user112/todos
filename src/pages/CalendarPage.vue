@@ -42,6 +42,7 @@ import {
 } from 'naive-ui';
 import { buildNaiveThemeOverrides } from '../utils/naiveTheme';
 import { apiRequest, getUserId } from '../utils/api';
+import { t } from '../utils/i18n.js';
 
 // ---- naive-ui 弹层跟随主题（Dialog / Message 等） ----
 const naiveDark = ref(false);
@@ -154,7 +155,7 @@ const initCalendar = async () => {
     setLoading(false);
   } catch (error) {
     console.error('初始化日历失败:', error);
-    alert('加载日历数据失败，请刷新页面重试');
+    alert(t('加载日历数据失败，请刷新页面重试'));
   }
 };
 

@@ -11,7 +11,7 @@
         <div class="card-header">
           <div class="term-emoji">{{ termInfo.emoji }}</div>
           <div class="term-title">
-            <h2>{{ termInfo.name }}</h2>
+            <h2>{{ t(termInfo.name) }}</h2>
             <p class="term-summary">{{ termInfo.summary }}</p>
           </div>
         </div>
@@ -21,14 +21,14 @@
         </div>
 
         <div class="card-tips">
-          <h3>🌿 养生小贴士</h3>
+          <h3>{{ t('🌿 养生小贴士') }}</h3>
           <ul>
             <li v-for="(tip, i) in termInfo.tips" :key="i">{{ tip }}</li>
           </ul>
         </div>
 
         <button class="got-it-btn" @click="close">
-          知道啦 🌸
+          {{ t('知道啦 🌸') }}
         </button>
       </div>
     </div>
@@ -36,6 +36,7 @@
 </template>
 
 <script setup>
+import { t } from '../utils/i18n.js';
 defineProps({
   visible: { type: Boolean, default: false },
   termInfo: {

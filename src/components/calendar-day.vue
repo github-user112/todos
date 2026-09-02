@@ -82,6 +82,7 @@
 
 <script setup>
 import { computed, ref } from 'vue';
+import { t, tf } from '../utils/i18n.js';
 import {
   isHoliday,
   isWorkday,
@@ -112,7 +113,7 @@ const emit = defineEmits([
 
 const displayLabel = computed(() => {
   const holidayName = getHolidayName(props.day.holiday);
-  return holidayName || props.day.lunarDate || '';
+  return t(holidayName || props.day.lunarDate || '');
 });
 
 const isInstanceCompleted = (todoId, dateStr) => {
@@ -233,7 +234,7 @@ const filteredTodos = computed(() => {
 function getReminderTooltip(todo) {
   const todoTime = todo.todo_time || todo.todoTime || '09:00';
   const reminderDesc = formatReminderDesc(todo.reminder);
-  return `${todoTime} ${reminderDesc}提醒`;
+  return tf('{time} {desc}提醒', { time: todoTime, desc: reminderDesc });
 }
 
 const dragOverTodoId = ref('');
@@ -313,12 +314,12 @@ function getHolidayBadgeText(holiday) {
     holiday === '休' ||
     (typeof holiday === 'object' && holiday.type === 'public_holiday')
   )
-    return '休';
+    return t('休');
   if (
     holiday === '班' ||
     (typeof holiday === 'object' && holiday.type === 'transfer_workday')
   )
-    return '班';
+    return t('班');
   return '';
 }
 
@@ -427,6 +428,10 @@ function getHolidayName(holiday) {
   border-radius: 999px;
   z-index: -1;
   box-shadow: 0 2px 8px -2px var(--form-input-focus-shadow);
+}
+/* 圆片溢出到相邻农历文字上方，提升农历层级避免被盖住 */
+.current-day .day-lunar {
+  position: relative;
 }
 
 /* ---- 单元格内部 ---- */
