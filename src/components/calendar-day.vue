@@ -429,9 +429,13 @@ function getHolidayName(holiday) {
   z-index: -1;
   box-shadow: 0 2px 8px -2px var(--form-input-focus-shadow);
 }
-/* 圆片溢出到相邻农历文字上方，提升农历层级避免被盖住 */
+/* 圆片溢出到农历文字区域：提升农历堆叠层级 + 添加半透明背板确保可读性 */
 .current-day .day-lunar {
   position: relative;
+  z-index: 1;
+  padding: 1px 3px;
+  background: color-mix(in srgb, var(--calendar-day-current-bg) 70%, transparent);
+  border-radius: 3px;
 }
 
 /* ---- 单元格内部 ---- */
