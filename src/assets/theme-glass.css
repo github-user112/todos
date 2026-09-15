@@ -1796,40 +1796,6 @@ html.fluid-glass-theme.dark-mode body::before {
     background 0.3s ease,
     border-color 0.3s ease,
     box-shadow 0.3s ease !important;
-  overflow: hidden;
-}
-/* 追光高光层：跟随鼠标的 radial-gradient */
-.fluid-glass-theme .calendar-day::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(
-    circle at var(--fg-x) var(--fg-y),
-    rgba(255, 255, 255, 0.35) 0%,
-    rgba(255, 255, 255, 0.08) 30%,
-    transparent 60%
-  );
-  pointer-events: none;
-  transition: opacity 0.3s ease;
-}
-/* 边缘折射层：conic-gradient 色散 */
-.fluid-glass-theme .calendar-day::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: conic-gradient(
-    from 0deg at var(--fg-x) var(--fg-y),
-    rgba(6, 182, 212, 0.12),
-    rgba(99, 102, 241, 0.08),
-    rgba(168, 85, 247, 0.1),
-    rgba(236, 72, 153, 0.06),
-    rgba(6, 182, 212, 0.12)
-  );
-  mix-blend-mode: screen;
-  opacity: 0.5;
-  pointer-events: none;
-  transition: opacity 0.3s ease;
 }
 .fluid-glass-theme .calendar-day:hover {
   background: rgba(255, 255, 255, 0.52) !important;
@@ -1841,12 +1807,6 @@ html.fluid-glass-theme.dark-mode body::before {
     0 0 0 1px rgba(6, 182, 212, 0.08) !important;
   transform: translateY(-2px);
   z-index: 5;
-}
-.fluid-glass-theme .calendar-day:hover::before {
-  opacity: 1;
-}
-.fluid-glass-theme .calendar-day:hover::after {
-  opacity: 0.7;
 }
 .fluid-glass-theme .calendar-day:hover .day-number {
   color: var(--primary-dark) !important;
@@ -2252,25 +2212,6 @@ body.dynamic-background.fluid-glass-theme .add-todo-popup {
     inset 0 0 0 0.5px rgba(255, 255, 255, 0.035),
     0 10px 28px -14px rgba(0, 0, 0, 0.44) !important;
 }
-.fluid-glass-theme.dark-mode .calendar-day::before {
-  background: radial-gradient(
-    circle at var(--fg-x) var(--fg-y),
-    rgba(34, 211, 238, 0.18) 0%,
-    rgba(34, 211, 238, 0.04) 30%,
-    transparent 60%
-  );
-}
-.fluid-glass-theme.dark-mode .calendar-day::after {
-  background: conic-gradient(
-    from 0deg at var(--fg-x) var(--fg-y),
-    rgba(34, 211, 238, 0.14),
-    rgba(99, 102, 241, 0.1),
-    rgba(168, 85, 247, 0.12),
-    rgba(236, 72, 153, 0.08),
-    rgba(34, 211, 238, 0.14)
-  );
-  opacity: 0.6;
-}
 .fluid-glass-theme.dark-mode .calendar-day:hover {
   background: rgba(28, 36, 66, 0.48) !important;
   border-color: rgba(255, 255, 255, 0.18) !important;
@@ -2530,8 +2471,6 @@ body.dynamic-background.fluid-glass-theme.dark-mode .add-todo-popup {
     transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease !important;
     transform: none !important;
   }
-  .fluid-glass-theme .calendar-day::before,
-  .fluid-glass-theme .calendar-day::after,
   .fluid-glass-theme .calendar-header::before,
   .fluid-glass-theme .calendar-header::after {
     opacity: 0 !important;
@@ -2588,8 +2527,6 @@ body.dynamic-background.fluid-glass-theme.dark-mode .add-todo-popup {
   }
 
   /* 浅色降级时隐藏追光/折射伪元素 */
-  .fluid-glass-theme .calendar-day::before,
-  .fluid-glass-theme .calendar-day::after,
   .fluid-glass-theme .calendar-header::before,
   .fluid-glass-theme .calendar-header::after {
     display: none !important;
@@ -2686,14 +2623,10 @@ body.dynamic-background.fluid-glass-theme.dark-mode .add-todo-popup {
     -webkit-backdrop-filter: none !important;
   }
   /* 深色降级时隐藏追光/折射伪元素 */
-  .fluid-glass-theme.dark-mode .calendar-day::before,
-  .fluid-glass-theme.dark-mode .calendar-day::after,
   .fluid-glass-theme.dark-mode .calendar-header::before,
   .fluid-glass-theme.dark-mode .calendar-header::after {
     display: none !important;
   }
-  .fluid-glass-theme .calendar-day::before,
-  .fluid-glass-theme .calendar-day::after,
   .fluid-glass-theme .calendar-header::before,
   .fluid-glass-theme .calendar-header::after {
     display: none !important;
