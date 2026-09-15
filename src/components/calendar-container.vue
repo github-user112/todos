@@ -457,6 +457,7 @@ const applyTheme = (theme) => {
     'ios-glass-theme',
     'liquid-glass-theme',
     'ios26-glass-theme',
+    'liquid-aurora-glass-theme',
     'persimmon-glass-theme',
     'moonlight-glass-theme',
     'bamboo-glass-theme',
@@ -477,8 +478,10 @@ const applyTheme = (theme) => {
     'ios-glass': 'ios-glass-theme',
     'liquid-glass': 'liquid-glass-theme',
     'ios26-glass': 'ios26-glass-theme',
-    // 深色变体 = 玻璃主题类 + dark-mode（naive-ui 弹层随之切深色基底）
     'ios26-glass-dark': 'ios26-glass-theme dark-mode',
+    // 深色变体 = 玻璃主题类 + dark-mode（naive-ui 弹层随之切深色基底）
+    'liquid-aurora-glass': 'liquid-aurora-glass-theme',
+    'liquid-aurora-glass-dark': 'liquid-aurora-glass-theme dark-mode',
     // 节气玻璃三套：霜柿 / 月白 / 竹青
     'persimmon-glass': 'persimmon-glass-theme',
     'moonlight-glass': 'moonlight-glass-theme',

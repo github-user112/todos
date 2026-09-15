@@ -990,3 +990,700 @@ body.dynamic-background.ios26-glass-theme.dark-mode .add-todo-popup {
     -webkit-backdrop-filter: none !important;
   }
 }
+
+/* ============================================================
+   流光玻璃 · Liquid Aurora（WWDC25 液态玻璃设计语言）
+   ----------------------------------------------------------
+   设计语言灵感：Apple Liquid Glass 26（WWDC 2025）
+   核心特征：
+   1. 极光壁纸——多层彩色光斑缓慢漂移，模拟北极光/星云；
+   2. 多层玻璃——面板(40px blur)、日期格(24px blur)、按钮(10px blur)；
+   3. 边缘折射——玻璃边缘渗出微妙的强调色光晕（drop-shadow + inset glow）；
+   4. 凸凹几何——按钮微凸（径向渐变穹顶），内容槽凹陷（inset shadow 井形）；
+   5. 镜面高光——每个玻璃面上沿一条极细的白色光带（inset 0 1px）；
+   6. 色彩透射——背景壁纸的极光色透过玻璃面产生自然色偏；
+   7. 形变过渡——状态切换时尺寸/透明度/模糊量同步平滑变化（cubic-bezier 回弹）；
+   8. 深色模式——极光夜景 + 黑烟玻璃，文字全浅色。
+   ============================================================ */
+
+/* ---- 极光色调定义 ---- */
+html.liquid-aurora-glass-theme {
+  --stage-a: #e8e4f5;
+  --stage-b: #d5e0f7;
+  --orb-rgb-1: 99, 102, 241;  /* 靛蓝 Indigo */
+  --orb-rgb-2: 139, 92, 246;  /* 紫罗兰 Violet */
+  --orb-rgb-3: 56, 189, 248;  /* 天青 Sky */
+  --orb-rgb-4: 236, 72, 153;  /* 品红 Magenta */
+  --orb-rgb-5: 34, 197, 94;   /* 翠绿 Emerald */
+}
+html.liquid-aurora-glass-theme.dark-mode {
+  --stage-a: #0c1028;
+  --stage-b: #100d2a;
+  --orb-rgb-1: 79, 70, 229;  /* 深靛 Deep Indigo */
+  --orb-rgb-2: 109, 40, 217;  /* 深紫 Deep Violet */
+  --orb-rgb-3: 14, 165, 233;  /* 深天 Deep Sky */
+  --orb-rgb-4: 190, 24, 93;   /* 深品红 Deep Magenta */
+  --orb-rgb-5: 21, 128, 61;   /* 深绿 Deep Emerald */
+}
+
+/* ---- 极光壁纸：五层彩色光斑 + 慢速漂移动画 ---- */
+html.liquid-aurora-glass-theme body {
+  background:
+    radial-gradient(ellipse 64% 52% at 12% 8%, rgba(var(--orb-rgb-1), 0.48) 0%, transparent 60%),
+    radial-gradient(ellipse 56% 46% at 88% 14%, rgba(var(--orb-rgb-2), 0.42) 0%, transparent 58%),
+    radial-gradient(ellipse 72% 58% at 50% 102%, rgba(var(--orb-rgb-3), 0.38) 0%, transparent 62%),
+    radial-gradient(ellipse 42% 36% at 74% 76%, rgba(var(--orb-rgb-4), 0.3) 0%, transparent 54%),
+    radial-gradient(ellipse 50% 40% at 22% 64%, rgba(var(--orb-rgb-5), 0.24) 0%, transparent 56%),
+    linear-gradient(165deg, var(--stage-a) 0%, var(--stage-b) 100%);
+  min-height: 100vh;
+}
+html.liquid-aurora-glass-theme.dark-mode body {
+  background:
+    radial-gradient(ellipse 60% 50% at 12% 8%, rgba(var(--orb-rgb-2), 0.36) 0%, transparent 62%),
+    radial-gradient(ellipse 52% 44% at 88% 16%, rgba(var(--orb-rgb-1), 0.3) 0%, transparent 58%),
+    radial-gradient(ellipse 68% 56% at 50% 100%, rgba(var(--orb-rgb-3), 0.26) 0%, transparent 64%),
+    radial-gradient(ellipse 38% 32% at 72% 72%, rgba(var(--orb-rgb-4), 0.2) 0%, transparent 52%),
+    radial-gradient(ellipse 44% 36% at 24% 62%, rgba(var(--orb-rgb-5), 0.16) 0%, transparent 54%),
+    linear-gradient(165deg, var(--stage-a) 0%, var(--stage-b) 100%);
+}
+
+/* 光斑漂移动画（尊重减弱动效偏好） */
+html.liquid-aurora-glass-theme body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 28% 22% at 18% 22%, rgba(var(--orb-rgb-1), 0.3) 0%, transparent 70%),
+    radial-gradient(ellipse 24% 20% at 82% 18%, rgba(var(--orb-rgb-2), 0.26) 0%, transparent 68%),
+    radial-gradient(ellipse 32% 26% at 50% 92%, rgba(var(--orb-rgb-3), 0.24) 0%, transparent 70%);
+  animation: aurora-drift-1 28s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+html.liquid-aurora-glass-theme.dark-mode body::before {
+  background:
+    radial-gradient(ellipse 26% 20% at 18% 22%, rgba(var(--orb-rgb-2), 0.22) 0%, transparent 70%),
+    radial-gradient(ellipse 22% 18% at 82% 18%, rgba(var(--orb-rgb-1), 0.2) 0%, transparent 68%),
+    radial-gradient(ellipse 30% 24% at 50% 92%, rgba(var(--orb-rgb-3), 0.18) 0%, transparent 70%);
+}
+
+@keyframes aurora-drift-1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(12px, -8px) scale(1.04); }
+  66% { transform: translate(-6px, 10px) scale(0.97); }
+}
+
+/* ============================================================
+   浅色 · 流光玻璃表面
+   ============================================================ */
+
+/* ---- 日历容器：浮于极光之上 ---- */
+.liquid-aurora-glass-theme .calendar-container {
+  position: relative;
+  z-index: 1;
+}
+
+/* ---- 日期格：极薄磨砂玻璃 + 镜面高光 + 边缘折射 ---- */
+.liquid-aurora-glass-theme .calendar-day {
+  border-radius: 18px !important;
+  background: rgba(255, 255, 255, 0.42) !important;
+  border-color: rgba(255, 255, 255, 0.52) !important;
+  backdrop-filter: blur(24px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(200%) !important;
+  box-shadow:
+    /* 顶部镜面高光 */
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.85),
+    /* 边缘折射光晕 */
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.22),
+    /* 环境落影 */
+    0 6px 20px -10px rgba(31, 38, 63, 0.22),
+    /* 底部微光 */
+    0 0 0 0 transparent !important;
+  transition:
+    transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+    background 0.3s ease,
+    border-color 0.3s ease,
+    box-shadow 0.3s ease,
+    backdrop-filter 0.3s ease !important;
+}
+.liquid-aurora-glass-theme .calendar-day:hover {
+  background: rgba(255, 255, 255, 0.6) !important;
+  border-color: rgba(255, 255, 255, 0.72) !important;
+  box-shadow:
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.92),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.3),
+    0 10px 30px -14px rgba(31, 38, 63, 0.28),
+    0 0 0 1px rgba(79, 70, 229, 0.08) !important;
+  transform: translateY(-2px);
+  z-index: 5;
+}
+.liquid-aurora-glass-theme .calendar-day:hover .day-number {
+  color: var(--primary-dark) !important;
+}
+/* 按压：轻微下压 + 快速回弹 */
+.liquid-aurora-glass-theme .calendar-day:active {
+  transform: scale(0.985);
+  transition-duration: 0.12s;
+}
+
+/* ---- 星期标题 / 周号：透明文字层 ---- */
+.liquid-aurora-glass-theme .calendar-weekday,
+.liquid-aurora-glass-theme .week-number {
+  background: transparent !important;
+  box-shadow: none;
+}
+
+/* ---- 头部：悬浮玻璃导航条（40px blur 最厚玻璃层） ---- */
+.liquid-aurora-glass-theme .calendar-header {
+  position: relative;
+  z-index: 2;
+  backdrop-filter: blur(40px) saturate(220%) !important;
+  -webkit-backdrop-filter: blur(40px) saturate(220%) !important;
+  background: rgba(255, 255, 255, 0.48) !important;
+  border-color: rgba(255, 255, 255, 0.6) !important;
+  box-shadow:
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.88),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.26),
+    0 10px 36px -18px rgba(31, 38, 63, 0.3),
+    0 0 0 0 transparent !important;
+}
+
+/* ---- 按钮：微凸玻璃穹顶 + 边缘辉光 + 按压动效 ---- */
+.liquid-aurora-glass-theme .nav-btn,
+.liquid-aurora-glass-theme .icon-btn {
+  backdrop-filter: blur(12px) saturate(200%);
+  -webkit-backdrop-filter: blur(12px) saturate(200%);
+  background: rgba(255, 255, 255, 0.36) !important;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow:
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.8),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.2),
+    0 2px 8px -2px rgba(31, 38, 63, 0.12);
+}
+.liquid-aurora-glass-theme .nav-btn:hover,
+.liquid-aurora-glass-theme .icon-btn:hover {
+  background: rgba(255, 255, 255, 0.56) !important;
+  box-shadow:
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.88),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.28),
+    0 4px 12px -4px rgba(31, 38, 63, 0.18);
+}
+.liquid-aurora-glass-theme .today-btn {
+  backdrop-filter: blur(12px) saturate(200%);
+  -webkit-backdrop-filter: blur(12px) saturate(200%);
+  box-shadow:
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.35),
+    0 4px 16px -6px var(--form-input-focus-shadow) !important;
+}
+
+/* 按钮按压/过渡动效 */
+.liquid-aurora-glass-theme .nav-btn,
+.liquid-aurora-glass-theme .icon-btn,
+.liquid-aurora-glass-theme .today-btn,
+.liquid-aurora-glass-theme .drawer-close,
+.liquid-aurora-glass-theme .toggle-btn {
+  transition:
+    transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+    background 0.3s ease,
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
+}
+.liquid-aurora-glass-theme .nav-btn:active,
+.liquid-aurora-glass-theme .icon-btn:active,
+.liquid-aurora-glass-theme .today-btn:active,
+.liquid-aurora-glass-theme .drawer-close:active,
+.liquid-aurora-glass-theme .toggle-btn:active {
+  transform: scale(0.9);
+  transition-duration: 0.08s;
+}
+
+/* ---- 开关：玻璃轨道 + 强调色激活态 ---- */
+.liquid-aurora-glass-theme .toggle-btn {
+  background: rgba(255, 255, 255, 0.38);
+  box-shadow:
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.85),
+    inset 0 0 0 0.5px rgba(31, 38, 63, 0.06);
+}
+.liquid-aurora-glass-theme .toggle-btn.active {
+  background: var(--button-primary-bg);
+  box-shadow:
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.3),
+    0 4px 14px -6px var(--form-input-focus-shadow);
+}
+
+/* ---- 面板：厚玻璃 + 凹陷井形效果 ---- */
+.liquid-aurora-glass-theme .pc-panel,
+.liquid-aurora-glass-theme .mobile-panel {
+  backdrop-filter: blur(36px) saturate(210%);
+  -webkit-backdrop-filter: blur(36px) saturate(210%);
+  background: rgba(255, 255, 255, 0.64);
+  box-shadow:
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.7),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.18),
+    0 8px 28px -12px rgba(31, 38, 63, 0.18);
+}
+
+/* ---- 抽屉：厚玻璃侧板 + 凹陷槽感 ---- */
+.liquid-aurora-glass-theme .drawer-panel {
+  backdrop-filter: blur(48px) saturate(220%) !important;
+  -webkit-backdrop-filter: blur(48px) saturate(220%) !important;
+  background: rgba(255, 255, 255, 0.68) !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.68) !important;
+  box-shadow:
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.82),
+    -24px 0 64px -28px rgba(31, 38, 63, 0.36) !important;
+}
+.liquid-aurora-glass-theme .drawer-overlay {
+  background: rgba(15, 20, 40, 0.22) !important;
+  backdrop-filter: blur(6px) saturate(120%);
+  -webkit-backdrop-filter: blur(6px) saturate(120%);
+}
+
+/* ---- 弹窗：厚玻璃卡片 + 凹陷效果 ---- */
+.liquid-aurora-glass-theme .add-todo-popup {
+  backdrop-filter: blur(44px) saturate(220%) !important;
+  -webkit-backdrop-filter: blur(44px) saturate(220%) !important;
+  background: rgba(255, 255, 255, 0.72) !important;
+  border-color: rgba(255, 255, 255, 0.7) !important;
+  box-shadow:
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.86),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.24),
+    0 20px 60px -20px rgba(15, 20, 40, 0.4) !important;
+}
+
+/* ---- 提醒 Toast ---- */
+.liquid-aurora-glass-theme .reminder-toast {
+  backdrop-filter: blur(24px) saturate(210%);
+  -webkit-backdrop-filter: blur(24px) saturate(210%);
+  background: rgba(255, 255, 255, 0.72) !important;
+  box-shadow:
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.82),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.22),
+    0 8px 28px -12px rgba(31, 38, 63, 0.24);
+}
+
+/* ---- 待办操作菜单 ---- */
+.liquid-aurora-glass-theme .todo-actions {
+  backdrop-filter: blur(24px) saturate(210%);
+  -webkit-backdrop-filter: blur(24px) saturate(210%);
+  background: rgba(255, 255, 255, 0.76) !important;
+  box-shadow:
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.84),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.24),
+    0 12px 36px -16px rgba(31, 38, 63, 0.28);
+}
+
+/* ---- 待办项：极轻玻璃 ---- */
+.liquid-aurora-glass-theme .todo-item {
+  backdrop-filter: blur(8px) saturate(180%);
+  -webkit-backdrop-filter: blur(8px) saturate(180%);
+  box-shadow:
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.55),
+    0 2px 6px -2px rgba(31, 38, 63, 0.08);
+}
+
+/* ---- 节日倒计时芯片：轻玻璃胶囊 + 边缘辉光 ---- */
+.liquid-aurora-glass-theme .festival-chip {
+  background: rgba(255, 255, 255, 0.45) !important;
+  border-color: rgba(255, 255, 255, 0.6) !important;
+  color: var(--text-primary) !important;
+  backdrop-filter: blur(10px) saturate(200%);
+  -webkit-backdrop-filter: blur(10px) saturate(200%);
+  box-shadow:
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.78),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.2);
+  animation: none !important;
+}
+
+/* ---- 加载遮罩 ---- */
+.liquid-aurora-glass-theme .loading-overlay {
+  background: rgba(240, 245, 252, 0.5) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* ---- 设置页：玻璃卡片 ---- */
+.liquid-aurora-glass-theme .settings-page {
+  background: transparent;
+}
+.liquid-aurora-glass-theme .setting-section {
+  backdrop-filter: blur(32px) saturate(200%);
+  -webkit-backdrop-filter: blur(32px) saturate(200%);
+  background: rgba(255, 255, 255, 0.6) !important;
+  border: 1px solid rgba(255, 255, 255, 0.5) !important;
+  box-shadow:
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.75),
+    0 8px 28px -12px rgba(31, 38, 63, 0.16);
+}
+.liquid-aurora-glass-theme .access-denied {
+  backdrop-filter: blur(32px) saturate(200%);
+  -webkit-backdrop-filter: blur(32px) saturate(200%);
+  background: rgba(255, 255, 255, 0.6) !important;
+}
+.liquid-aurora-glass-theme .preview-box {
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  background: rgba(255, 255, 255, 0.36) !important;
+}
+
+/* ---- 表单控件 ---- */
+.liquid-aurora-glass-theme .form-input,
+.liquid-aurora-glass-theme .form-select,
+.liquid-aurora-glass-theme .form-textarea {
+  backdrop-filter: blur(8px) saturate(160%);
+  -webkit-backdrop-filter: blur(8px) saturate(160%);
+  background: rgba(255, 255, 255, 0.52) !important;
+  border-color: rgba(255, 255, 255, 0.48) !important;
+}
+.liquid-aurora-glass-theme .form-input:focus,
+.liquid-aurora-glass-theme .form-select:focus,
+.liquid-aurora-glass-theme .form-textarea:focus {
+  box-shadow:
+    0 0 0 3px var(--form-input-focus-shadow),
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.5) !important;
+}
+.liquid-aurora-glass-theme .template-hints {
+  background: rgba(255, 255, 255, 0.32) !important;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+/* ---- 动态背景开启时：提高玻璃面不透明度 ---- */
+body.dynamic-background.liquid-aurora-glass-theme .calendar-day {
+  background: rgba(255, 255, 255, 0.6) !important;
+}
+body.dynamic-background.liquid-aurora-glass-theme .calendar-header,
+body.dynamic-background.liquid-aurora-glass-theme .drawer-panel,
+body.dynamic-background.liquid-aurora-glass-theme .add-todo-popup {
+  background: rgba(255, 255, 255, 0.76) !important;
+}
+
+/* ============================================================
+   深色 · 黑烟玻璃表面（挂 dark-mode）
+   ============================================================ */
+
+/* ---- 日期格：黑烟玻璃 + 微弱边缘辉光 ---- */
+.liquid-aurora-glass-theme.dark-mode .calendar-day {
+  background: rgba(20, 27, 50, 0.38) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  box-shadow:
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.09),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.04),
+    0 10px 28px -14px rgba(0, 0, 0, 0.48) !important;
+}
+.liquid-aurora-glass-theme.dark-mode .calendar-day:hover {
+  background: rgba(30, 39, 70, 0.52) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  box-shadow:
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.12),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.06),
+    0 14px 34px -16px rgba(0, 0, 0, 0.52),
+    0 0 0 1px rgba(79, 70, 229, 0.1) !important;
+}
+
+/* ---- 星期标题 / 周号 ---- */
+.liquid-aurora-glass-theme.dark-mode .calendar-weekday,
+.liquid-aurora-glass-theme.dark-mode .week-number {
+  background: transparent !important;
+}
+
+/* ---- 头部：黑烟玻璃导航条 ---- */
+.liquid-aurora-glass-theme.dark-mode .calendar-header {
+  background: rgba(12, 17, 38, 0.48) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  box-shadow:
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.08),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.03),
+    0 10px 36px -18px rgba(0, 0, 0, 0.52) !important;
+}
+
+/* ---- 按钮：黑烟玻璃穹顶 ---- */
+.liquid-aurora-glass-theme.dark-mode .nav-btn,
+.liquid-aurora-glass-theme.dark-mode .icon-btn {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.1),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.03);
+}
+.liquid-aurora-glass-theme.dark-mode .nav-btn:hover,
+.liquid-aurora-glass-theme.dark-mode .icon-btn:hover {
+  background: rgba(255, 255, 255, 0.14) !important;
+  box-shadow:
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.14),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.05);
+}
+.liquid-aurora-glass-theme.dark-mode .today-btn {
+  box-shadow:
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.08),
+    0 4px 16px -6px var(--form-input-focus-shadow) !important;
+}
+
+/* ---- 开关：黑烟玻璃轨道 ---- */
+.liquid-aurora-glass-theme.dark-mode .toggle-btn {
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow:
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.09),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.04);
+}
+.liquid-aurora-glass-theme.dark-mode .toggle-btn.active {
+  background: var(--button-primary-bg);
+  box-shadow:
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.2),
+    0 4px 14px -6px var(--form-input-focus-shadow);
+}
+
+/* ---- 面板 / 抽屉 / 弹窗 / Toast ---- */
+.liquid-aurora-glass-theme.dark-mode .pc-panel,
+.liquid-aurora-glass-theme.dark-mode .mobile-panel {
+  background: rgba(10, 14, 32, 0.62);
+}
+.liquid-aurora-glass-theme.dark-mode .drawer-panel {
+  background: rgba(10, 14, 32, 0.72) !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow:
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.07),
+    -24px 0 64px -28px rgba(0, 0, 0, 0.58) !important;
+}
+.liquid-aurora-glass-theme.dark-mode .drawer-overlay {
+  background: rgba(8, 11, 24, 0.3) !important;
+}
+.liquid-aurora-glass-theme.dark-mode .add-todo-popup {
+  background: rgba(12, 17, 38, 0.76) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  box-shadow:
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.08),
+    0 20px 60px -20px rgba(0, 0, 0, 0.58) !important;
+}
+.liquid-aurora-glass-theme.dark-mode .reminder-toast {
+  background: rgba(12, 17, 38, 0.76) !important;
+}
+.liquid-aurora-glass-theme.dark-mode .todo-actions {
+  background: rgba(14, 19, 40, 0.82) !important;
+}
+.liquid-aurora-glass-theme.dark-mode .todo-item {
+  box-shadow:
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.06),
+    0 2px 6px -2px rgba(0, 0, 0, 0.3);
+}
+
+/* ---- 节日芯片（深色） ---- */
+.liquid-aurora-glass-theme.dark-mode .festival-chip {
+  background: rgba(20, 27, 50, 0.52) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: var(--text-primary) !important;
+  box-shadow: inset 0 1px 0.5px rgba(255, 255, 255, 0.09);
+}
+
+/* ---- 设置页（深色） ---- */
+.liquid-aurora-glass-theme.dark-mode .settings-page {
+  background: transparent;
+}
+.liquid-aurora-glass-theme.dark-mode .setting-section {
+  background: rgba(10, 14, 32, 0.6) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow:
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.07),
+    0 8px 28px -12px rgba(0, 0, 0, 0.4);
+}
+.liquid-aurora-glass-theme.dark-mode .access-denied {
+  background: rgba(10, 14, 32, 0.6) !important;
+}
+.liquid-aurora-glass-theme.dark-mode .preview-box {
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+.liquid-aurora-glass-theme.dark-mode .form-input,
+.liquid-aurora-glass-theme.dark-mode .form-select,
+.liquid-aurora-glass-theme.dark-mode .form-textarea {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+.liquid-aurora-glass-theme.dark-mode .template-hints {
+  background: rgba(255, 255, 255, 0.04) !important;
+}
+
+/* ---- 加载遮罩（深色） ---- */
+.liquid-aurora-glass-theme.dark-mode .loading-overlay {
+  background: rgba(8, 11, 24, 0.65) !important;
+}
+
+/* ---- 动态背景（深色） ---- */
+body.dynamic-background.liquid-aurora-glass-theme.dark-mode .calendar-day {
+  background: rgba(20, 27, 50, 0.62) !important;
+}
+body.dynamic-background.liquid-aurora-glass-theme.dark-mode .calendar-header,
+body.dynamic-background.liquid-aurora-glass-theme.dark-mode .drawer-panel,
+body.dynamic-background.liquid-aurora-glass-theme.dark-mode .add-todo-popup {
+  background: rgba(10, 14, 32, 0.82) !important;
+}
+
+/* ---- 移动端 ---- */
+@media (max-width: 768px) {
+  .liquid-aurora-glass-theme .calendar-day,
+  .liquid-aurora-glass-theme.dark-mode .calendar-day {
+    border-radius: 14px !important;
+  }
+  .liquid-aurora-glass-theme .calendar-day:hover {
+    transform: none;
+  }
+  .liquid-aurora-glass-theme .drawer-panel {
+    width: 100%;
+  }
+}
+
+/* ---- 尊重减弱动效偏好 ---- */
+@media (prefers-reduced-motion: reduce) {
+  html.liquid-aurora-glass-theme body::before {
+    animation: none !important;
+  }
+  .liquid-aurora-glass-theme .calendar-day,
+  .liquid-aurora-glass-theme .nav-btn,
+  .liquid-aurora-glass-theme .icon-btn,
+  .liquid-aurora-glass-theme .today-btn,
+  .liquid-aurora-glass-theme .drawer-close,
+  .liquid-aurora-glass-theme .toggle-btn {
+    transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease !important;
+    transform: none !important;
+  }
+}
+
+/* ============================================================
+   兼容降级：不支持 backdrop-filter 时纯色兜底
+   ============================================================ */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .liquid-aurora-glass-theme .calendar-day {
+    background: rgba(255, 255, 255, 0.88) !important;
+  }
+  .liquid-aurora-glass-theme .calendar-header {
+    background: rgba(244, 246, 252, 0.94) !important;
+  }
+  .liquid-aurora-glass-theme .drawer-overlay {
+    background: rgba(15, 20, 40, 0.45) !important;
+  }
+  .liquid-aurora-glass-theme .nav-btn,
+  .liquid-aurora-glass-theme .icon-btn,
+  .liquid-aurora-glass-theme .today-btn {
+    background: rgba(238, 241, 248, 0.92) !important;
+  }
+  .liquid-aurora-glass-theme .pc-panel,
+  .liquid-aurora-glass-theme .mobile-panel {
+    background: rgba(242, 244, 250, 0.94);
+  }
+  .liquid-aurora-glass-theme .drawer-panel {
+    background: rgba(244, 246, 252, 0.96) !important;
+  }
+  .liquid-aurora-glass-theme .add-todo-popup {
+    background: rgba(244, 246, 252, 0.96) !important;
+  }
+  .liquid-aurora-glass-theme .reminder-toast {
+    background: rgba(244, 246, 252, 0.96) !important;
+  }
+  .liquid-aurora-glass-theme .todo-actions {
+    background: rgba(246, 248, 254, 0.96) !important;
+  }
+  .liquid-aurora-glass-theme .todo-item {
+    background: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  .liquid-aurora-glass-theme .festival-chip {
+    background: rgba(244, 246, 252, 0.94) !important;
+  }
+  .liquid-aurora-glass-theme .settings-page {
+    background: rgba(237, 239, 248, 0.96) !important;
+  }
+  .liquid-aurora-glass-theme .setting-section {
+    background: rgba(244, 246, 252, 0.96) !important;
+  }
+
+  .liquid-aurora-glass-theme.dark-mode .calendar-day {
+    background: rgba(18, 24, 44, 0.94) !important;
+  }
+  .liquid-aurora-glass-theme.dark-mode .calendar-header {
+    background: rgba(12, 16, 34, 0.95) !important;
+  }
+  .liquid-aurora-glass-theme.dark-mode .drawer-overlay {
+    background: rgba(8, 11, 24, 0.55) !important;
+  }
+  .liquid-aurora-glass-theme.dark-mode .nav-btn,
+  .liquid-aurora-glass-theme.dark-mode .icon-btn,
+  .liquid-aurora-glass-theme.dark-mode .today-btn {
+    background: rgba(30, 37, 60, 0.92) !important;
+  }
+  .liquid-aurora-glass-theme.dark-mode .pc-panel,
+  .liquid-aurora-glass-theme.dark-mode .mobile-panel {
+    background: rgba(10, 14, 32, 0.94);
+  }
+  .liquid-aurora-glass-theme.dark-mode .drawer-panel {
+    background: rgba(10, 14, 32, 0.96) !important;
+  }
+  .liquid-aurora-glass-theme.dark-mode .add-todo-popup {
+    background: rgba(10, 14, 32, 0.96) !important;
+  }
+  .liquid-aurora-glass-theme.dark-mode .reminder-toast {
+    background: rgba(12, 16, 34, 0.96) !important;
+  }
+  .liquid-aurora-glass-theme.dark-mode .todo-actions {
+    background: rgba(14, 19, 40, 0.96) !important;
+  }
+  .liquid-aurora-glass-theme.dark-mode .todo-item {
+    background: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  .liquid-aurora-glass-theme.dark-mode .festival-chip {
+    background: rgba(18, 24, 44, 0.94) !important;
+  }
+  .liquid-aurora-glass-theme.dark-mode .settings-page {
+    background: rgba(8, 11, 24, 0.96) !important;
+  }
+  .liquid-aurora-glass-theme.dark-mode .setting-section {
+    background: rgba(10, 14, 32, 0.96) !important;
+  }
+
+  .liquid-aurora-glass-theme .calendar-day,
+  .liquid-aurora-glass-theme .calendar-header,
+  .liquid-aurora-glass-theme .nav-btn,
+  .liquid-aurora-glass-theme .icon-btn,
+  .liquid-aurora-glass-theme .today-btn,
+  .liquid-aurora-glass-theme .pc-panel,
+  .liquid-aurora-glass-theme .mobile-panel,
+  .liquid-aurora-glass-theme .drawer-panel,
+  .liquid-aurora-glass-theme .drawer-overlay,
+  .liquid-aurora-glass-theme .add-todo-popup,
+  .liquid-aurora-glass-theme .reminder-toast,
+  .liquid-aurora-glass-theme .todo-actions,
+  .liquid-aurora-glass-theme .todo-item,
+  .liquid-aurora-glass-theme .festival-chip,
+  .liquid-aurora-glass-theme .setting-section,
+  .liquid-aurora-glass-theme .access-denied,
+  .liquid-aurora-glass-theme .loading-overlay,
+  .liquid-aurora-glass-theme .preview-box,
+  .liquid-aurora-glass-theme .form-input,
+  .liquid-aurora-glass-theme .form-select,
+  .liquid-aurora-glass-theme .form-textarea,
+  .liquid-aurora-glass-theme.dark-mode .calendar-day,
+  .liquid-aurora-glass-theme.dark-mode .calendar-header,
+  .liquid-aurora-glass-theme.dark-mode .nav-btn,
+  .liquid-aurora-glass-theme.dark-mode .icon-btn,
+  .liquid-aurora-glass-theme.dark-mode .today-btn,
+  .liquid-aurora-glass-theme.dark-mode .pc-panel,
+  .liquid-aurora-glass-theme.dark-mode .mobile-panel,
+  .liquid-aurora-glass-theme.dark-mode .drawer-panel,
+  .liquid-aurora-glass-theme.dark-mode .drawer-overlay,
+  .liquid-aurora-glass-theme.dark-mode .add-todo-popup,
+  .liquid-aurora-glass-theme.dark-mode .reminder-toast,
+  .liquid-aurora-glass-theme.dark-mode .todo-actions,
+  .liquid-aurora-glass-theme.dark-mode .todo-item,
+  .liquid-aurora-glass-theme.dark-mode .festival-chip,
+  .liquid-aurora-glass-theme.dark-mode .setting-section,
+  .liquid-aurora-glass-theme.dark-mode .access-denied,
+  .liquid-aurora-glass-theme.dark-mode .loading-overlay,
+  .liquid-aurora-glass-theme.dark-mode .preview-box,
+  .liquid-aurora-glass-theme.dark-mode .form-input,
+  .liquid-aurora-glass-theme.dark-mode .form-select,
+  .liquid-aurora-glass-theme.dark-mode .form-textarea {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
