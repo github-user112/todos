@@ -433,6 +433,49 @@ function buildLiquidAuroraGlassDark({ accent, accentStrong }) {
   };
 }
 
+/* ---------------- Fluid Glass · 浅色 ---------------- */
+function buildFluidGlass({ accent, accentStrong }) {
+  return {
+    ...buildIos26Glass({ accent, accentStrong }),
+    /* 比 Liquid Aurora 更通透——极薄玻璃 + 鼠标追光驱动 */
+    'background-color': 'rgba(255, 255, 255, 0.03)',
+    'card-background': 'rgba(255, 255, 255, 0.45)',
+    'border-color': 'rgba(255, 255, 255, 0.48)',
+    'hover-color': 'rgba(255, 255, 255, 0.34)',
+    'current-month-bg': 'rgba(255, 255, 255, 0.42)',
+    'current-month-border': 'rgba(255, 255, 255, 0.56)',
+    'button-secondary-bg': 'rgba(255, 255, 255, 0.38)',
+    'button-secondary-hover-bg': 'rgba(255, 255, 255, 0.52)',
+    'calendar-day-bg': 'rgba(255, 255, 255, 0.4)',
+    'calendar-day-border': 'rgba(255, 255, 255, 0.48)',
+    'calendar-day-hover-bg': 'rgba(255, 255, 255, 0.58)',
+    'todo-item-bg': 'rgba(255, 255, 255, 0.36)',
+    'todo-item-hover-bg': 'rgba(255, 255, 255, 0.5)',
+    'loading-overlay-bg': 'rgba(240, 245, 252, 0.45)',
+  };
+}
+
+/* ---------------- Fluid Glass · 深色 ---------------- */
+function buildFluidGlassDark({ accent, accentStrong }) {
+  return {
+    ...buildGlassDark({ accent, accentStrong }),
+    /* 深色更通透——黑烟玻璃 + 鼠标追光 */
+    'background-color': 'rgba(8, 12, 28, 0.24)',
+    'card-background': 'rgba(255, 255, 255, 0.05)',
+    'border-color': 'rgba(255, 255, 255, 0.09)',
+    'hover-color': 'rgba(255, 255, 255, 0.07)',
+    'current-month-bg': 'rgba(255, 255, 255, 0.03)',
+    'current-month-border': 'rgba(255, 255, 255, 0.09)',
+    'button-secondary-bg': 'rgba(255, 255, 255, 0.07)',
+    'button-secondary-hover-bg': 'rgba(255, 255, 255, 0.12)',
+    'calendar-day-bg': 'rgba(255, 255, 255, 0.045)',
+    'calendar-day-border': 'rgba(255, 255, 255, 0.08)',
+    'calendar-day-hover-bg': 'rgba(255, 255, 255, 0.1)',
+    'todo-item-bg': 'rgba(255, 255, 255, 0.05)',
+    'todo-item-hover-bg': 'rgba(255, 255, 255, 0.1)',
+  };
+}
+
 /* ---------------- 主题清单 ---------------- */
 const THEMES = [
   { id: '',                     cls: null,               comment: '默认 · 极光紫 Aurora Violet', build: () => buildLight({ accent: '#6e56cf', accentStrong: '#5b41bd' }) },
@@ -452,6 +495,8 @@ const THEMES = [
   { id: 'ios26-glass-theme-dark', cls: '.ios26-glass-theme.dark-mode', comment: '液态玻璃 26 · 深色 Liquid Glass 26 Dark', build: () => buildGlassDark({ accent: '#5856d6', accentStrong: '#4643cf' }) },
   { id: 'liquid-aurora-glass',      cls: '.liquid-aurora-glass-theme',       comment: '流光玻璃 · 浅色 Liquid Aurora Light', build: () => buildLiquidAuroraGlass({ accent: '#4f46e5', accentStrong: '#4338ca' }) },
   { id: 'liquid-aurora-glass-dark', cls: '.liquid-aurora-glass-theme.dark-mode', comment: '流光玻璃 · 深色 Liquid Aurora Dark', build: () => buildLiquidAuroraGlassDark({ accent: '#4f46e5', accentStrong: '#4338ca' }) },
+  { id: 'fluid-glass',      cls: '.fluid-glass-theme',       comment: 'Fluid Glass · 浅色 Fluid Glass Light', build: () => buildFluidGlass({ accent: '#06b6d4', accentStrong: '#0891b2' }) },
+  { id: 'fluid-glass-dark', cls: '.fluid-glass-theme.dark-mode', comment: 'Fluid Glass · 深色 Fluid Glass Dark', build: () => buildFluidGlassDark({ accent: '#22d3ee', accentStrong: '#67e8f9' }) },
   { id: 'persimmon-glass-theme',  cls: '.persimmon-glass-theme',       comment: '霜柿玻璃 Persimmon Glass',              build: () => buildGlass({ accent: '#d9480f', accentStrong: '#b83a0a' }) },
   { id: 'moonlight-glass-theme',  cls: '.moonlight-glass-theme',       comment: '月白玻璃 Moonlight Glass',              build: () => buildGlass({ accent: '#3d52c7', accentStrong: '#3043a6' }) },
   { id: 'bamboo-glass-theme',     cls: '.bamboo-glass-theme',          comment: '竹青玻璃 Bamboo Glass',                 build: () => buildGlass({ accent: '#4d7c0f', accentStrong: '#3f6212' }) },
@@ -508,6 +553,8 @@ export {
   buildIos26Glass,
   buildLiquidAuroraGlass,
   buildLiquidAuroraGlassDark,
+  buildFluidGlass,
+  buildFluidGlassDark,
   THEMES,
   GROUPS,
   serialize,

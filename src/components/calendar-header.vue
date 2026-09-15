@@ -437,6 +437,8 @@ const themeOptions = [
   { value: 'ios26-glass-dark', label: '🌑 液态玻璃 26 · 深色' },
   { value: 'liquid-aurora-glass', label: '🌊 流光玻璃' },
   { value: 'liquid-aurora-glass-dark', label: '🌑 流光玻璃 · 深色' },
+  { value: 'fluid-glass', label: '✨ Fluid Glass' },
+  { value: 'fluid-glass-dark', label: '🌑 Fluid Glass · 深色' },
   { value: 'persimmon-glass', label: '🍂 霜柿玻璃' },
   { value: 'moonlight-glass', label: '🌙 月白玻璃' },
   { value: 'bamboo-glass', label: '🎋 竹青玻璃' },

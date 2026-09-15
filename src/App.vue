@@ -36,6 +36,7 @@ import { generateHash } from './utils/hashUtils';
 import { getUserId } from './utils/api';
 import { loading } from './utils/loading';
 import { activeReminders, dismissReminder } from './utils/reminderState';
+import { initFluidGlassLight, stopFluidGlassLight, watchFluidGlassTheme } from './utils/fluid-glass-light';
 
 const initializeUserId = () => {
   let uid = getUserId();
@@ -50,6 +51,11 @@ const initializeUserId = () => {
 
 onMounted(() => {
   initializeUserId();
+  // Fluid Glass 鼠标追光：主题激活时启动，切换时自动停止
+  watchFluidGlassTheme((active) => {
+    if (active) initFluidGlassLight();
+    else stopFluidGlassLight();
+  });
 });
 </script>
 
