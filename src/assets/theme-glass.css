@@ -1906,7 +1906,6 @@ html.fluid-glass-theme.dark-mode body::before {
 /* ---- 面板：厚玻璃 + 追光 ---- */
 .fluid-glass-theme .pc-panel,
 .fluid-glass-theme .mobile-panel {
-  position: relative;
   backdrop-filter: blur(36px) saturate(210%);
   -webkit-backdrop-filter: blur(36px) saturate(210%);
   background: rgba(255, 255, 255, 0.58);
@@ -1937,7 +1936,6 @@ html.fluid-glass-theme.dark-mode body::before {
 
 /* ---- 弹窗：厚玻璃卡片 + 追光 ---- */
 .fluid-glass-theme .add-todo-popup {
-  position: relative;
   backdrop-filter: blur(44px) saturate(220%) !important;
   -webkit-backdrop-filter: blur(44px) saturate(220%) !important;
   background: rgba(255, 255, 255, 0.66) !important;
