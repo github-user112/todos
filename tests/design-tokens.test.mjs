@@ -46,7 +46,7 @@ function contrast(a, b) {
   return (l1 + 0.05) / (l2 + 0.05);
 }
 
-const isGlassId = (id) => id.includes('glass-theme');
+const isGlassId = (id) => id.includes('glass');
 /** 是否为可计算亮度的实色 hex */
 const isSolidHex = (v) => /^#[0-9a-fA-F]{6}$/.test(v);
 const lightThemes = THEMES.filter((t) => t.id !== 'dark-mode');
@@ -80,20 +80,23 @@ describe('颜色工具', () => {
 
 /* ---------------- 主题清单 ---------------- */
 describe('主题清单', () => {
-  it('共 18 套主题且 id 唯一', () => {
-    assert.equal(THEMES.length, 18);
-    assert.equal(new Set(THEMES.map((t) => t.id)).size, 18);
+  it('共 19 套主题且 id 唯一', () => {
+    assert.equal(THEMES.length, 19);
+    assert.equal(new Set(THEMES.map((t) => t.id)).size, 19);
   });
 
-  it('包含默认主题、深色模式与七套玻璃主题（液态玻璃 26 含浅色/深色两个配方块）', () => {
+  it('包含默认主题、深色模式与八套玻璃主题（均为浅色，无深色玻璃变体）', () => {
     assert.ok(THEMES.some((t) => t.cls === null), '缺少 :root 默认主题');
     assert.ok(darkTheme, '缺少 dark-mode');
-    assert.equal(glassThemes.length, 8, '应有七套玻璃主题（液态玻璃 26 占浅色+深色两块）');
+    assert.equal(glassThemes.length, 9, '应有八套玻璃主题（三套 v3 + ios26 + aurora + fluid + 三套节气）');
     assert.ok(
-      THEMES.some((t) => t.id === 'ios26-glass-theme') &&
-        THEMES.some((t) => t.id === 'ios26-glass-theme-dark'),
-      '缺少液态玻璃 26 的浅色/深色配方',
+      THEMES.some((t) => t.id === 'ios26-glass-theme'),
+      '缺少液态玻璃 26 浅色配方',
     );
+    // 深色玻璃变体已按设计移除，只能保留浅色玻璃 + 通用深色模式
+    for (const id of ['ios26-glass-theme-dark', 'liquid-aurora-glass-dark', 'fluid-glass-dark']) {
+      assert.ok(!THEMES.some((t) => t.id === id), `${id} 已下线，不应再生成`);
+    }
     // 节气玻璃三套：霜柿 / 月白 / 竹青
     for (const id of ['persimmon-glass-theme', 'moonlight-glass-theme', 'bamboo-glass-theme']) {
       assert.ok(THEMES.some((t) => t.id === id), `缺少节气玻璃 ${id}`);
@@ -195,9 +198,13 @@ describe('玻璃主题配方', () => {
       assert.equal(vars['glass-day-backdrop'], 'none', `${t.id} 应显式关闭 day backdrop`);
     }
   });
+
+  it('液态玻璃 26 深色配方已随深色玻璃选项下线', () => {
+    assert.ok(!THEMES.some((t) => t.id === 'ios26-glass-theme-dark'), '深色玻璃配方应已移除');
+  });
 });
 
-/* ---------------- 液态玻璃 26 · 深色配方 ---------------- */
+/* ---------------- 浅色玻璃可读性 ---------------- */
 /** 把 rgba 前景叠到不透明背景上，返回合成后的 hex（用于玻璃面可读性检查） */
 function composite(fgRgba, bgHex) {
   const m = fgRgba.match(/rgba\((\d+), (\d+), (\d+), ([\d.]+)\)/);
@@ -208,27 +215,24 @@ function composite(fgRgba, bgHex) {
   return rgbToHex([r, g, b].map((c, i) => c * t + bg[i] * (1 - t)));
 }
 
-describe('液态玻璃 26 深色配方', () => {
-  const darkGlass = THEMES.find((t) => t.id === 'ios26-glass-theme-dark');
-  const vars = darkGlass.build();
+describe('玻璃主题可读性', () => {
+  for (const t of glassThemes) {
+    it(`${t.comment}：正文对玻璃面合成底对比度 ≥ 4.5:1`, () => {
+      const vars = t.build();
+      const cardOnWallpaper = composite(vars['card-background'], '#dfe3ee');
+      assert.ok(
+        contrast(vars['text-primary'], cardOnWallpaper) >= 4.5,
+        `实际 ${contrast(vars['text-primary'], cardOnWallpaper).toFixed(2)}:1（合成底 ${cardOnWallpaper}）`,
+      );
+    });
+  }
 
-  it('正文文字对深色壁纸上的玻璃卡片底对比度 ≥ 7:1', () => {
-    // 卡片是低透明度白雾，先叠到近似壁纸中调再算对比度
-    const cardOnWallpaper = composite(vars['card-background'], '#141a2e');
-    assert.ok(
-      contrast(vars['text-primary'], cardOnWallpaper) >= 7,
-      `实际 ${contrast(vars['text-primary'], cardOnWallpaper).toFixed(2)}:1（合成底 ${cardOnWallpaper}）`,
-    );
-  });
-
-  it('primary-dark 在暗底上是更亮的强调变体（而非更暗）', () => {
-    assert.ok(luminance(vars['primary-dark']) > luminance(vars['primary-color']));
-  });
-
-  it('浅色/深色共用同一强调色，跨模式品牌一致', () => {
-    const light = THEMES.find((t) => t.id === 'ios26-glass-theme').build();
-    assert.equal(light['primary-color'], vars['primary-color']);
-    assert.notEqual(vars['text-primary'], light['text-primary'], '深色配方必须换浅色文字');
+  it('强调色跨浅色玻璃主题满足白字 3:1 底线', () => {
+    for (const t of glassThemes) {
+      const vars = t.build();
+      const c = contrast(vars['primary-color'], '#ffffff');
+      assert.ok(c >= 3, `${t.comment} 实际 ${c.toFixed(2)}`);
+    }
   });
 });
 
@@ -281,7 +285,11 @@ describe('生成产物回归（src/assets/theme.css）', () => {
       'week-count', 'dx', 'dy', 'rot', 'scale', 'direction',
       'dynamic-bg', 'dynamic-overlay', 'i',
       // 玻璃主题的壁纸舞台配色，仅定义在 html.<glass> 选择器上（theme-glass.css）
-      'orb-rgb-1', 'orb-rgb-2', 'orb-rgb-3', 'stage-a', 'stage-b',
+      'orb-rgb-1', 'orb-rgb-2', 'orb-rgb-3', 'orb-rgb-4', 'orb-rgb-5', 'stage-a', 'stage-b',
+      'fg-x', 'fg-y', 'fg-shine', 'fg-tint', 'fg-surface-alpha',
+      'fg-edge', 'fg-rim', 'fg-shade', 'fg-shadow', 'fg-panel-alpha',
+      // 每格浅色玻璃配方：只在玻璃主题作用域定义
+      'day-glass-sheen', 'day-glass-fill', 'day-glass-shadow',
     ]);
 
     const rootBlock = onDisk.slice(onDisk.indexOf(':root {'), onDisk.indexOf('}', onDisk.indexOf(':root {')));

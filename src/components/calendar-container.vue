@@ -108,6 +108,7 @@ import {
 } from '../utils/lunarUtils';
 import { apiRequest } from '../utils/api';
 import { t, tf } from '../utils/i18n.js';
+import { normalizeTheme } from '../utils/theme-selection.js';
 const dialog = useDialog();
 const message = useMessage();
 
@@ -140,7 +141,8 @@ const resolvedAnimationType = computed(() => {
   }
   return animationType.value;
 });
-const themeType = ref(localStorage.getItem('calendar_theme_type') || 'default');
+const themeType = ref(normalizeTheme(localStorage.getItem('calendar_theme_type') || 'default'));
+localStorage.setItem('calendar_theme_type', themeType.value);
 
 // 合法视图模式白名单（旧版本前端不识别 'auto' 时回退到默认值）
 const VIEW_MODE_WHITELIST = ['today-priority', 'full-month', 'auto'];
@@ -190,8 +192,9 @@ const loadUserSettings = async () => {
       localStorage.setItem('calendar_animation_type', settings.animation_type);
     }
     if (settings.theme_type) {
-      themeType.value = settings.theme_type;
-      localStorage.setItem('calendar_theme_type', settings.theme_type);
+      themeType.value = normalizeTheme(settings.theme_type);
+      localStorage.setItem('calendar_theme_type', themeType.value);
+      applyTheme(themeType.value);
     }
     if (settings.view_mode && isValidViewMode(settings.view_mode)) {
       viewMode.value = settings.view_mode;
@@ -429,9 +432,9 @@ const changeAnimation = (v) => {
   saveUserSettings('animationType', v);
 };
 const changeTheme = (v) => {
-  themeType.value = v;
-  applyTheme(v);
-  saveUserSettings('themeType', v);
+  themeType.value = normalizeTheme(v);
+  applyTheme(themeType.value);
+  saveUserSettings('themeType', themeType.value);
 };
 const changeViewMode = (v) => {
   viewMode.value = v;
@@ -443,6 +446,7 @@ const changeShowLunar = (v) => {
 };
 
 const applyTheme = (theme) => {
+  theme = normalizeTheme(theme);
   const root = document.documentElement;
   root.classList.remove(
     'classic-theme',
@@ -479,13 +483,9 @@ const applyTheme = (theme) => {
     'ios-glass': 'ios-glass-theme',
     'liquid-glass': 'liquid-glass-theme',
     'ios26-glass': 'ios26-glass-theme',
-    'ios26-glass-dark': 'ios26-glass-theme dark-mode',
-    // 深色变体 = 玻璃主题类 + dark-mode（naive-ui 弹层随之切深色基底）
     'liquid-aurora-glass': 'liquid-aurora-glass-theme',
-    'liquid-aurora-glass-dark': 'liquid-aurora-glass-theme dark-mode',
     // Fluid Glass：鼠标追光玻璃
     'fluid-glass': 'fluid-glass-theme',
-    'fluid-glass-dark': 'fluid-glass-theme dark-mode',
     // 节气玻璃三套：霜柿 / 月白 / 竹青
     'persimmon-glass': 'persimmon-glass-theme',
     'moonlight-glass': 'moonlight-glass-theme',
