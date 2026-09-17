@@ -455,6 +455,7 @@ const THEMES = [
   { id: 'persimmon-glass-theme',  cls: '.persimmon-glass-theme',       comment: '霜柿玻璃 Persimmon Glass',              build: () => buildGlass({ accent: '#d9480f', accentStrong: '#b83a0a' }) },
   { id: 'moonlight-glass-theme',  cls: '.moonlight-glass-theme',       comment: '月白玻璃 Moonlight Glass',              build: () => buildGlass({ accent: '#3d52c7', accentStrong: '#3043a6' }) },
   { id: 'bamboo-glass-theme',     cls: '.bamboo-glass-theme',          comment: '竹青玻璃 Bamboo Glass',                 build: () => buildGlass({ accent: '#4d7c0f', accentStrong: '#3f6212' }) },
+  { id: 'webgl-glass',            cls: '.webgl-glass-theme',           comment: 'WebGL 液态玻璃 WebGL Glass',            build: () => buildGlass({ accent: '#4361b5', accentStrong: '#304990' }) },
 ];
 
 /* ---------------- 序列化 ---------------- */

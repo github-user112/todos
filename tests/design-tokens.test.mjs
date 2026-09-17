@@ -80,15 +80,15 @@ describe('颜色工具', () => {
 
 /* ---------------- 主题清单 ---------------- */
 describe('主题清单', () => {
-  it('共 19 套主题且 id 唯一', () => {
-    assert.equal(THEMES.length, 19);
-    assert.equal(new Set(THEMES.map((t) => t.id)).size, 19);
+  it('共 20 套主题且 id 唯一', () => {
+    assert.equal(THEMES.length, 20);
+    assert.equal(new Set(THEMES.map((t) => t.id)).size, 20);
   });
 
-  it('包含默认主题、深色模式与八套玻璃主题（均为浅色，无深色玻璃变体）', () => {
+  it('包含默认主题、深色模式与十套玻璃主题（均为浅色，无深色玻璃变体）', () => {
     assert.ok(THEMES.some((t) => t.cls === null), '缺少 :root 默认主题');
     assert.ok(darkTheme, '缺少 dark-mode');
-    assert.equal(glassThemes.length, 9, '应有八套玻璃主题（三套 v3 + ios26 + aurora + fluid + 三套节气）');
+    assert.equal(glassThemes.length, 10, '应有十套玻璃主题（三套 v3 + ios26 + aurora + fluid + 三套节气 + webgl）');
     assert.ok(
       THEMES.some((t) => t.id === 'ios26-glass-theme'),
       '缺少液态玻璃 26 浅色配方',
@@ -101,6 +101,18 @@ describe('主题清单', () => {
     for (const id of ['persimmon-glass-theme', 'moonlight-glass-theme', 'bamboo-glass-theme']) {
       assert.ok(THEMES.some((t) => t.id === id), `缺少节气玻璃 ${id}`);
     }
+  });
+
+  it('WebGL 液态玻璃主题：id / 根类名 / 配方正确', () => {
+    const t = THEMES.find((x) => x.id === 'webgl-glass');
+    assert.ok(t, '缺少 webgl-glass 主题');
+    assert.equal(t.cls, '.webgl-glass-theme');
+    const vars = t.build();
+    // 与 buildGlass({ accent: '#4361b5', accentStrong: '#304990' }) 的直接产物一致
+    assert.equal(vars['primary-color'], '#4361b5');
+    assert.equal(vars['primary-dark'], '#304990');
+    assert.match(vars['card-background'], /^rgba\(255, 255, 255, 0\.\d+\)$/);
+    assert.match(vars['glass-day-backdrop'], /blur\(\d+px\)/);
   });
 });
 

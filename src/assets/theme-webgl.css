@@ -1,0 +1,43 @@
+/* Experimental light-only WebGL theme. All selectors are opt-in. */
+html.webgl-glass-theme:root:not(.dark-mode) body {
+  background: radial-gradient(ellipse at 10% 15%, #8fcbdc, transparent 65%),
+    radial-gradient(ellipse at 95% 65%, #b7abe3, transparent 70%), #e5edf8;
+}
+html.webgl-glass-theme:root:not(.dark-mode) .calendar-container {
+  position: relative;
+  z-index: 1;
+  background: transparent;
+}
+/* Opaque-enough CSS fallback until the first successful GL frame. */
+html.webgl-glass-theme:root:not(.dark-mode) body .calendar-day.calendar-day {
+  background: linear-gradient(145deg, #ffffffb8, #ffffff52 50%, #ffffff85) !important;
+  border-color: #ffffffc9 !important;
+  box-shadow: inset 0 1px 1px #fff, inset 0 -1px 1px #54688833, 0 7px 16px -12px #34496980 !important;
+  border-radius: 16px !important;
+  transform: none !important;
+  backdrop-filter: blur(18px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(160%) !important;
+}
+html.webgl-glass-theme:root:not(.dark-mode) .calendar-header {
+  background: #ffffff85 !important;
+  backdrop-filter: blur(22px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(150%) !important;
+  box-shadow: inset 0 1px 0 #fff, 0 8px 28px -20px #23375166 !important;
+}
+html.webgl-glass-theme:root:not(.dark-mode) .calendar-grid { background: transparent !important; }
+html.webgl-glass-theme:root:not(.dark-mode).webgl-glass-ready body .calendar-day.calendar-day {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-color: #ffffff45 !important;
+  box-shadow: 0 6px 16px -12px #263c7066 !important;
+}
+html.webgl-glass-theme:root:not(.dark-mode) body .calendar-day.calendar-day:is(.current-day, .selected-day) {
+  border-color: var(--primary-color) !important;
+  box-shadow: inset 0 0 0 1px var(--primary-color), 0 0 0 2px var(--form-input-focus-shadow) !important;
+}
+html.webgl-glass-theme:root:not(.dark-mode) .calendar-day.current-day:hover .day-number { color: #fff !important; }
+html.webgl-glass-theme:root:not(.dark-mode):not(.webgl-glass-ready) .webgl-glass-canvas { visibility: hidden; }
+@media (prefers-reduced-transparency: reduce) {
+  html.webgl-glass-theme:root:not(.dark-mode) body .calendar-day.calendar-day { background: #f5f8ff !important; }
+}

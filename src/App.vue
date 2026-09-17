@@ -1,5 +1,6 @@
 <template>
   <div class="app-container">
+    <WebglGlass />
     <LoadingComponent :show="loading" />
 
     <TransitionGroup
@@ -32,6 +33,7 @@
 <script setup>
 import { onMounted } from 'vue';
 import LoadingComponent from './components/LoadingComponent.vue';
+import WebglGlass from './components/WebglGlass.vue';
 import { generateHash } from './utils/hashUtils';
 import { getUserId } from './utils/api';
 import { loading } from './utils/loading';

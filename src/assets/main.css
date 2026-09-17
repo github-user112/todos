@@ -4,6 +4,7 @@
 
 @import './theme.css';
 @import './theme-glass.css';
+@import './theme-webgl.css';
 
 /* ---- Reset & Base ---- */
 *,

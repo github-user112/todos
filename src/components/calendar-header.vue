@@ -439,6 +439,7 @@ const themeOptions = [
   { value: 'persimmon-glass', label: '🍂 霜柿玻璃' },
   { value: 'moonlight-glass', label: '🌙 月白玻璃' },
   { value: 'bamboo-glass', label: '🎋 竹青玻璃' },
+  { value: 'webgl-glass', label: '🔬 WebGL 液态玻璃' },
   { value: 'auto', label: '🔄 跟随系统' },
 ];
 

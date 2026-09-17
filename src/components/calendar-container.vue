@@ -466,6 +466,7 @@ const applyTheme = (theme) => {
     'persimmon-glass-theme',
     'moonlight-glass-theme',
     'bamboo-glass-theme',
+    'webgl-glass-theme',
     'dark-mode',
   );
 
@@ -490,6 +491,8 @@ const applyTheme = (theme) => {
     'persimmon-glass': 'persimmon-glass-theme',
     'moonlight-glass': 'moonlight-glass-theme',
     'bamboo-glass': 'bamboo-glass-theme',
+    // WebGL 液态玻璃
+    'webgl-glass': 'webgl-glass-theme',
     dark: 'dark-mode',
   };
 
