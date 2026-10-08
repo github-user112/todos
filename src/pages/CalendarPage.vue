@@ -14,6 +14,7 @@
         @fetch-calendar-data="fetchCalendarData"
         @fetch-holiday-data="fetchHolidayData"
         @add-todo="handleAddTodo"
+        @update-todo="handleUpdateTodo"
         @complete-todo="handleCompleteTodo"
         @delete-todo="handleDeleteTodo"
         @moveTodoDate="handleMoveTodoDate"
@@ -213,6 +214,58 @@ const handleAddTodo = async (todoData) => {
     return false;
   } catch (error) {
     console.error('保存待办事项失败:', error);
+    return false;
+  }
+};
+
+// 修改已有待办：更新后同步本地数据（重复实例由前端按 todos 行展开，无需重新拉取）
+const handleUpdateTodo = async ({
+  id,
+  text,
+  date,
+  repeatType,
+  repeatInterval,
+  endDate,
+  skipHolidays,
+  reminder,
+  todoTime,
+}) => {
+  try {
+    const result = await apiRequest(
+      '/api/todos',
+      'PUT',
+      {
+        id,
+        text,
+        date,
+        repeatType: repeatType || 'none',
+        repeatInterval: repeatInterval || 1,
+        endDate: endDate || '2039-12-31',
+        skipHolidays: !!skipHolidays,
+        reminder: reminder || 0,
+        todoTime: todoTime || '09:00',
+      },
+      null,
+      true,
+    );
+
+    if (result.success) {
+      const todo = todos.value.find((t) => t.id == id);
+      if (todo) {
+        todo.text = text;
+        todo.date = date;
+        todo.repeat_type = repeatType || 'none';
+        todo.repeat_interval = repeatInterval || 1;
+        todo.end_date = endDate || '2039-12-31';
+        todo.skip_holidays = !!skipHolidays;
+        todo.reminder = reminder || 0;
+        todo.todo_time = todoTime || '09:00';
+      }
+      return true;
+    }
+    return false;
+  } catch (error) {
+    console.error('修改待办事项失败:', error);
     return false;
   }
 };

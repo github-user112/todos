@@ -44,14 +44,17 @@
       v-model:todoText="todoText"
       v-model:todoRepeat="todoRepeat"
       :selectedDate="selectedDate"
+      :initialTodo="editingTodo"
       @close="closeAddTodoPopup"
       @save="saveTodo"
     />
 
     <TodoActionsMenu
       v-if="showTodoActions"
+      ref="todoActionsMenuRef"
       :style="todoActionsStyle"
       @complete="completeTodo"
+      @edit="editTodo"
       @delete="deleteTodo"
     />
 
@@ -124,6 +127,7 @@ const emit = defineEmits([
   'fetch-calendar-data',
   'fetch-holiday-data',
   'add-todo',
+  'update-todo',
   'complete-todo',
   'delete-todo',
   'moveTodoDate',
@@ -267,6 +271,9 @@ const showAddTodoPopup = ref(false);
 const todoText = ref('');
 const todoRepeat = ref('none');
 const selectedDate = ref(null);
+// 编辑模式：非空表示当前弹窗用于修改已有待办
+const editingTodo = ref(null);
+const editingTodoId = ref(null);
 
 // Todo list drawer
 const showTodoListDrawer = ref(false);
@@ -274,6 +281,7 @@ const showTodoListDrawer = ref(false);
 // Todo actions
 const showTodoActions = ref(false);
 const todoActionsStyle = ref({});
+const todoActionsMenuRef = ref(null);
 const selectedTodo = ref(null);
 const selectedTodoDate = ref(null);
 
@@ -514,19 +522,39 @@ const handleColorSchemeChange = () => {
 // ---- Todo 弹窗 ----
 const openAddTodoPopup = (date) => {
   selectedDate.value = date;
+  editingTodo.value = null;
+  editingTodoId.value = null;
   showAddTodoPopup.value = true;
   todoText.value = '';
   todoRepeat.value = 'none';
 };
 const closeAddTodoPopup = () => {
   showAddTodoPopup.value = false;
+  editingTodo.value = null;
+  editingTodoId.value = null;
 };
 
 const saveTodo = async (eventData) => {
-  if (!todoText.value.trim()) return;
+  const text = todoText.value.trim();
+  if (!text) return;
   try {
+    if (editingTodoId.value) {
+      await emit('update-todo', {
+        id: editingTodoId.value,
+        text,
+        date: selectedDate.value,
+        repeatType: eventData?.repeatType || todoRepeat.value,
+        repeatInterval: eventData?.repeatInterval || 1,
+        endDate: eventData?.endDate,
+        skipHolidays: eventData?.skipHolidays || false,
+        reminder: eventData?.reminder || 0,
+        todoTime: eventData?.todoTime || '09:00',
+      });
+      closeAddTodoPopup();
+      return;
+    }
     await emit('add-todo', {
-      text: todoText.value.trim(),
+      text,
       date: selectedDate.value,
       repeatType: eventData?.repeatType || todoRepeat.value,
       repeatInterval: eventData?.repeatInterval || 1,
@@ -542,27 +570,86 @@ const saveTodo = async (eventData) => {
 };
 
 // ---- Todo 操作 ----
-const openTodoActions = (todoId, todoDate, event) => {
+// 自适应定位：优先在待办下方弹出，底部空间不足时翻转到上方，并在视口内水平/垂直居中约束
+// 注意：菜单必须先以 fixed（隐藏）渲染再测量，否则插入文档流会挤压日历、导致坐标失真
+const positionTodoActions = (event) => {
+  const target =
+    event?.target?.closest?.('.todo-item') ||
+    event?.target ||
+    event?.currentTarget;
+  if (!target) return false;
+
+  const rect = target.getBoundingClientRect();
+  lastActionRect = rect;
+
+  const menu = todoActionsMenuRef.value?.$el || todoActionsMenuRef.value;
+  if (!menu || typeof menu.getBoundingClientRect !== 'function') return false;
+
+  const menuRect = menu.getBoundingClientRect();
+  const gap = 6;
+  const margin = 8;
+
+  let top = rect.bottom + gap;
+  // 下方放不下 → 向上弹出
+  if (top + menuRect.height + margin > window.innerHeight) {
+    top = rect.top - menuRect.height - gap;
+  }
+  top = Math.min(
+    Math.max(margin, top),
+    Math.max(margin, window.innerHeight - menuRect.height - margin),
+  );
+
+  const left = Math.min(
+    Math.max(margin, rect.left),
+    Math.max(margin, window.innerWidth - menuRect.width - margin),
+  );
+
+  todoActionsStyle.value = {
+    position: 'fixed',
+    visibility: 'visible',
+    top: `${top}px`,
+    left: `${left}px`,
+  };
+  return true;
+};
+
+const openTodoActions = async (todoId, todoDate, event) => {
   selectedTodo.value = todoId;
   selectedTodoDate.value = todoDate;
-  showTodoActions.value = true;
 
-  // 桌面端定位
-  if (window.innerWidth > 768) {
-    const target = event?.target || event?.currentTarget;
-    if (target) {
-      const rect = target.getBoundingClientRect();
-      lastActionRect = rect;
-      todoActionsStyle.value = {
-        position: 'absolute',
-        top: `${rect.bottom + 4}px`,
-        left: `${Math.min(rect.left, window.innerWidth - 150)}px`,
-      };
-    }
-  } else {
+  if (window.innerWidth <= 768) {
+    // 移动端为底部抽屉，无需定位
     lastActionRect = null;
     todoActionsStyle.value = {};
+    showTodoActions.value = true;
+    return;
   }
+
+  // 先以 fixed + 隐藏渲染（不参与文档流），量完真实尺寸再一次性定位，避免闪烁与跳动
+  todoActionsStyle.value = {
+    position: 'fixed',
+    top: '0px',
+    left: '0px',
+    visibility: 'hidden',
+  };
+  showTodoActions.value = true;
+  await nextTick();
+  if (!positionTodoActions(event)) {
+    todoActionsStyle.value = { position: 'fixed', visibility: 'visible' };
+  }
+};
+
+const editTodo = () => {
+  const todo = props.todos.find((t) => t.id == selectedTodo.value);
+  showTodoActions.value = false;
+  if (!todo) return;
+
+  editingTodoId.value = todo.id;
+  editingTodo.value = { ...todo };
+  selectedDate.value = todo.date;
+  todoText.value = todo.text;
+  todoRepeat.value = todo.repeat_type || 'none';
+  showAddTodoPopup.value = true;
 };
 
 function triggerCelebration() {

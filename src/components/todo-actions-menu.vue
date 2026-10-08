@@ -6,6 +6,12 @@
       </span>
       <span>{{ t('完成') }}</span>
     </button>
+    <button class="action-btn edit-btn" @click="$emit('edit')">
+      <span class="action-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+      </span>
+      <span>{{ t('编辑') }}</span>
+    </button>
     <button class="action-btn delete-btn" @click="$emit('delete')">
       <span class="action-icon">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
@@ -17,7 +23,7 @@
 
 <script setup>
 import { t } from '../utils/i18n.js';
-defineEmits(['complete', 'delete']);
+defineEmits(['complete', 'edit', 'delete']);
 </script>
 
 <style scoped>
@@ -69,6 +75,15 @@ defineEmits(['complete', 'delete']);
   color: var(--success-color);
 }
 
+.edit-btn .action-icon {
+  background: color-mix(in srgb, var(--primary-color) 12%, transparent);
+  color: var(--primary-color);
+}
+.edit-btn:hover {
+  background: color-mix(in srgb, var(--primary-color) 10%, transparent);
+  color: var(--primary-color);
+}
+
 .delete-btn .action-icon {
   background: color-mix(in srgb, var(--danger-color) 10%, transparent);
   color: var(--danger-color);
@@ -100,11 +115,12 @@ defineEmits(['complete', 'delete']);
   .action-btn {
     flex-direction: column;
     gap: 6px;
-    padding: 12px 28px;
+    padding: 12px 8px;
     font-size: 0.8rem;
     font-weight: 600;
     border-radius: 14px;
-    min-width: 80px;
+    min-width: 72px;
+    flex: 1;
   }
   .action-btn:active {
     background: var(--hover-color);

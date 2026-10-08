@@ -117,6 +117,7 @@ export default {
   删除: 'Delete',
   已删除: 'Deleted',
   完成: 'Done',
+  编辑: 'Edit',
   撤销: 'Undo',
   设置: 'Settings',
   分享: 'Share',
@@ -171,6 +172,7 @@ export default {
 
   // ---- 待办弹窗/抽屉 ----
   添加待办: 'Add Todo',
+  编辑待办: 'Edit Todo',
   '输入待办事项...': 'Enter a todo...',
   待办列表: 'Todo List',
   待办时间: 'Todo time',

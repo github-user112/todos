@@ -5,7 +5,7 @@
         <div class="drag-bar"></div>
 
         <div class="popup-header">
-          <h2>{{ t('添加待办') }}</h2>
+          <h2>{{ initialTodo ? t('编辑待办') : t('添加待办') }}</h2>
           <button class="close-btn" @click="$emit('close')">✕</button>
         </div>
 
@@ -167,6 +167,8 @@ const props = defineProps({
   todoText: { type: String, required: true },
   todoRepeat: { type: String, required: true },
   selectedDate: { type: String, default: '' },
+  // 编辑模式：传入要修改的待办，用于回填重复/提醒等设置
+  initialTodo: { type: Object, default: null },
 });
 
 const emit = defineEmits([
@@ -234,6 +236,23 @@ const requestNotifyPermission = async () => {
   notificationPermission.value = result;
 };
 
+// 编辑模式：回填已有待办的重复/结束/节假日/提醒设置
+const applyInitialTodo = () => {
+  const todo = props.initialTodo;
+  if (!todo) return;
+
+  const repeat = todo.repeat_type || 'none';
+  if (repeat !== 'none' && todo.repeat_interval) {
+    intervals.value[repeat] = todo.repeat_interval;
+  }
+  endDate.value =
+    !todo.end_date || todo.end_date === '2039-12-31' ? '' : todo.end_date;
+  skipHolidays.value = !!todo.skip_holidays;
+  reminder.value = Number(todo.reminder) || 0;
+  todoTime.value = todo.todo_time || '09:00';
+  showReminderOptions.value = reminder.value > 0;
+};
+
 const resetForm = () => {
   skipHolidays.value = false;
   endDate.value = '';
@@ -241,7 +260,11 @@ const resetForm = () => {
   reminder.value = 0;
   todoTime.value = '09:00';
   showReminderOptions.value = false;
+  applyInitialTodo();
 };
+
+// 组件随弹窗挂载，setup 时即回填
+applyInitialTodo();
 
 const handleSave = () => {
   if (!props.todoText?.trim()) return;

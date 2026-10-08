@@ -108,10 +108,40 @@ async function handleUpdateTodo(request, env, userId) {
     const date = data.date !== undefined ? data.date : todo.date;
     const sortOrder = data.sortOrder !== undefined ? data.sortOrder : todo.sort_order;
 
+    // 支持修改内容与重复规则
+    const text = data.text !== undefined ? data.text : todo.text;
+    const repeatType = data.repeatType !== undefined ? data.repeatType : todo.repeat_type;
+    const repeatInterval =
+      data.repeatInterval !== undefined ? data.repeatInterval : todo.repeat_interval;
+    const skipHolidays =
+      data.skipHolidays !== undefined ? (data.skipHolidays ? 1 : 0) : todo.skip_holidays;
+
+    if (!text || !text.trim()) {
+      return jsonResponse({ error: '待办内容不能为空' }, 400);
+    }
+
+    const validationResult = validateRepeatInterval(repeatType, repeatInterval);
+    if (!validationResult.valid) {
+      return jsonResponse({ error: validationResult.message }, 400);
+    }
+
     const result = await env.DB.prepare(
-      `UPDATE todos SET completed = ?, end_date = ?, todo_time = ?, reminder = ?, date = ?, sort_order = ? WHERE id = ?`,
+      `UPDATE todos SET completed = ?, end_date = ?, todo_time = ?, reminder = ?, date = ?, sort_order = ?,
+        text = ?, repeat_type = ?, repeat_interval = ?, skip_holidays = ? WHERE id = ?`,
     )
-      .bind(completed, endDate, todoTime, reminder, date, sortOrder, data.id)
+      .bind(
+        completed,
+        endDate,
+        todoTime,
+        reminder,
+        date,
+        sortOrder,
+        text.trim(),
+        repeatType,
+        repeatInterval,
+        skipHolidays,
+        data.id,
+      )
       .run();
 
     return jsonResponse({ success: result.success });
