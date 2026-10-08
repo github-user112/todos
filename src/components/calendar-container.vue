@@ -11,6 +11,7 @@
       @prevMonth="prevMonth"
       @nextMonth="nextMonth"
       @goToToday="goToToday"
+      @jumpTo="jumpToDate"
       @changeAnimation="changeAnimation"
       @changeTheme="changeTheme"
       @changeViewMode="changeViewMode"
@@ -98,6 +99,7 @@ import TodoListDrawer from './TodoListDrawer.vue';
 import CelebrationEffect from './CelebrationEffect.vue';
 import { getCelebrationEffect } from '../utils/celebrationUtils';
 import { formatDate, getWeekNumber } from '../utils/dateUtils';
+import { jumpToYM } from '../utils/quickJump.js';
 import {
   isDynamicBackgroundEnabled,
   applyDynamicBackground,
@@ -425,6 +427,10 @@ const nextMonth = () => {
 const goToToday = () => {
   currentDate.value = new Date();
   selectedDate.value = formatDate(new Date());
+};
+/** 左上角快速跳转：切到指定年月，保留原来的“日”（月末自动收敛） */
+const jumpToDate = ({ year, month }) => {
+  currentDate.value = jumpToYM(currentDate.value, year, month);
 };
 
 watch(currentDate, (newDate, oldValue) => {

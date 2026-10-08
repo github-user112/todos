@@ -16,8 +16,40 @@
         </svg>
       </button>
       <h2 class="header-title">
-        <span class="title-main">{{ tMonth(currentMonth) }}</span>
-        <span class="title-sub">{{ currentYear }}</span>
+        <button
+          class="title-trigger"
+          :aria-expanded="showJump"
+          aria-haspopup="dialog"
+          :aria-label="t('快速跳转年月')"
+          @click.stop="showJump = !showJump"
+        >
+          <span class="title-main">{{ tMonth(currentMonth) }}</span>
+          <span class="title-sub">{{ currentYear }}</span>
+          <svg
+            class="title-caret"
+            :class="{ open: showJump }"
+            width="12"
+            height="12"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="3"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+        </button>
+        <Transition name="jump">
+          <DateJumpPopup
+            v-if="showJump"
+            :year="currentYear"
+            :month="currentMonth"
+            @select="onJumpSelect"
+            @today="onJumpToday"
+            @close="showJump = false"
+          />
+        </Transition>
       </h2>
       <button class="nav-btn" @click="$emit('nextMonth')" :aria-label="t('下一月')">
         <svg
@@ -307,6 +339,7 @@ import { ref, computed } from 'vue';
 import { t, tf, tMonth, locale, setLocale } from '../utils/i18n.js';
 import { apiRequest } from '../utils/api';
 import FestivalCountdown from './FestivalCountdown.vue';
+import DateJumpPopup from './date-jump-popup.vue';
 import {
   getCelebrationEffect,
   setCelebrationEffect,
@@ -335,6 +368,7 @@ const emit = defineEmits([
   'prevMonth',
   'nextMonth',
   'goToToday',
+  'jumpTo',
   'changeAnimation',
   'changeTheme',
   'changeViewMode',
@@ -342,6 +376,17 @@ const emit = defineEmits([
   'changeShowLunar',
   'changeCelebrationEffect',
 ]);
+
+// ---- 日期快速跳转弹窗 ----
+const showJump = ref(false);
+const onJumpSelect = ({ year, month }) => {
+  showJump.value = false;
+  emit('jumpTo', { year, month });
+};
+const onJumpToday = () => {
+  showJump.value = false;
+  emit('goToToday');
+};
 
 const showDrawer = ref(false);
 const celebrationEffect = ref(getCelebrationEffect());
@@ -618,8 +663,9 @@ const copyUrlToClipboard = () => {
   transform: scale(0.9);
 }
 
-/* ---- 标题：大月份 + 小年份，现代日历排版 ---- */
+/* ---- 标题：大月份 + 小年份，现代日历排版（点击弹出年月跳转） ---- */
 .header-title {
+  position: relative;
   margin: 0;
   min-width: 108px;
   display: flex;
@@ -627,6 +673,29 @@ const copyUrlToClipboard = () => {
   gap: 7px;
   text-align: center;
   user-select: none;
+}
+.title-trigger {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  padding: 4px 8px;
+  margin: -4px -8px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.title-trigger:hover {
+  background: var(--hover-color);
+}
+.title-caret {
+  align-self: center;
+  color: var(--text-secondary);
+  transition: transform 0.2s ease;
+}
+.title-caret.open {
+  transform: rotate(180deg);
+  color: var(--primary-color);
 }
 .title-main {
   font-size: 1.35rem;

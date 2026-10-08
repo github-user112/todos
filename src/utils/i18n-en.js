@@ -139,6 +139,7 @@ export default {
   '加载日历数据失败，请刷新页面重试': 'Failed to load calendar data. Please refresh and try again',
 
   // ---- 重复 ----
+  '🔄 重复': '🔁 Repeat',
   不重复: 'Does not repeat',
   每天: 'Daily',
   每日: 'Daily',
@@ -199,6 +200,13 @@ export default {
   // ---- 日历头部/设置抽屉 ----
   上一月: 'Previous month',
   下一月: 'Next month',
+  快速跳转年月: 'Jump to month / year',
+  选择年份: 'Choose year',
+  选择月份: 'Choose month',
+  上一年: 'Previous year',
+  下一年: 'Next year',
+  上一个十年: 'Previous decade',
+  下一个十年: 'Next decade',
   '🌐 语言': '🌐 Language',
   '👁️ 视图模式': '👁️ View Mode',
   '🎨 主题风格': '🎨 Theme',

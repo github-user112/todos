@@ -11,8 +11,9 @@
  *  2. 点击待办 → 编辑 → 修改内容 → 保存 → 数据落地
  *  3. 全局 loading 计数只增不减（1,2,3,4,5…）
  *  4. 删除确认弹窗（自研 ConfirmDialog，桌面端重复待办三选一 / Esc 取消）
- *  5. 移动端：底部抽屉操作菜单 + 底部式删除确认弹窗
- *  6. 玻璃主题下确认弹窗遮罩与「添加待办」弹窗同款（共用 .add-todo-popup 主题规则）
+ *  5. 左上角日期快速跳转（月份面板 / 十年区间面板 / 跳转 / 面板内回到今天）
+ *  6. 移动端：底部抽屉操作菜单 + 底部式删除确认弹窗
+ *  7. 玻璃主题下确认弹窗遮罩与「添加待办」弹窗同款（共用 .add-todo-popup 主题规则）
  */
 import { spawn } from 'node:child_process';
 import { mkdirSync, writeFileSync } from 'node:fs';
@@ -430,6 +431,122 @@ try {
   ok(remainAfterDelete === 0, `确认删除后所有重复实例移除（剩余 ${remainAfterDelete}）`);
   await wait(400);
 
+  // ---- 5. 左上角日期快速跳转（月/年） ----
+  console.log('\n[5] 左上角日期快速跳转（月/年）');
+  const jumpClick = (expr) =>
+    ev(`(async () => {
+      const el = ${expr};
+      if (!el) return false;
+      el.click();
+      await new Promise(r => setTimeout(r, 320));
+      return true;
+    })()`);
+  const readJump = () =>
+    ev(`(() => {
+      const pop = document.querySelector('.date-jump');
+      if (!pop) return { err: 'no popup' };
+      const r = pop.getBoundingClientRect();
+      const cells = [...pop.querySelectorAll('.jump-cell')];
+      const texts = cells.map(c => c.textContent.trim());
+      return {
+        label: pop.querySelector('.jump-label')?.textContent.trim(),
+        cells: cells.length,
+        mode: texts.every(t => /^\\d{4}$/.test(t)) ? 'year' : 'month',
+        firstCell: texts[0],
+        inViewport:
+          r.left >= -0.5 && r.right <= innerWidth + 0.5 &&
+          r.top >= -0.5 && r.bottom <= innerHeight + 0.5,
+        title: document.querySelector('.header-title .title-main')?.textContent.trim(),
+        year: document.querySelector('.header-title .title-sub')?.textContent.trim(),
+      };
+    })()`);
+  const titleInfo = () =>
+    ev(`(() => ({
+      title: document.querySelector('.header-title .title-main')?.textContent.trim(),
+      year: document.querySelector('.header-title .title-sub')?.textContent.trim(),
+      months: [...document.querySelectorAll('.calendar-day')]
+        .map(d => d.getAttribute('data-date') || '')
+        .filter(s => s.startsWith('2025-03')).length,
+      nowMonths: [...document.querySelectorAll('.calendar-day')]
+        .map(d => d.getAttribute('data-date') || '')
+        .filter(s => s.startsWith('2026-10')).length,
+      open: !!document.querySelector('.date-jump'),
+    }))()`);
+
+  ok(
+    await jumpClick(`document.querySelector('.header-title .title-trigger')`),
+    '点击左上角标题打开跳转面板',
+  );
+  const j1 = await readJump();
+  ok(!j1.err, '面板已弹出', JSON.stringify(j1));
+  ok(j1.mode === 'month' && j1.cells === 12, `月份面板 12 格 → ${j1.cells} 格（首格「${j1.firstCell}」）`);
+  ok(j1.label === '2026', `面板年份跟随当前视图 → ${j1.label}`);
+  ok(j1.title === '10月' && j1.year === '2026', `标题 → ${j1.title} ${j1.year}`);
+  ok(j1.inViewport, '面板完整落在视口内');
+  await shot('desktop-date-jump');
+
+  // 标题 → 年份面板（十年区间）
+  ok(await jumpClick(`document.querySelector('.date-jump .jump-label')`), '点年份切到年份面板');
+  const j2 = await readJump();
+  ok(j2.mode === 'year' && j2.cells === 10, `年份面板 10 格 → ${j2.cells} 格`);
+  ok(j2.label === '2020–2029', `十年区间 → ${j2.label}`);
+
+  // › / ‹ 快速切换十年
+  ok(
+    await jumpClick(`[...document.querySelectorAll('.date-jump .jump-nav')][1]`),
+    '点 › 切到下一个十年',
+  );
+  ok((await readJump()).label === '2030–2039', '下一个十年 → 2030–2039');
+  await jumpClick(`[...document.querySelectorAll('.date-jump .jump-nav')][0]`);
+  ok((await readJump()).label === '2020–2029', '点 ‹ 回到 2020–2029');
+
+  // 选年份 → 回到月份面板
+  ok(
+    await jumpClick(
+      `[...document.querySelectorAll('.date-jump .jump-cell')].find(c => c.textContent.trim() === '2025')`,
+    ),
+    '选中 2025 年',
+  );
+  const j3 = await readJump();
+  ok(j3.mode === 'month' && j3.label === '2025', `回到月份面板 → ${j3.label}`);
+
+  // 选月份 → 视图跳到 2025-03，面板关闭
+  ok(
+    await jumpClick(
+      `[...document.querySelectorAll('.date-jump .jump-cell')].find(c => c.textContent.trim() === '3月')`,
+    ),
+    '选中 3 月',
+  );
+  await wait(600);
+  const j4 = await titleInfo();
+  ok(!j4.open, '选完月份后面板自动关闭');
+  ok(
+    j4.title === '3月' && j4.year === '2025',
+    `标题跳到 → ${j4.title} ${j4.year}`,
+  );
+  ok(j4.months > 0, `日历已切到 2025-03（命中 ${j4.months} 个 3 月日期格）`);
+  await shot('desktop-date-jump-2025-03');
+
+  // 面板内「今天」一键回到今天
+  await jumpClick(`document.querySelector('.header-title .title-trigger')`);
+  ok(await jumpClick(`document.querySelector('.date-jump .jump-today')`), '面板内点「今天」');
+  await wait(600);
+  const j5 = await titleInfo();
+  ok(
+    j5.title === '10月' && j5.year === '2026',
+    `「今天」回到 → ${j5.title} ${j5.year}`,
+  );
+  ok(j5.nowMonths > 0, `日历回到 2026-10（命中 ${j5.nowMonths} 个日期格）`);
+
+  // Esc 关闭
+  await jumpClick(`document.querySelector('.header-title .title-trigger')`);
+  ok((await readJump()).label === '2026', '重新打开仍是当前年');
+  await ev(
+    `document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))`,
+  );
+  await wait(300);
+  ok(!(await titleInfo()).open, 'Esc 关闭跳转面板');
+
   // ========== 移动端 ==========
   console.log('\n[移动端 390x844]');
   await send('Emulation.setDeviceMetricsOverride', {
@@ -481,8 +598,41 @@ try {
   );
   await shot('mobile-menu');
 
-  // ---- 5. 移动端删除确认（底部抽屉式） ----
-  console.log('\n[5] 移动端删除确认弹窗');
+  // ---- 移动端的快速跳转面板（点按目标/不溢出） ----
+  const mJump = await ev(`(async () => {
+    document.body.click();
+    await new Promise(r => setTimeout(r, 150));
+    document.querySelector('.header-title .title-trigger')?.click();
+    await new Promise(r => setTimeout(r, 350));
+    const pop = document.querySelector('.date-jump');
+    if (!pop) return { err: 'no popup' };
+    const r = pop.getBoundingClientRect();
+    const cell = pop.querySelector('.jump-cell');
+    return {
+      cells: pop.querySelectorAll('.jump-cell').length,
+      left: Math.round(r.left),
+      right: Math.round(r.right),
+      bottom: Math.round(r.bottom),
+      fits: r.left >= -0.5 && r.right <= innerWidth + 0.5,
+      inViewport: r.top >= -0.5 && r.bottom <= innerHeight + 0.5,
+      cellH: cell ? Math.round(cell.getBoundingClientRect().height) : 0,
+    };
+  })()`);
+  ok(!mJump.err, '移动端打开快速跳转面板', JSON.stringify(mJump));
+  ok(mJump.cells === 12, `12 个月份格 → ${mJump.cells}`);
+  ok(
+    mJump.fits && mJump.inViewport,
+    `面板未溢出（left=${mJump.left}, right=${mJump.right}, bottom=${mJump.bottom}）`,
+  );
+  ok(mJump.cellH >= 36, `月份格点按高度 ${mJump.cellH}px（>= 36）`);
+  await shot('mobile-date-jump');
+  await ev(
+    `document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))`,
+  );
+  await wait(300);
+
+  // ---- 6. 移动端删除确认（底部抽屉式） ----
+  console.log('\n[6] 移动端删除确认弹窗');
   await ev(`(async () => {
     document.body.click();
     await new Promise(r => setTimeout(r, 150));
@@ -538,8 +688,8 @@ try {
   ok(mAfter.open === false, 'Esc 关闭移动端确认框');
   ok(mAfter.rows > 0, `待办列表仍完好（${mAfter.rows} 行）`);
 
-  // ---- 6. 玻璃主题下遮罩与「添加待办」弹窗同款 ----
-  console.log('\n[6] 玻璃主题遮罩一致性');
+  // ---- 7. 玻璃主题下遮罩与「添加待办」弹窗同款 ----
+  console.log('\n[7] 玻璃主题遮罩一致性');
   await ev(`document.documentElement.classList.add('ios26-glass-theme')`);
   await wait(200);
   const themed = await ev(`(async () => {
@@ -597,4 +747,6 @@ try {
     socket?.close();
   } catch {}
   chrome.kill();
+  // 主流程已跑完即退出：chromium/WS 句柄可能仍挂在事件循环上，否则 test:ui 会卡住
+  process.exit(process.exitCode ?? 0);
 }
