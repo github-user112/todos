@@ -9,9 +9,7 @@
           <div class="calendar-ring ring-3"></div>
           <div class="calendar-core">
             <div class="flip-pages">
-              <div class="page page-1">1</div>
-              <div class="page page-2">2</div>
-              <div class="page page-3">3</div>
+              <div class="page" :key="flipCount">{{ flipCount }}</div>
             </div>
             <div class="calendar-icon">
               <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -40,8 +38,10 @@
 </template>
 
 <script setup>
+import { ref, watch, onUnmounted } from 'vue';
 import { t } from '../utils/i18n.js';
-defineProps({
+
+const props = defineProps({
   show: {
     type: Boolean,
     required: true,
@@ -52,6 +52,33 @@ defineProps({
     default: ''
   }
 })
+
+// 全局计数：每次翻页 +1（1,2,3,4,5…），不循环
+const flipCount = ref(1);
+let flipTimer = null;
+
+const stopFlip = () => {
+  if (flipTimer) {
+    clearInterval(flipTimer);
+    flipTimer = null;
+  }
+};
+
+watch(
+  () => props.show,
+  (visible) => {
+    stopFlip();
+    if (visible) {
+      flipCount.value = 1;
+      flipTimer = setInterval(() => {
+        flipCount.value++;
+      }, 1500);
+    }
+  },
+  { immediate: true },
+);
+
+onUnmounted(stopFlip);
 </script>
 
 <style scoped>
@@ -181,36 +208,33 @@ defineProps({
   height: 100%;
 }
 
-/* 翻页数字 */
+/* 翻页数字 —— 单个数字持续递增（1,2,3,4,5…），每次翻页换新元素以重播动画 */
 .flip-pages {
   position: absolute;
   top: -6px;
   right: -6px;
-  width: 24px;
+  min-width: 24px;
   height: 24px;
+  padding: 0 4px;
 }
 
 .page {
   position: absolute;
-  width: 24px;
-  height: 24px;
+  inset: 0;
   background: var(--primary-color);
   color: #fff;
   border-radius: 7px;
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   font-size: 11px;
   font-weight: 700;
   animation: page-flip 1.5s ease-in-out infinite;
   backface-visibility: hidden;
   opacity: 0;
+  white-space: nowrap;
   box-shadow: 0 4px 10px -3px var(--form-input-focus-shadow);
 }
-
-.page-1 { animation-delay: 0s; }
-.page-2 { animation-delay: 0.5s; }
-.page-3 { animation-delay: 1s; }
 
 @keyframes page-flip {
   0% {
