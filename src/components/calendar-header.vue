@@ -17,6 +17,7 @@
       </button>
       <h2 class="header-title">
         <button
+          ref="titleTrigger"
           class="title-trigger"
           :aria-expanded="showJump"
           aria-haspopup="dialog"
@@ -45,6 +46,7 @@
             v-if="showJump"
             :year="currentYear"
             :month="currentMonth"
+            :anchor="titleTrigger"
             @select="onJumpSelect"
             @today="onJumpToday"
             @close="showJump = false"
@@ -378,6 +380,7 @@ const emit = defineEmits([
 ]);
 
 // ---- 日期快速跳转弹窗 ----
+const titleTrigger = ref(null);
 const showJump = ref(false);
 const onJumpSelect = ({ year, month }) => {
   showJump.value = false;

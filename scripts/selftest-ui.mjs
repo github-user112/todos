@@ -409,12 +409,21 @@ try {
   await ev(
     `document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))`,
   );
-  await wait(400);
-  const afterEsc = await ev(`({
-    open: !!document.querySelector('.confirm-overlay'),
-    remain: [...document.querySelectorAll('.todo-item')]
-      .filter(el => el.textContent.includes('自测重复待办')).length,
-  })`);
+  await wait(200);
+  // 同上：轮询等遮罩淡出结束
+  const afterEsc = await ev(`(async () => {
+    let open = true;
+    for (let i = 0; i < 30; i++) {
+      await new Promise(r => setTimeout(r, 100));
+      open = !!document.querySelector('.confirm-overlay');
+      if (!open) break;
+    }
+    return {
+      open,
+      remain: [...document.querySelectorAll('.todo-item')]
+        .filter(el => el.textContent.includes('自测重复待办')).length,
+    };
+  })()`);
   ok(!afterEsc.open, 'Esc 关闭确认框（取消）');
   ok(afterEsc.remain > 0, `取消后待办仍在（${afterEsc.remain} 个重复实例）`);
 
@@ -547,6 +556,100 @@ try {
   await wait(300);
   ok(!(await titleInfo()).open, 'Esc 关闭跳转面板');
 
+  // ---- 层叠与命中：面板必须真的盖在日历之上 ----
+  // 玻璃主题 / 动态背景下，头部会因 backdrop-filter 成为层叠上下文，而日历格子的
+  // z-index 高达 10 —— 面板若留在头部里会被下方格子盖住、按钮点不动。只看矩形位置
+  // 发现不了这种问题，必须用 elementFromPoint 做命中测试 + 区域覆盖采样。
+  const pressEsc = () =>
+    ev(`document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))`);
+  const jumpHit = () =>
+    ev(`(() => {
+      const pop = document.querySelector('.date-jump');
+      if (!pop) return { err: 'no popup' };
+      const navs = [...pop.querySelectorAll('.jump-nav')];
+      const inside = (el) => {
+        if (!el) return false;
+        const r = el.getBoundingClientRect();
+        const top = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+        return !!top && pop.contains(top);
+      };
+      const pr = pop.getBoundingClientRect();
+      // 内缩 10px 采样：面板是圆角矩形，紧贴圆角的点本来就落在面板之外
+      let over = 0, total = 0;
+      for (let x = pr.left + 10; x < pr.right - 10; x += 6) {
+        for (let y = pr.top + 10; y < pr.bottom - 10; y += 6) {
+          total++;
+          const top = document.elementFromPoint(x, y);
+          if (!top || !pop.contains(top)) over++;
+        }
+      }
+      // 表面不透明度：玻璃家族与其它弹窗一样用 0.82 厚玻璃，普通主题则完全不透明
+      const parseAlpha = (css) => {
+        const m = css.match(/rgba?\(([^)]+)\)/);
+        if (!m) return 1;
+        const p = m[1].split(',').map((s) => parseFloat(s));
+        return p.length === 4 ? p[3] : 1;
+      };
+      return {
+        hits: {
+          prev: inside(navs[0]),
+          next: inside(navs[1]),
+          label: inside(pop.querySelector('.jump-label')),
+          month: inside(pop.querySelector('.jump-cell')),
+          today: inside(pop.querySelector('.jump-today')),
+        },
+        over,
+        total,
+        fits:
+          pr.left >= -0.5 && pr.right <= innerWidth + 0.5 &&
+          pr.top >= -0.5 && pr.bottom <= innerHeight + 0.5,
+        rect: [Math.round(pr.left), Math.round(pr.top), Math.round(pr.width), Math.round(pr.height)],
+        parent: pop.parentElement?.tagName,
+        bg: getComputedStyle(pop).backgroundColor,
+        alpha: parseAlpha(getComputedStyle(pop).backgroundColor),
+      };
+    })()`);
+
+  const stackConfigs = [
+    ['默认主题', `document.body.classList.remove('dynamic-background');
+       document.documentElement.classList.remove('ios26-glass-theme');`, 0.99],
+    ['动态背景', `document.body.classList.add('dynamic-background');`, 0.8],
+    ['玻璃主题', `document.body.classList.remove('dynamic-background');
+       document.documentElement.classList.add('ios26-glass-theme');`, 0.8],
+  ];
+  for (const [name, setup, minAlpha] of stackConfigs) {
+    await ev(setup);
+    await dismissOverlays();
+    await jumpClick(`document.querySelector('.header-title .title-trigger')`);
+    const st = await jumpHit();
+    if (st.err) {
+      ok(false, `${name}：跳转面板能打开`, JSON.stringify(st));
+      continue;
+    }
+    const blocked = Object.entries(st.hits)
+      .filter(([, v]) => !v)
+      .map(([k]) => k);
+    ok(
+      blocked.length === 0,
+      `${name}：面板控件全部可点（prev/next/label/month/today）`,
+      `被挡：${blocked.join(',')}`,
+    );
+    ok(st.over === 0, `${name}：面板不被日历内容覆盖`, `采样 ${st.over}/${st.total} 点被盖`);
+    ok(st.fits, `${name}：面板完整在视口内`, JSON.stringify(st.rect));
+    ok(st.parent === 'BODY', `${name}：面板挂在 body 上（脱离头部层叠上下文）`, String(st.parent));
+    ok(
+      st.alpha >= minAlpha,
+      `${name}：面板足够不透明（≥${minAlpha}）`,
+      `alpha=${st.alpha} 背景=${st.bg}`,
+    );
+    await shot(`desktop-date-jump-stack-${name}`);
+    await pressEsc();
+    await wait(250);
+  }
+  await ev(`document.body.classList.remove('dynamic-background');
+            document.documentElement.classList.remove('ios26-glass-theme');`);
+  await wait(200);
+
   // ========== 移动端 ==========
   console.log('\n[移动端 390x844]');
   await send('Emulation.setDeviceMetricsOverride', {
@@ -616,10 +719,18 @@ try {
       fits: r.left >= -0.5 && r.right <= innerWidth + 0.5,
       inViewport: r.top >= -0.5 && r.bottom <= innerHeight + 0.5,
       cellH: cell ? Math.round(cell.getBoundingClientRect().height) : 0,
+      hitOk: (() => {
+        const nav = pop.querySelector('.jump-nav');
+        if (!nav) return false;
+        const b = nav.getBoundingClientRect();
+        const top = document.elementFromPoint(b.left + b.width / 2, b.top + b.height / 2);
+        return !!top && pop.contains(top);
+      })(),
     };
   })()`);
   ok(!mJump.err, '移动端打开快速跳转面板', JSON.stringify(mJump));
   ok(mJump.cells === 12, `12 个月份格 → ${mJump.cells}`);
+  ok(mJump.hitOk, '移动端面板首行按钮可点（未被日历覆盖）');
   ok(
     mJump.fits && mJump.inViewport,
     `面板未溢出（left=${mJump.left}, right=${mJump.right}, bottom=${mJump.bottom}）`,
@@ -680,11 +791,16 @@ try {
   await ev(
     `document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))`,
   );
-  await wait(400);
-  const mAfter = await ev(`({
-    open: !!document.querySelector('.confirm-overlay'),
-    rows: document.querySelectorAll('.todo-row').length,
-  })`);
+  // 遮罩有淡出动画，轮询等它消失，避免把过渡帧误判成没关掉
+  const mAfter = await ev(`(async () => {
+    let open = true;
+    for (let i = 0; i < 30; i++) {
+      await new Promise(r => setTimeout(r, 100));
+      open = !!document.querySelector('.confirm-overlay');
+      if (!open) break;
+    }
+    return { open, rows: document.querySelectorAll('.todo-row').length };
+  })()`);
   ok(mAfter.open === false, 'Esc 关闭移动端确认框');
   ok(mAfter.rows > 0, `待办列表仍完好（${mAfter.rows} 行）`);
 

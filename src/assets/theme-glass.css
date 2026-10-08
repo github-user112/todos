@@ -251,12 +251,20 @@ html.liquid-glass-theme body {
 }
 
 /* ---- 弹窗 / 提醒 / 操作菜单 / 待办列表 ---- */
+/* .date-jump（日期跳转面板）同属弹窗层：沿用 0.82 厚玻璃，
+   否则面板压不住下方日历格子（面板是 fixed 浮层，格子不透字但会透色） */
 .glass-theme .add-todo-popup,
+.glass-theme .date-jump,
 .ios-glass-theme .add-todo-popup,
+.ios-glass-theme .date-jump,
 .persimmon-glass-theme .add-todo-popup ,
+.persimmon-glass-theme .date-jump ,
 .moonlight-glass-theme .add-todo-popup ,
+.moonlight-glass-theme .date-jump ,
 .bamboo-glass-theme .add-todo-popup ,
-.liquid-glass-theme .add-todo-popup {
+.bamboo-glass-theme .date-jump ,
+.liquid-glass-theme .add-todo-popup,
+.liquid-glass-theme .date-jump {
   backdrop-filter: blur(44px) saturate(200%) !important;
   -webkit-backdrop-filter: blur(44px) saturate(200%) !important;
   background: rgba(255, 255, 255, 0.82) !important;
@@ -355,7 +363,8 @@ body.dynamic-background.ios-glass-theme .add-todo-popup,
 body.dynamic-background.persimmon-glass-theme .add-todo-popup ,
 body.dynamic-background.moonlight-glass-theme .add-todo-popup ,
 body.dynamic-background.bamboo-glass-theme .add-todo-popup ,
-body.dynamic-background.liquid-glass-theme .add-todo-popup {
+body.dynamic-background.liquid-glass-theme .add-todo-popup,
+body.dynamic-background .date-jump {
   background: rgba(255, 255, 255, 0.86) !important;
 }
 
@@ -567,7 +576,8 @@ html.ios26-glass-theme body {
   backdrop-filter: blur(8px) saturate(120%);
   -webkit-backdrop-filter: blur(8px) saturate(120%);
 }
-.ios26-glass-theme .add-todo-popup {
+.ios26-glass-theme .add-todo-popup,
+.ios26-glass-theme .date-jump {
   backdrop-filter: blur(44px) saturate(200%) !important;
   -webkit-backdrop-filter: blur(44px) saturate(200%) !important;
   background: rgba(255, 255, 255, 0.82) !important;
@@ -1084,7 +1094,8 @@ html.liquid-aurora-glass-theme body::before {
 }
 
 /* ---- 弹窗：厚玻璃卡片 + 凹陷效果 ---- */
-.liquid-aurora-glass-theme .add-todo-popup {
+.liquid-aurora-glass-theme .add-todo-popup,
+.liquid-aurora-glass-theme .date-jump {
   backdrop-filter: blur(44px) saturate(220%) !important;
   -webkit-backdrop-filter: blur(44px) saturate(220%) !important;
   background: rgba(255, 255, 255, 0.72) !important;
