@@ -247,7 +247,8 @@
 <script setup>
 import { computed, ref, watch, nextTick, inject, onMounted, onUnmounted } from 'vue';
 import { t, tf } from '../utils/i18n.js';
-import { useDialog, useMessage } from 'naive-ui';
+import { useMessage } from 'naive-ui';
+import { confirmDialog } from '../utils/confirm.js';
 import { formatDate } from '../utils/dateUtils';
 import { shouldShowRepeatingTodo } from '../utils/repeatUtils';
 import { formatReminderDesc } from '../utils/reminderManager';
@@ -268,7 +269,6 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['close', 'complete-todo', 'delete-todo', 'celebrate']);
-const dialog = useDialog();
 const message = useMessage();
 
 const scrollBody = ref(null);
@@ -574,46 +574,45 @@ function showCompletionFeedback(todoText) {
   message.success(feedback, { duration: 3000 });
 }
 
-function handleDelete(item) {
+async function handleDelete(item) {
   const isRepeat = item.repeat_type && item.repeat_type !== 'none';
   if (isRepeat) {
-    dialog.warning({
+    const choice = await confirmDialog({
       title: t('删除重复事件'),
-      content: tf('确定要删除「{text}」吗？请选择删除范围：', { text: item.text }),
-      positiveText: t('删除所有重复事件'),
-      negativeText: t('仅删除当前事件'),
-      onPositiveClick: () => {
-        emit('delete-todo', {
-          todoId: item.id,
-          date: item.date,
-          allInstances: true,
-        });
-        message.success(t('已删除所有重复事件'));
-      },
-      onNegativeClick: () => {
-        emit('delete-todo', {
-          todoId: item.id,
-          date: item.date,
-          allInstances: false,
-        });
-        message.success(t('已删除当前事件'));
-      },
+      message: tf('确定要删除「{text}」吗？请选择删除范围：', { text: item.text }),
+      buttons: [
+        { text: t('仅删除当前事件'), variant: 'secondary', value: 'single' },
+        { text: t('删除所有重复事件'), variant: 'danger', value: 'all' },
+      ],
     });
+    if (choice === null) return; // Esc / 点遮罩取消
+
+    const allInstances = choice === 'all';
+    emit('delete-todo', {
+      todoId: item.id,
+      date: item.date,
+      allInstances,
+    });
+    message.success(
+      allInstances ? t('已删除所有重复事件') : t('已删除当前事件'),
+    );
   } else {
-    dialog.warning({
+    const confirmed = await confirmDialog({
       title: t('确认删除'),
-      content: tf('确定要删除「{text}」吗？此操作不可撤销。', { text: item.text }),
-      positiveText: t('删除'),
-      negativeText: t('取消'),
-      onPositiveClick: () => {
-        emit('delete-todo', {
-          todoId: item.id,
-          date: item.date,
-          allInstances: false,
-        });
-        message.success(t('已删除'));
-      },
+      message: tf('确定要删除「{text}」吗？此操作不可撤销。', { text: item.text }),
+      buttons: [
+        { text: t('取消'), variant: 'secondary', value: false },
+        { text: t('删除'), variant: 'danger', value: true },
+      ],
     });
+    if (confirmed !== true) return;
+
+    emit('delete-todo', {
+      todoId: item.id,
+      date: item.date,
+      allInstances: false,
+    });
+    message.success(t('已删除'));
   }
 }
 

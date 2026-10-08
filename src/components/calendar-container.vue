@@ -89,7 +89,7 @@ import {
   onUnmounted,
   nextTick,
 } from 'vue';
-import { useDialog, useMessage } from 'naive-ui';
+import { useMessage } from 'naive-ui';
 import CalendarHeader from './calendar-header.vue';
 import CalendarGrid from './calendar-grid.vue';
 import AddTodoPopup from './add-todo-popup.vue';
@@ -110,9 +110,9 @@ import {
   isLunarLoaded,
 } from '../utils/lunarUtils';
 import { apiRequest } from '../utils/api';
+import { confirmDialog } from '../utils/confirm.js';
 import { t, tf } from '../utils/i18n.js';
 import { normalizeTheme } from '../utils/theme-selection.js';
-const dialog = useDialog();
 const message = useMessage();
 
 const props = defineProps({
@@ -691,30 +691,26 @@ const deleteTodo = async () => {
   if (!todo) return;
 
   if (todo.repeat_type && todo.repeat_type !== 'none') {
-    dialog.warning({
+    const choice = await confirmDialog({
       title: t('删除重复事件'),
-      content: t('请选择操作范围'),
-      positiveText: t('删除所有重复事件'),
-      negativeText: t('仅删除当前事件'),
-      onPositiveClick: async () => {
-        await emit('delete-todo', {
-          todoId: selectedTodo.value,
-          date: selectedTodoDate.value,
-          allInstances: true,
-        });
-        message.success(t('已删除所有重复事件'));
-        showTodoActions.value = false;
-      },
-      onNegativeClick: async () => {
-        await emit('delete-todo', {
-          todoId: selectedTodo.value,
-          date: selectedTodoDate.value,
-          allInstances: false,
-        });
-        message.success(t('已删除当前事件'));
-        showTodoActions.value = false;
-      },
+      message: t('请选择操作范围'),
+      buttons: [
+        { text: t('仅删除当前事件'), variant: 'secondary', value: 'single' },
+        { text: t('删除所有重复事件'), variant: 'danger', value: 'all' },
+      ],
     });
+    if (choice === null) return; // Esc / 点遮罩取消
+
+    const allInstances = choice === 'all';
+    await emit('delete-todo', {
+      todoId: selectedTodo.value,
+      date: selectedTodoDate.value,
+      allInstances,
+    });
+    message.success(
+      allInstances ? t('已删除所有重复事件') : t('已删除当前事件'),
+    );
+    showTodoActions.value = false;
     return;
   }
 

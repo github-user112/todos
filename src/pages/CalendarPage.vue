@@ -3,8 +3,7 @@
     :theme="naiveDark ? darkTheme : undefined"
     :theme-overrides="naiveOverrides"
   >
-    <n-dialog-provider
-      ><n-message-provider>
+    <n-message-provider>
       <calendar-container
         :todos="todos"
         :completedInstances="completedInstances"
@@ -26,7 +25,6 @@
       @close="closeSolarTermPopup"
     />
     </n-message-provider>
-  </n-dialog-provider>
   </n-config-provider>
 </template>
 
@@ -37,7 +35,6 @@ import SolarTermPopup from '../components/SolarTermPopup.vue';
 import { formatDate } from '../utils/dateUtils';
 import {
   NConfigProvider,
-  NDialogProvider,
   NMessageProvider,
   darkTheme,
 } from 'naive-ui';

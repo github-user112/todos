@@ -2,6 +2,7 @@
   <div class="app-container">
     <WebglGlass />
     <LoadingComponent :show="loading" />
+    <ConfirmDialog />
 
     <TransitionGroup
       name="reminder-toast"
@@ -33,6 +34,7 @@
 <script setup>
 import { onMounted } from 'vue';
 import LoadingComponent from './components/LoadingComponent.vue';
+import ConfirmDialog from './components/ConfirmDialog.vue';
 import WebglGlass from './components/WebglGlass.vue';
 import { generateHash } from './utils/hashUtils';
 import { getUserId } from './utils/api';

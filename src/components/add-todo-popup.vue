@@ -1,6 +1,9 @@
 <template>
   <Transition name="popup">
-    <div class="add-todo-popup" @click.self="$emit('close')">
+    <div
+      class="add-todo-popup todo-form-popup"
+      @click.self="$emit('close')"
+    >
       <div class="popup-card">
         <div class="drag-bar"></div>
 
