@@ -10,7 +10,9 @@
  *  1. 待办操作菜单自适应定位（下方放不下 → 上方弹出，且始终在视口内）
  *  2. 点击待办 → 编辑 → 修改内容 → 保存 → 数据落地
  *  3. 全局 loading 计数只增不减（1,2,3,4,5…）
- *  4. 移动端底部抽屉（贴底、不溢出、三按钮横排）
+ *  4. 删除确认弹窗（自研 ConfirmDialog，桌面端重复待办三选一 / Esc 取消）
+ *  5. 移动端：底部抽屉操作菜单 + 底部式删除确认弹窗
+ *  6. 玻璃主题下确认弹窗遮罩与「添加待办」弹窗同款（共用 .add-todo-popup 主题规则）
  */
 import { spawn } from 'node:child_process';
 import { mkdirSync, writeFileSync } from 'node:fs';
@@ -237,7 +239,7 @@ try {
     if (!editBtn) return { err: 'no edit button' };
     editBtn.click();
     await new Promise(r => setTimeout(r, 400));
-    const popup = document.querySelector('.add-todo-popup');
+    const popup = document.querySelector('.todo-form-popup');
     if (!popup) return { err: 'popup not open' };
     const title = popup.querySelector('.popup-header h2').textContent;
     const input = popup.querySelector('.todo-input');
@@ -248,7 +250,7 @@ try {
     await new Promise(r => setTimeout(r, 100));
     popup.querySelector('.btn-save').click();
     await new Promise(r => setTimeout(r, 1200));
-    const stillOpen = !!document.querySelector('.add-todo-popup');
+    const stillOpen = !!document.querySelector('.todo-form-popup');
     const after = [...document.querySelectorAll('.todo-item .todo-text')]
       .map(n => n.textContent);
     const loadingVisible = !!document.querySelector('.loading-overlay');
@@ -333,6 +335,101 @@ try {
   })`);
   await wait(300);
 
+  // ---- 4. 删除确认弹窗（自研，与全局风格一致） ----
+  console.log('\n[4] 删除确认弹窗（重复待办 · 桌面端）');
+  const repeatRes = await fetch(`${API}/api/todos`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-User-ID': uid },
+    body: JSON.stringify({
+      text: '自测重复待办',
+      date: `${y}-${m}-18`,
+      repeatType: 'daily',
+    }),
+  });
+  ok((await repeatRes.json()).success === true, '造一个每日重复待办');
+  await send('Page.navigate', { url: `${APP}/?uid=${uid}` });
+  await ev(`new Promise((res) => {
+    const t0 = Date.now();
+    (function poll() {
+      if ([...document.querySelectorAll('.todo-item')]
+        .some(el => el.textContent.includes('自测重复待办'))) return res(true);
+      if (Date.now() - t0 > 20000) return res(false);
+      setTimeout(poll, 200);
+    })();
+  })`);
+  await wait(1800);
+  await dismissOverlays();
+  await wait(400);
+
+  const openRepeatDelete = () =>
+    ev(`(async () => {
+      document.body.click();
+      await new Promise(r => setTimeout(r, 80));
+      const it = [...document.querySelectorAll('.todo-item')]
+        .find(el => el.textContent.includes('自测重复待办'));
+      if (!it) return { err: 'repeat todo not found' };
+      it.click();
+      await new Promise(r => setTimeout(r, 250));
+      const del = document.querySelector('.todo-actions .delete-btn');
+      if (!del) return { err: 'no delete button' };
+      del.click();
+      await new Promise(r => setTimeout(r, 450));
+      const ov = document.querySelector('.confirm-overlay');
+      if (!ov) return { err: 'no confirm dialog' };
+      const card = ov.querySelector('.confirm-card');
+      const cr = card.getBoundingClientRect();
+      return {
+        title: ov.querySelector('.confirm-title')?.textContent,
+        buttons: [...ov.querySelectorAll('.confirm-btn')].map(b => b.textContent.trim()),
+        variants: [...ov.querySelectorAll('.confirm-btn')]
+          .map(b => b.className.includes('is-danger') ? 'danger' : 'secondary'),
+        cardRadius: getComputedStyle(card).borderTopLeftRadius,
+        scrimBlur: getComputedStyle(ov).backdropFilter,
+        inViewport:
+          cr.top >= 0 && cr.bottom <= window.innerHeight + 0.5 &&
+          cr.left >= 0 && cr.right <= window.innerWidth + 0.5,
+        z: Number(getComputedStyle(ov).zIndex),
+      };
+    })()`);
+
+  const dlg = await openRepeatDelete();
+  ok(!dlg.err, '重复待办点删除弹出确认框', JSON.stringify(dlg));
+  ok(dlg.title?.includes('删除重复事件'), `标题 → "${dlg.title}"`);
+  ok(
+    JSON.stringify(dlg.buttons) ===
+      JSON.stringify(['仅删除当前事件', '删除所有重复事件']) &&
+      JSON.stringify(dlg.variants) === JSON.stringify(['secondary', 'danger']),
+    `按钮 → [${(dlg.buttons || []).join(' / ')}] (${(dlg.variants || []).join('/')})`,
+  );
+  ok(dlg.inViewport, '确认框完整落在视口内');
+  ok(dlg.z >= 2600, `层级高于抽屉/添加弹窗（z-index=${dlg.z}）`);
+  await shot('desktop-confirm-delete');
+
+  await ev(
+    `document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))`,
+  );
+  await wait(400);
+  const afterEsc = await ev(`({
+    open: !!document.querySelector('.confirm-overlay'),
+    remain: [...document.querySelectorAll('.todo-item')]
+      .filter(el => el.textContent.includes('自测重复待办')).length,
+  })`);
+  ok(!afterEsc.open, 'Esc 关闭确认框（取消）');
+  ok(afterEsc.remain > 0, `取消后待办仍在（${afterEsc.remain} 个重复实例）`);
+
+  const dlg2 = await openRepeatDelete();
+  ok(!dlg2.err, '再次打开确认框');
+  await ev(`(async () => {
+    document.querySelector('.confirm-overlay .confirm-btn.is-danger')?.click();
+    await new Promise(r => setTimeout(r, 1500));
+  })()`);
+  const remainAfterDelete = await ev(
+    `[...document.querySelectorAll('.todo-item')]
+      .filter(el => el.textContent.includes('自测重复待办')).length`,
+  );
+  ok(remainAfterDelete === 0, `确认删除后所有重复实例移除（剩余 ${remainAfterDelete}）`);
+  await wait(400);
+
   // ========== 移动端 ==========
   console.log('\n[移动端 390x844]');
   await send('Emulation.setDeviceMetricsOverride', {
@@ -383,6 +480,108 @@ try {
     `三个按钮横排 → [${(mobile.buttons || []).join(', ')}]`,
   );
   await shot('mobile-menu');
+
+  // ---- 5. 移动端删除确认（底部抽屉式） ----
+  console.log('\n[5] 移动端删除确认弹窗');
+  await ev(`(async () => {
+    document.body.click();
+    await new Promise(r => setTimeout(r, 150));
+    // 移动端点日期格是「添加待办」，待办列表从头部按钮打开
+    document.querySelector('.header-right .icon-btn')?.click();
+    await new Promise(r => setTimeout(r, 800));
+  })()`);
+  const mConfirm = await ev(`(async () => {
+    const delBtn = document.querySelector('.drawer-overlay .row-action-btn.delete')
+      || document.querySelector('.row-action-btn.delete');
+    if (!delBtn) return { err: 'no drawer delete button' };
+    delBtn.click();
+    await new Promise(r => setTimeout(r, 500));
+    const ov = document.querySelector('.confirm-overlay');
+    if (!ov) return { err: 'no confirm dialog' };
+    const card = ov.querySelector('.confirm-card');
+    const cr = card.getBoundingClientRect();
+    const btns = [...ov.querySelectorAll('.confirm-btn')];
+    return {
+      title: ov.querySelector('.confirm-title')?.textContent,
+      bottomGap: window.innerHeight - cr.bottom,
+      fullWidth: Math.abs(cr.width - window.innerWidth) < 1,
+      radius: getComputedStyle(card).borderTopLeftRadius,
+      btnCount: btns.length,
+      btnHeight: btns[0] ? Math.round(btns[0].getBoundingClientRect().height) : 0,
+      z: Number(getComputedStyle(ov).zIndex),
+    };
+  })()`);
+  ok(!mConfirm.err, '移动端抽屉删除按钮弹出确认框', JSON.stringify(mConfirm));
+  ok(
+    mConfirm.bottomGap <= 1 && mConfirm.fullWidth,
+    `底部抽屉贴底满宽（gap=${mConfirm.bottomGap?.toFixed(1)}px）`,
+  );
+  ok(
+    Number.parseFloat(mConfirm.radius) >= 16,
+    `顶部圆角 ${mConfirm.radius}`,
+  );
+  ok(mConfirm.btnCount === 2, `两个按钮 → ${mConfirm.btnCount}`);
+  ok(
+    mConfirm.btnHeight >= 44,
+    `按钮触控高度 ${mConfirm.btnHeight}px（>= 44）`,
+  );
+  ok(mConfirm.z >= 2600, `层级高于抽屉（z-index=${mConfirm.z}）`);
+  await shot('mobile-confirm-delete');
+  await ev(
+    `document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))`,
+  );
+  await wait(400);
+  const mAfter = await ev(`({
+    open: !!document.querySelector('.confirm-overlay'),
+    rows: document.querySelectorAll('.todo-row').length,
+  })`);
+  ok(mAfter.open === false, 'Esc 关闭移动端确认框');
+  ok(mAfter.rows > 0, `待办列表仍完好（${mAfter.rows} 行）`);
+
+  // ---- 6. 玻璃主题下遮罩与「添加待办」弹窗同款 ----
+  console.log('\n[6] 玻璃主题遮罩一致性');
+  await ev(`document.documentElement.classList.add('ios26-glass-theme')`);
+  await wait(200);
+  const themed = await ev(`(async () => {
+    const delBtn = document.querySelector('.drawer-overlay .row-action-btn.delete')
+      || document.querySelector('.row-action-btn.delete');
+    if (!delBtn) return { err: 'no drawer delete button' };
+    delBtn.click();
+    await new Promise(r => setTimeout(r, 500));
+    const ov = document.querySelector('.confirm-overlay');
+    if (!ov) return { err: 'no confirm dialog' };
+    const cs = getComputedStyle(ov);
+    // 用一个同 class 的探针元素对比：确认遮罩与「添加待办」弹窗走同一套主题规则
+    const probe = document.createElement('div');
+    probe.className = 'add-todo-popup';
+    document.body.appendChild(probe);
+    const probeBg = getComputedStyle(probe).backgroundColor;
+    probe.remove();
+    return {
+      bg: cs.backgroundColor,
+      blur: cs.backdropFilter || cs.webkitBackdropFilter,
+      baseBg: 'rgba(23, 28, 45, 0.45)',
+      popupBg: probeBg,
+    };
+  })()`);
+  if (!themed.err) await shot('mobile-confirm-glass');
+  await ev(
+    `document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));` +
+      `document.documentElement.classList.remove('ios26-glass-theme');`,
+  );
+  ok(!themed.err, '玻璃主题下能弹出确认框', JSON.stringify(themed));
+  ok(
+    themed.bg !== themed.baseBg,
+    `遮罩已被主题接管 → ${themed.bg}（基础值 ${themed.baseBg}）`,
+  );
+  ok(
+    /blur/.test(themed.blur || ''),
+    `遮罩带毛玻璃模糊 → ${themed.blur}`,
+  );
+  ok(
+    themed.popupBg === themed.bg,
+    `与「添加待办」弹窗遮罩同值（添加=${themed.popupBg}）`,
+  );
 
   console.log(
     failures === 0
