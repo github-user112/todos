@@ -1,4 +1,4 @@
-import { formatDate } from './dateUtils';
+import { formatDate } from './dateUtils.js';
 
 /**
  * 判断指定日期是否为工作日

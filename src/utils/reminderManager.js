@@ -1,5 +1,5 @@
-import { isHoliday, findLastWorkday } from './holidayAdjustment';
-import { shouldShowRepeatingTodo } from './repeatUtils';
+import { isHoliday, findLastWorkday } from './holidayAdjustment.js';
+import { shouldShowRepeatingTodo } from './repeatUtils.js';
 import { t, tf } from './i18n.js';
 
 const NOTIFICATION_TAG_PREFIX = 'todo-reminder-';

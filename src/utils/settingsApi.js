@@ -1,4 +1,4 @@
-import { apiRequest } from './api';
+import { apiRequest } from './api.js';
 
 export async function checkAdminAccess() {
   return apiRequest('/api/weekly-summary/check-access', 'GET');

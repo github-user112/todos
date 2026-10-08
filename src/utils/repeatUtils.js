@@ -234,21 +234,23 @@ export function getNextRepeatDates(todoDate, repeatType, interval = 1, count = 1
         break;
         
       case 'monthly':
-        nextDate = new Date(todoDate);
-        nextDate.setMonth(todoDate.getMonth() + (interval * i));
-        // 处理月末日期调整
-        if (nextDate.getDate() !== todoDate.getDate()) {
-          nextDate = adjustMonthEndDate(todoDate, nextDate.getFullYear(), nextDate.getMonth());
-        }
+        // 先按“年月”推进、再收敛“日”。直接 setMonth 会让 1/31 溢出到 3/2，
+        // 随后按已经跑偏的月份做月末收敛，结果是 2 月被跳过（1/31 → 3/31）。
+        nextDate = adjustMonthEndDate(
+          todoDate,
+          todoDate.getFullYear(),
+          todoDate.getMonth() + interval * i,
+        );
         break;
-        
+
       case 'yearly':
-        nextDate = new Date(todoDate);
-        nextDate.setFullYear(todoDate.getFullYear() + (interval * i));
-        // 处理闰年2月29日的情况
-        if (todoDate.getMonth() === 1 && todoDate.getDate() === 29 && !isLeapYear(nextDate.getFullYear())) {
-          nextDate.setDate(28); // 非闰年调整为2月28日
-        }
+        // 同理：2/29 在非闰年 setFullYear 会先溢出到 3/1，再 setDate(28) 变成 3/28。
+        // 先算目标年该月的天数再取较小值，稳定落在 2/28。
+        nextDate = adjustMonthEndDate(
+          todoDate,
+          todoDate.getFullYear() + interval * i,
+          todoDate.getMonth(),
+        );
         break;
         
       default:
@@ -302,21 +304,23 @@ export function getNextRepeatDatesWithEndDate(todoDate, repeatType, interval = 1
         break;
         
       case 'monthly':
-        nextDate = new Date(todoDate);
-        nextDate.setMonth(todoDate.getMonth() + (interval * i));
-        // 处理月末日期调整
-        if (nextDate.getDate() !== todoDate.getDate()) {
-          nextDate = adjustMonthEndDate(todoDate, nextDate.getFullYear(), nextDate.getMonth());
-        }
+        // 先按“年月”推进、再收敛“日”。直接 setMonth 会让 1/31 溢出到 3/2，
+        // 随后按已经跑偏的月份做月末收敛，结果是 2 月被跳过（1/31 → 3/31）。
+        nextDate = adjustMonthEndDate(
+          todoDate,
+          todoDate.getFullYear(),
+          todoDate.getMonth() + interval * i,
+        );
         break;
-        
+
       case 'yearly':
-        nextDate = new Date(todoDate);
-        nextDate.setFullYear(todoDate.getFullYear() + (interval * i));
-        // 处理闰年2月29日的情况
-        if (todoDate.getMonth() === 1 && todoDate.getDate() === 29 && !isLeapYear(nextDate.getFullYear())) {
-          nextDate.setDate(28); // 非闰年调整为2月28日
-        }
+        // 同理：2/29 在非闰年 setFullYear 会先溢出到 3/1，再 setDate(28) 变成 3/28。
+        // 先算目标年该月的天数再取较小值，稳定落在 2/28。
+        nextDate = adjustMonthEndDate(
+          todoDate,
+          todoDate.getFullYear() + interval * i,
+          todoDate.getMonth(),
+        );
         break;
         
       default:

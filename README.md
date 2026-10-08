@@ -1,8 +1,8 @@
 # 智能日历管家（Todos）
 
 基于 Vue 3 + Vite 的日历待办应用：月历/今日优先双视图、农历与节气、法定节假日调休标注、
-重复事项、提醒推送（Webhook）、数据导入导出。前端为 Vue 3 SFC + Naive UI，API 部署于
-Cloudflare Workers（`wrangler`）。
+重复事项、提醒推送（Webhook）、数据导入导出；点击左上角标题可快速跳转任意月份/年份。
+前端为 Vue 3 SFC + Naive UI，API 部署于 Cloudflare Workers（`wrangler`）。
 
 ## 开发
 
@@ -69,11 +69,25 @@ moonlight 月白 · bamboo 竹青；全部为浅色，深色玻璃变体已下�
 
 ## 单元测试
 
-`tests/design-tokens.test.mjs` 守护设计系统的核心不变量：
-颜色工具正确性、语义色恒定、强调色对比度底线（白字 ≥3:1）、
-深色模式层级与对比度（≥7:1）、玻璃半透明表面与浅色玻璃可读性、
-序列化分组完整性，以及 **theme.css 与生成器输出零漂移**
-（直接手改生成文件会导致测试失败）。
+`npm test` 跑 `tests/**/*.test.mjs`（node:test，零额外依赖，`tests/helpers/env.mjs`
+统一垫时区与 localStorage）：
+
+| 文件 | 覆盖 |
+| --- | --- |
+| `design-tokens.test.mjs` | 设计系统核心不变量：颜色工具正确性、语义色跨主题恒定、强调色对比度底线（白字 ≥3:1）、深色模式层级与对比度（≥7:1）、玻璃半透明表面可读性、序列化分组完整性，以及 **theme.css 与生成器输出零漂移**（直接手改生成文件会导致测试失败） |
+| `quick-jump.test.mjs` | 左上角快速跳转：年月校验、闰年与月天数、十年区间、跳转时保留原“日”并月末收敛 |
+| `date-utils.test.mjs` | `formatDate`、ISO 8601 周数（含跨年周、全年单调性） |
+| `repeat-utils.test.mjs` | 重复事件：日/周/月/年 + 间隔、月末与闰日、结束日期、间隔上下界、后续日期、老数据缺省间隔的向后兼容 |
+| `holiday-adjustment.test.mjs` | 工作日/节假日/调休判断与“往前找最近工作日” |
+| `i18n.test.mjs` | `t`/`tf`/`tMonth` 行为，以及**翻译完整性**（源码里每个中文 key 必须有英文词条、占位符 `{x}` 中英一致） |
+| `loading-confirm.test.mjs` | 全局 loading 并发计数（全部结束才关闭、不为负）、确认弹窗 Promise 契约（含重入不悬挂） |
+| `prefs.test.mjs` | 下线主题映射、用户 ID 生成、完成动效偏好、提醒条目增删与自动消散、naive-ui 主题覆盖派生 |
+| `almanac-festival.test.mjs` | 24 节气数据与当日节气、弹窗当天只标记一次、传统节日倒计时、每日宜忌与完成反馈 |
+| `worker-api.test.mjs` | Workers 路由分发（401/404/400）与待办增删改：用假 D1 断言 SQL 与绑定参数（含编辑待办的 text/repeat/skip_holidays 字段） |
+
+早期的 `test/*.js` 手写脚本（重复事件、节气节日、向后兼容）用例已全部并入上表。
+
+端到端 UI 自测另走 `npm run test:ui`（`scripts/selftest-ui.mjs`，CDP + 无头 chromium）。
 
 ## 视觉验收管线（无头截图）
 

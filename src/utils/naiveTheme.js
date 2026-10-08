@@ -24,24 +24,28 @@ export function buildNaiveThemeOverrides() {
   const warning = token('--warning-color', '#d97706');
   const info = token('--info-color', '#2563eb');
 
-  /** 语义色的 hover/pressed/suppl 统一取同色，保持按钮观感稳定 */
-  const accent = (color, hover = color) => ({
-    color,
-    colorHover: hover,
-    colorPressed: hover,
-    colorSuppl: color,
+  /**
+   * 语义色的 hover/pressed/suppl 统一取同色，保持按钮观感稳定。
+   * 注意：naive 的 common 键是 `primaryColor` / `successColor` …，
+   * 不是裸的 `color`——后者会被 naive 忽略，四组强调色会互相覆盖。
+   */
+  const accent = (name, color, hover = color) => ({
+    [`${name}Color`]: color,
+    [`${name}ColorHover`]: hover,
+    [`${name}ColorPressed`]: hover,
+    [`${name}ColorSuppl`]: color,
   });
 
   return {
     common: {
-      ...accent(primary, primaryHover),
-      ...accent(success),
+      ...accent('primary', primary, primaryHover),
+      ...accent('success', success),
+      ...accent('warning', warning),
+      ...accent('info', info),
       errorColor: danger,
       errorColorHover: danger,
       errorColorPressed: danger,
       errorColorSuppl: danger,
-      ...accent(warning),
-      ...accent(info),
       borderRadius: '10px',
       borderRadiusSmall: '8px',
     },

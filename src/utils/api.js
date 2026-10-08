@@ -1,4 +1,4 @@
-import { setLoading } from './loading';
+import { setLoading } from './loading.js';
 import { t } from './i18n.js';
 
 export const getUserId = () => {
