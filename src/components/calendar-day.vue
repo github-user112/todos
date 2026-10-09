@@ -134,6 +134,16 @@ const filteredTodos = computed(() => {
   const holidayData = props.holidayData;
   const hasHolidayData = holidayData && Object.keys(holidayData).length > 0;
   const result = [];
+  // 同一格内同一待办只渲染一条（与待办列表的 seen 集合保持一致）。
+  // 优先级由 push 顺序决定：本次实例 > 历史完成 > 节假日提前。
+  // 没有它的话，连续假期里每个节假日都会把待办推到同一个工作日，
+  // 加上当天本身就是实例，一格能出现 8 条一模一样的待办。
+  const pushed = new Set();
+  const pushOnce = (todo, entry) => {
+    if (pushed.has(todo.id)) return;
+    pushed.add(todo.id);
+    result.push({ ...todo, ...entry });
+  };
 
   props.todos.forEach((todo) => {
     if (isInstanceDeleted(todo.id, dateStr)) return;
@@ -152,8 +162,7 @@ const filteredTodos = computed(() => {
       if (dateStr === displayDate) {
         const isCompleted =
           todo.completed || isInstanceCompleted(todo.id, dateStr);
-        result.push({
-          ...todo,
+        pushOnce(todo, {
           isCompleted,
           isHolidayAdjusted: adjusted,
           originalDate: todo.date,
@@ -181,8 +190,7 @@ const filteredTodos = computed(() => {
 
       if (!currentDateIsHoliday) {
         const isCompleted = isInstanceCompleted(todo.id, dateStr);
-        result.push({
-          ...todo,
+        pushOnce(todo, {
           isCompleted,
           isHolidayAdjusted: false,
           originalDate: dateStr,
@@ -191,8 +199,7 @@ const filteredTodos = computed(() => {
     } else if (isInstanceCompleted(todo.id, dateStr)) {
       // 历史完成：按当前锚点/规则这天已经不是实例了（例如把「每周五」改成「每周日」之后），
       // 但当天确实完成过 —— 照常作为已完成显示，历史不因改规则而消失
-      result.push({
-        ...todo,
+      pushOnce(todo, {
         isCompleted: true,
         isHistorical: true,
         isHolidayAdjusted: false,
@@ -226,8 +233,7 @@ const filteredTodos = computed(() => {
               )
             ) {
               const isCompleted = isInstanceCompleted(todo.id, dateStr);
-              result.push({
-                ...todo,
+              pushOnce(todo, {
                 isCompleted,
                 isHolidayAdjusted: true,
                 originalDate: checkDateStr,

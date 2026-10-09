@@ -13,8 +13,9 @@
  *  4. 删除确认弹窗（自研 ConfirmDialog，桌面端重复待办三选一 / Esc 取消）
  *  5. 左上角日期快速跳转（月份面板 / 十年区间面板 / 跳转 / 面板内回到今天）
  *  6. 编辑重复待办的锚点日期（每周五→每周日、每月几号、每年几月几日）
- *  7. 移动端：底部抽屉操作菜单 + 底部式删除确认弹窗
- *  8. 玻璃主题下确认弹窗遮罩与「添加待办」弹窗同款（共用 .add-todo-popup 主题规则）
+ *  7. 一格内同一待办只渲染一条（节假日提前 / 历史完成 都不重复）
+ *  8. 移动端：底部抽屉操作菜单 + 底部式删除确认弹窗
+ *  9. 玻璃主题下确认弹窗遮罩与「添加待办」弹窗同款（共用 .add-todo-popup 主题规则）
  */
 import { spawn } from 'node:child_process';
 import { mkdirSync, writeFileSync } from 'node:fs';
@@ -849,6 +850,87 @@ try {
     });
   }
 
+
+  // ---- 7. 一格内同一待办只渲染一条 ----
+  // 回归：连续假期里每个节假日都会把待办「提前」到同一个工作日，
+  // 加上当天本身就是实例 / 历史完成，一格曾出现 8 条一模一样的待办。
+  console.log('\n[7] 日历格子不重复（节假日提前 + 历史完成）');
+  const dupAnchor = new Date();
+  dupAnchor.setDate(dupAnchor.getDate() - 12);
+  const dupAnchorStr = fmtDate(dupAnchor);
+  const dupTodo = await (
+    await fetch(`${API}/api/todos`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-User-ID': uid },
+      body: JSON.stringify({
+        text: '重复渲染检查',
+        date: dupAnchorStr,
+        repeatType: 'daily',
+        repeatInterval: 1,
+        skipHolidays: true,
+      }),
+    })
+  ).json();
+  ok(dupTodo.success, `造「每天重复 + 避开节假日」待办（${dupAnchorStr}）`);
+  await jumpClick(`document.querySelector('.today-btn')`);
+  await wait(1500);
+  // 完成其中一天：从当前视图里挑一个 >= 锚点且可见的日期（月末跨天格子也可能带出下月）
+  const visiblePick = await ev(`(() => {
+    const dates = [...document.querySelectorAll('.calendar-day')]
+      .map((c) => c.getAttribute('data-date'))
+      .filter(Boolean)
+      .sort();
+    return dates.find((d) => d >= ${JSON.stringify(dupAnchorStr)}) || dates[0];
+  })()`);
+  await fetch(`${API}/api/completed-instances`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-User-ID': uid },
+    body: JSON.stringify({ todoId: dupTodo.todo.id, date: visiblePick }),
+  });
+  await jumpClick(`document.querySelector('.today-btn')`);
+  await wait(1500);
+  const dupScan = await ev(`(() => {
+    const bad = [];
+    let maxPerCell = 0;
+    const cells = [...document.querySelectorAll('.calendar-day')];
+    for (const cell of cells) {
+      const ids = [...cell.querySelectorAll('.todo-item')].map((el) =>
+        el.getAttribute('data-id'),
+      );
+      const max = Math.max(0, ...ids.map((id) => ids.filter((x) => x === id).length));
+      if (max > maxPerCell) maxPerCell = max;
+      if (max > 1) bad.push(cell.getAttribute('data-date') + '×' + max);
+    }
+    return { bad, maxPerCell, cells: cells.length };
+  })()`);
+  ok(
+    dupScan.bad.length === 0,
+    `没有一格多条（扫 ${dupScan.cells} 格，单格最多重复 ${dupScan.maxPerCell} 次）`,
+    dupScan.bad.join(', '),
+  );
+  const dupCell = await ev(`(() => {
+    const cell = document.querySelector('.calendar-day[data-date="${visiblePick}"]');
+    const items = (cell ? [...cell.querySelectorAll('.todo-item')] : []).filter((el) =>
+      el.textContent.includes('重复渲染检查'),
+    );
+    return {
+      count: items.length,
+      completed: items.filter((el) => el.classList.contains('completed')).length,
+    };
+  })()`);
+  ok(
+    dupCell.count === 1 && dupCell.completed === 1,
+    `完成那天恰好一条且已划掉（${visiblePick}）`,
+    JSON.stringify(dupCell),
+  );
+  await shot('desktop-no-dup');
+  if (dupTodo.todo?.id) {
+    await fetch(`${API}/api/todos?id=${dupTodo.todo.id}`, {
+      method: 'DELETE',
+      headers: { 'X-User-ID': uid },
+    });
+  }
+
   // ========== 移动端 ==========
   console.log('\n[移动端 390x844]');
   await send('Emulation.setDeviceMetricsOverride', {
@@ -941,8 +1023,8 @@ try {
   );
   await wait(300);
 
-  // ---- 7. 移动端删除确认（底部抽屉式） ----
-  console.log('\n[7] 移动端删除确认弹窗');
+  // ---- 8. 移动端删除确认（底部抽屉式） ----
+  console.log('\n[8] 移动端删除确认弹窗');
   await ev(`(async () => {
     document.body.click();
     await new Promise(r => setTimeout(r, 150));
@@ -1003,8 +1085,8 @@ try {
   ok(mAfter.open === false, 'Esc 关闭移动端确认框');
   ok(mAfter.rows > 0, `待办列表仍完好（${mAfter.rows} 行）`);
 
-  // ---- 8. 玻璃主题下遮罩与「添加待办」弹窗同款 ----
-  console.log('\n[8] 玻璃主题遮罩一致性');
+  // ---- 9. 玻璃主题下遮罩与「添加待办」弹窗同款 ----
+  console.log('\n[9] 玻璃主题遮罩一致性');
   await ev(`document.documentElement.classList.add('ios26-glass-theme')`);
   await wait(200);
   const themed = await ev(`(async () => {
