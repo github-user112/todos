@@ -416,6 +416,17 @@ function generateTodosInRange(startDate, endDate) {
           isHolidayAdjusted: adjusted,
           originalDate,
         });
+      } else if (isInstanceCompleted(todo.id, dateStr)) {
+        // 历史完成：不再是当前规则的实例，但当天完成过 → 照常列出来（与日历格子一致）
+        seen.add(key);
+        result.push({
+          ...todo,
+          date: dateStr,
+          isCompleted: true,
+          isHistorical: true,
+          isHolidayAdjusted: false,
+          originalDate: dateStr,
+        });
       }
       if (
         todo.repeat_type &&

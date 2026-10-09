@@ -687,15 +687,35 @@ try {
   const anchorCell = (dateStr) =>
     ev(`(() => {
       const cell = document.querySelector('.calendar-day[data-date="${dateStr}"]');
+      const items = cell ? [...cell.querySelectorAll('.todo-item')] : [];
+      const mine = items.find((el) =>
+        el.textContent.includes(${JSON.stringify(anchorText)}),
+      );
       return {
         found: !!cell,
-        has: !!cell && cell.textContent.includes(${JSON.stringify(anchorText)}),
+        has: !!mine,
+        completed: !!mine && mine.classList.contains('completed'),
+        title: mine ? mine.getAttribute('title') || '' : '',
       };
     })()`);
   const beforeFriday = await anchorCell(anchorFriday);
   ok(
-    beforeFriday.found && beforeFriday.has,
-    `待办显示在起始日 ${anchorFriday}（周五）`,
+    beforeFriday.found && beforeFriday.has && !beforeFriday.completed,
+    `待办显示在起始日 ${anchorFriday}（周五，未完成）`,
+  );
+
+  // 先把周五这次完成掉，作为「历史完成」的素材
+  await fetch(`${API}/api/completed-instances`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-User-ID': uid },
+    body: JSON.stringify({ todoId: createdAnchor.todo.id, date: anchorFriday }),
+  });
+  await jumpClick(`document.querySelector('.today-btn')`);
+  await wait(1500);
+  const filledFriday = await anchorCell(anchorFriday);
+  ok(
+    filledFriday.has && filledFriday.completed,
+    `周五这次完成后格子照常划掉显示（${anchorFriday}）`,
   );
 
   // 点待办 → 编辑
@@ -804,8 +824,21 @@ try {
   await wait(1500);
   const afterFriday = await anchorCell(anchorFriday);
   const afterSunday = await anchorCell(anchorSunday);
-  ok(!afterFriday.has, `周五不再显示（${anchorFriday}）`);
-  ok(afterSunday.has, `周日显示该待办（${anchorSunday}）`);
+  // 核心回归：改了锚点之后，那次「已完成」不能消失——照常留在原日期格子里划掉
+  ok(
+    afterFriday.has && afterFriday.completed,
+    `改锚点后历史完成仍显示在原日期（${anchorFriday}，已完成划掉）`,
+    JSON.stringify(afterFriday),
+  );
+  ok(
+    /历史完成/.test(afterFriday.title),
+    `历史完成有悬浮说明 → “${afterFriday.title}”`,
+  );
+  ok(
+    afterSunday.has && !afterSunday.completed,
+    `周日是新的未完成实例（${anchorSunday}）`,
+    JSON.stringify(afterSunday),
+  );
   await shot('desktop-anchor-after-save');
 
   // 清理

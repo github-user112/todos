@@ -197,6 +197,10 @@ export default {
   已删除所有重复事件: 'All recurring events deleted',
   '🎉 完成一项待办！': '🎉 Todo completed!',
 
+  // ---- 历史完成 ----
+  '历史完成（该日期已不在当前重复规则内）':
+    'Completed earlier (this date is no longer part of the repeat rule)',
+
   // ---- 重复锚点日期（编辑弹窗） ----
   日期: 'Date',
   前一天: 'Previous day',

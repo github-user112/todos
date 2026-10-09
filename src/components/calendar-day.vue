@@ -57,6 +57,7 @@
         v-for="todo in filteredTodos"
         :key="`${todo.id}-${todo.originalDate}`"
         :class="['todo-item', { completed: todo.isCompleted, 'drag-over': dragOverTodoId === `${todo.id}-${todo.originalDate}` }]"
+        :title="todo.isHistorical ? t('历史完成（该日期已不在当前重复规则内）') : ''"
         :data-id="todo.id"
         :data-date="day.dateStr"
         :data-original-date="todo.originalDate"
@@ -187,6 +188,16 @@ const filteredTodos = computed(() => {
           originalDate: dateStr,
         });
       }
+    } else if (isInstanceCompleted(todo.id, dateStr)) {
+      // 历史完成：按当前锚点/规则这天已经不是实例了（例如把「每周五」改成「每周日」之后），
+      // 但当天确实完成过 —— 照常作为已完成显示，历史不因改规则而消失
+      result.push({
+        ...todo,
+        isCompleted: true,
+        isHistorical: true,
+        isHolidayAdjusted: false,
+        originalDate: dateStr,
+      });
     }
 
     if (skipHolidays && hasHolidayData && isWorkday(dateStr, holidayData)) {
