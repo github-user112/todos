@@ -12,8 +12,9 @@
  *  3. 全局 loading 计数只增不减（1,2,3,4,5…）
  *  4. 删除确认弹窗（自研 ConfirmDialog，桌面端重复待办三选一 / Esc 取消）
  *  5. 左上角日期快速跳转（月份面板 / 十年区间面板 / 跳转 / 面板内回到今天）
- *  6. 移动端：底部抽屉操作菜单 + 底部式删除确认弹窗
- *  7. 玻璃主题下确认弹窗遮罩与「添加待办」弹窗同款（共用 .add-todo-popup 主题规则）
+ *  6. 编辑重复待办的锚点日期（每周五→每周日、每月几号、每年几月几日）
+ *  7. 移动端：底部抽屉操作菜单 + 底部式删除确认弹窗
+ *  8. 玻璃主题下确认弹窗遮罩与「添加待办」弹窗同款（共用 .add-todo-popup 主题规则）
  */
 import { spawn } from 'node:child_process';
 import { mkdirSync, writeFileSync } from 'node:fs';
@@ -650,6 +651,171 @@ try {
             document.documentElement.classList.remove('ios26-glass-theme');`);
   await wait(200);
 
+
+  // ---- 6. 编辑重复待办的锚点日期（每周五 → 每周日） ----
+  console.log('\n[6] 编辑重复待办：改重复日期（每周五 → 每周日）');
+  const fmtDate = (d) =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  // 最近一个周五作为锚点；两三天后的周日就是「同一周里的周日」
+  const anchorFridayDate = (() => {
+    const d = new Date();
+    while (d.getDay() !== 5) d.setDate(d.getDate() - 1);
+    return d;
+  })();
+  const anchorFriday = fmtDate(anchorFridayDate);
+  const anchorSunday = fmtDate(new Date(anchorFridayDate.getTime() + 2 * 86400000));
+  const anchorDayNo = Number(anchorSunday.slice(8));
+  const anchorMonthNo = Number(anchorSunday.slice(5, 7));
+  const anchorText = '锚点测试-每周五';
+  const createdAnchor = await (
+    await fetch(`${API}/api/todos`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-User-ID': uid },
+      body: JSON.stringify({
+        text: anchorText,
+        date: anchorFriday,
+        repeatType: 'weekly',
+        repeatInterval: 1,
+      }),
+    })
+  ).json();
+  ok(createdAnchor.success, `造一个每周重复待办（${anchorFriday} 周五）`, JSON.stringify(createdAnchor));
+
+  // 触发一次数据刷新
+  await jumpClick(`document.querySelector('.today-btn')`);
+  await wait(1500);
+  const anchorCell = (dateStr) =>
+    ev(`(() => {
+      const cell = document.querySelector('.calendar-day[data-date="${dateStr}"]');
+      return {
+        found: !!cell,
+        has: !!cell && cell.textContent.includes(${JSON.stringify(anchorText)}),
+      };
+    })()`);
+  const beforeFriday = await anchorCell(anchorFriday);
+  ok(
+    beforeFriday.found && beforeFriday.has,
+    `待办显示在起始日 ${anchorFriday}（周五）`,
+  );
+
+  // 点待办 → 编辑
+  await jumpClick(
+    `document.querySelector('.calendar-day[data-date="${anchorFriday}"] .todo-item')`,
+  );
+  await wait(600);
+  const openedEditor = await jumpClick(
+    `[...document.querySelectorAll('.todo-actions .action-btn')]
+       .find(b => b.textContent.trim() === '编辑')`,
+  );
+  ok(openedEditor, '点待办 → 编辑打开弹窗');
+  const editor = await ev(`(() => ({
+    date: document.querySelector('.date-main-input')?.value,
+    chips: [...document.querySelectorAll('.anchor-chips .repeat-chip')].map(c => c.textContent.trim()),
+    active: [...document.querySelectorAll('.anchor-chips .repeat-chip')]
+      .find(c => c.classList.contains('active'))?.textContent.trim(),
+    summary: document.querySelector('.date-summary')?.textContent.trim(),
+    error: document.querySelector('.date-error')?.textContent.trim() || null,
+    dateBadgeGone: !document.querySelector('.date-badge'),
+  }))()`);
+  ok(editor.dateBadgeGone, '日期已从只读徽标改为可编辑');
+  ok(editor.date === anchorFriday, `弹窗回填锚点日期 → ${editor.date}`);
+  ok(
+    editor.chips.length === 7,
+    `每周显示 7 个星期 chip → [${editor.chips.join(' ')}]`,
+  );
+  ok(editor.active === '五', `当前高亮星期五 → ${editor.active}`);
+  ok(
+    /每周/.test(editor.summary || '') && !editor.error,
+    `规则说明 → ${editor.summary}`,
+  );
+
+  // 点「日」chip → 同一周的周日
+  await jumpClick(
+    `[...document.querySelectorAll('.anchor-chips .repeat-chip')]
+       .find(c => c.textContent.trim() === '日')`,
+  );
+  const afterPick = await ev(`(() => ({
+    date: document.querySelector('.date-main-input')?.value,
+    active: [...document.querySelectorAll('.anchor-chips .repeat-chip')]
+      .find(c => c.classList.contains('active'))?.textContent.trim(),
+    summary: document.querySelector('.date-summary')?.textContent.trim(),
+    adjusted: !!document.querySelector('.date-hint'),
+    error: document.querySelector('.date-error')?.textContent.trim() || null,
+  }))()`);
+  ok(afterPick.date === anchorSunday, `点「日」→ 锚点变为 ${afterPick.date}（周日）`);
+  ok(afterPick.active === '日', `高亮切到星期日 → ${afterPick.active}`);
+  ok(
+    /每周/.test(afterPick.summary || '') && !afterPick.adjusted && !afterPick.error,
+    `规则说明实时更新 → ${afterPick.summary}`,
+  );
+  await shot('desktop-anchor-weekday');
+
+  // 每月 / 每年的语义化控件
+  const repeatTab = (label) =>
+    `[...document.querySelectorAll('.repeat-chips .repeat-chip')]
+       .find(c => c.textContent.trim() === '${label}')`;
+  await jumpClick(repeatTab('每月'));
+  const monthly = await ev(`(() => ({
+    stepper: !!document.querySelector('.stepper'),
+    day: document.querySelector('.stepper-value')?.textContent.trim(),
+    summary: document.querySelector('.date-summary')?.textContent.trim(),
+    weekdayChips: document.querySelectorAll('.anchor-chips .repeat-chip').length,
+  }))()`);
+  ok(
+    monthly.stepper && monthly.day === String(anchorDayNo),
+    `每月 → 日号步进器（${monthly.day} 号）`,
+  );
+  ok(monthly.weekdayChips === 0, '每月不再显示星期 chip');
+  ok(/每月/.test(monthly.summary || ''), `每月规则说明 → ${monthly.summary}`);
+
+  await jumpClick(repeatTab('每年'));
+  const yearly = await ev(`(() => ({
+    monthChips: document.querySelectorAll('.month-chips .repeat-chip').length,
+    activeMonth: document.querySelector('.month-chips .repeat-chip.active')?.textContent.trim(),
+    day: document.querySelector('.stepper-value')?.textContent.trim(),
+    summary: document.querySelector('.date-summary')?.textContent.trim(),
+  }))()`);
+  ok(
+    yearly.monthChips === 12 && yearly.activeMonth === `${anchorMonthNo}月`,
+    `每年 → 12 个月 chip（高亮 ${yearly.activeMonth}，应为 ${anchorMonthNo}月）`,
+  );
+  ok(yearly.day === String(anchorDayNo), `每年日号 → ${yearly.day}`);
+  ok(/每年/.test(yearly.summary || ''), `每年规则说明 → ${yearly.summary}`);
+
+  // 切回每周（锚点仍是周日）后保存
+  await jumpClick(repeatTab('每周'));
+  await wait(300);
+  await jumpClick(`document.querySelector('.btn-save')`);
+  await wait(1500);
+  const persisted = await (
+    await fetch(
+      `${API}/api/todos?startDate=${anchorFriday}&endDate=${anchorSunday}`,
+      { headers: { 'X-User-ID': uid } },
+    )
+  ).json();
+  const savedAnchor = persisted.todos.find((t) => t.text === anchorText);
+  ok(
+    savedAnchor?.date === anchorSunday,
+    `服务端已保存新锚点 → ${savedAnchor?.date}`,
+    JSON.stringify(savedAnchor),
+  );
+
+  await jumpClick(`document.querySelector('.today-btn')`);
+  await wait(1500);
+  const afterFriday = await anchorCell(anchorFriday);
+  const afterSunday = await anchorCell(anchorSunday);
+  ok(!afterFriday.has, `周五不再显示（${anchorFriday}）`);
+  ok(afterSunday.has, `周日显示该待办（${anchorSunday}）`);
+  await shot('desktop-anchor-after-save');
+
+  // 清理
+  if (createdAnchor.todo?.id) {
+    await fetch(`${API}/api/todos?id=${createdAnchor.todo.id}`, {
+      method: 'DELETE',
+      headers: { 'X-User-ID': uid },
+    });
+  }
+
   // ========== 移动端 ==========
   console.log('\n[移动端 390x844]');
   await send('Emulation.setDeviceMetricsOverride', {
@@ -742,8 +908,8 @@ try {
   );
   await wait(300);
 
-  // ---- 6. 移动端删除确认（底部抽屉式） ----
-  console.log('\n[6] 移动端删除确认弹窗');
+  // ---- 7. 移动端删除确认（底部抽屉式） ----
+  console.log('\n[7] 移动端删除确认弹窗');
   await ev(`(async () => {
     document.body.click();
     await new Promise(r => setTimeout(r, 150));
@@ -804,8 +970,8 @@ try {
   ok(mAfter.open === false, 'Esc 关闭移动端确认框');
   ok(mAfter.rows > 0, `待办列表仍完好（${mAfter.rows} 行）`);
 
-  // ---- 7. 玻璃主题下遮罩与「添加待办」弹窗同款 ----
-  console.log('\n[7] 玻璃主题遮罩一致性');
+  // ---- 8. 玻璃主题下遮罩与「添加待办」弹窗同款 ----
+  console.log('\n[8] 玻璃主题遮罩一致性');
   await ev(`document.documentElement.classList.add('ios26-glass-theme')`);
   await wait(200);
   const themed = await ev(`(async () => {

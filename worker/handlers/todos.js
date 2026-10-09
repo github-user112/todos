@@ -1,4 +1,4 @@
-import { jsonResponse, validateRepeatInterval } from '../utils.js';
+import { jsonResponse, validateRepeatInterval, isValidDateStr } from '../utils.js';
 
 async function handleGetTodos(request, env, userId) {
   const url = new URL(request.url);
@@ -50,6 +50,10 @@ async function handleCreateTodo(request, env, userId) {
 
     if (!data.text || !data.date) {
       return jsonResponse({ error: '缺少必要的字段' }, 400);
+    }
+
+    if (!isValidDateStr(data.date)) {
+      return jsonResponse({ error: '日期格式无效' }, 400);
     }
 
     const repeatType = data.repeatType || 'none';
@@ -118,6 +122,20 @@ async function handleUpdateTodo(request, env, userId) {
 
     if (!text || !text.trim()) {
       return jsonResponse({ error: '待办内容不能为空' }, 400);
+    }
+
+    // 锚点日期可改（每周五 → 每周日），这里只校验显式传入的值，
+    // 避免历史脏数据挡住纯文本编辑
+    if (data.date !== undefined && !isValidDateStr(data.date)) {
+      return jsonResponse({ error: '日期格式无效' }, 400);
+    }
+
+    if (
+      isValidDateStr(data.date || '') &&
+      isValidDateStr(endDate || '') &&
+      endDate < date
+    ) {
+      return jsonResponse({ error: '结束日期不能早于开始日期' }, 400);
     }
 
     const validationResult = validateRepeatInterval(repeatType, repeatInterval);

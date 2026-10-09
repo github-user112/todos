@@ -12,7 +12,63 @@
           <button class="close-btn" @click="$emit('close')">✕</button>
         </div>
 
-        <div class="date-badge">📅 {{ selectedDate }}</div>
+        <!-- 锚点日期：重复待办的「哪天/周几/几号」在这里改 -->
+        <div class="date-section">
+          <div class="date-row">
+            <button
+              class="date-step"
+              :aria-label="t('前一天')"
+              @click="stepDay(-1)"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
+            </button>
+            <input
+              type="date"
+              class="date-main-input"
+              :value="anchorDate"
+              :aria-label="t('日期')"
+              @change="onDateInput($event.target.value)"
+            />
+            <button
+              class="date-step"
+              :aria-label="t('后一天')"
+              @click="stepDay(1)"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+            </button>
+          </div>
+          <p v-if="anchorSummary" class="date-summary">{{ anchorSummary }}</p>
+          <p v-if="anchorError" class="date-error">{{ anchorError }}</p>
+          <p v-else-if="anchorAdjusted" class="date-hint">
+            {{
+              tf('已自动调整到 {date}（重复待办不能早于今天）', {
+                date: anchorDate,
+              })
+            }}
+          </p>
+        </div>
 
         <input
           ref="inputRef"
@@ -59,6 +115,67 @@
               }}{{ t(INTERVAL_LIMITS[todoRepeat]?.unit) }}</span
             >
           </div>
+
+          <!-- 每周：选星期几（「每周五」改成「每周日」就点这里） -->
+          <div v-if="todoRepeat === 'weekly'" class="anchor-row">
+            <span class="interval-prefix">{{ t('星期') }}</span>
+            <div class="anchor-chips">
+              <button
+                v-for="wd in WEEKDAYS"
+                :key="wd.value"
+                :class="['repeat-chip', { active: anchorWeekday === wd.value }]"
+                @click="pickWeekday(wd.value)"
+              >
+                {{ t(wd.label) }}
+              </button>
+            </div>
+          </div>
+
+          <!-- 每月：几号（31 号在 2 月自动按月末） -->
+          <div v-if="todoRepeat === 'monthly'" class="anchor-row">
+            <span class="interval-prefix">{{ t('几号') }}</span>
+            <div class="stepper">
+              <button class="stepper-btn" :aria-label="t('前一天')" @click="stepMonthDay(-1)">
+                ‹
+              </button>
+              <span class="stepper-value">{{ anchorDay }}</span>
+              <button class="stepper-btn" :aria-label="t('后一天')" @click="stepMonthDay(1)">
+                ›
+              </button>
+            </div>
+            <span v-if="monthDayClamped" class="interval-hint">
+              {{ tf('该月无 {d} 号，按月末', { d: anchorDay }) }}
+            </span>
+          </div>
+
+          <!-- 每年：几月 + 几号 -->
+          <template v-if="todoRepeat === 'yearly'">
+            <div class="anchor-row">
+              <span class="interval-prefix">{{ t('几月') }}</span>
+              <div class="anchor-chips month-chips">
+                <button
+                  v-for="m in 12"
+                  :key="m"
+                  :class="['repeat-chip', { active: anchorMonth === m }]"
+                  @click="pickMonth(m)"
+                >
+                  {{ tMonth(m - 1) }}
+                </button>
+              </div>
+            </div>
+            <div class="anchor-row">
+              <span class="interval-prefix">{{ t('几号') }}</span>
+              <div class="stepper">
+                <button class="stepper-btn" :aria-label="t('前一天')" @click="stepYearDay(-1)">
+                  ‹
+                </button>
+                <span class="stepper-value">{{ anchorDay }}</span>
+                <button class="stepper-btn" :aria-label="t('后一天')" @click="stepYearDay(1)">
+                  ›
+                </button>
+              </div>
+            </div>
+          </template>
 
           <div v-if="todoRepeat !== 'none'" class="interval-row">
             <label class="interval-prefix" for="end-date">{{ t('结束') }}</label>
@@ -144,7 +261,7 @@
           <RepeatPreview
             v-if="showPreview"
             :showPreview="showPreview"
-            :baseDate="selectedDate"
+            :baseDate="anchorDate"
             :repeatType="todoRepeat"
             :repeatInterval="currentInterval"
             :endDate="endDate"
@@ -163,7 +280,16 @@
 
 <script setup>
 import { ref, computed, onMounted, nextTick, watch } from 'vue';
-import { t, tf } from '../utils/i18n.js';
+import { t, tf, tMonth } from '../utils/i18n.js';
+import {
+  addDaysStr,
+  applyAnchorPatch,
+  isMonthEndClamped,
+  parseLocalDate,
+  stepDateStr,
+  todayStr,
+  validateAnchor,
+} from '../utils/repeatAnchor.js';
 import RepeatPreview from './RepeatPreview.vue';
 
 const props = defineProps({
@@ -183,6 +309,113 @@ const emit = defineEmits([
 
 const inputRef = ref(null);
 const showPreview = ref(false);
+// 锚点日期：编辑重复待办时改它 = 改「哪天/周几/几号」。
+// 用户没动过就不做下限收敛，保留历史待办本来的日期（可能早于今天）。
+const anchorDate = ref(props.initialTodo?.date || props.selectedDate || todayStr());
+const anchorAdjusted = ref(false);
+
+/** 每周的星期 chip（0=周日） */
+const WEEKDAYS = [
+  { value: 1, label: '一' },
+  { value: 2, label: '二' },
+  { value: 3, label: '三' },
+  { value: 4, label: '四' },
+  { value: 5, label: '五' },
+  { value: 6, label: '六' },
+  { value: 0, label: '日' },
+];
+
+const anchorDateObj = computed(() => parseLocalDate(anchorDate.value));
+const anchorWeekday = computed(() => anchorDateObj.value?.getDay() ?? -1);
+const anchorDay = computed(() => anchorDateObj.value?.getDate() ?? 1);
+const anchorMonth = computed(() => (anchorDateObj.value?.getMonth() ?? 0) + 1);
+const monthDayClamped = computed(() =>
+  props.todoRepeat === 'monthly' ? isMonthEndClamped(anchorDate.value, anchorDay.value) : false,
+);
+
+/** 一句话说明当前规则，所见即所得 */
+const anchorSummary = computed(() => {
+  const interval = currentInterval.value;
+  const wdLabel = WEEKDAYS.find((w) => w.value === anchorWeekday.value)?.label ?? '';
+  switch (props.todoRepeat) {
+    case 'daily':
+      return t('每天执行，日期只作为起始日');
+    case 'weekly':
+      return interval > 1
+        ? tf('每 {n} 周的{wd}执行', { n: interval, wd: t(wdLabel) })
+        : tf('每周{wd}执行', { wd: t(wdLabel) });
+    case 'monthly':
+      return interval > 1
+        ? tf('每 {n} 个月的 {d} 号', { n: interval, d: anchorDay.value })
+        : tf('每月 {d} 号', { d: anchorDay.value });
+    case 'yearly':
+      return tf('每年 {m} 月 {d} 日', { m: anchorMonth.value, d: anchorDay.value });
+    default:
+      return t('仅这一天执行');
+  }
+});
+
+/** 重复待办的锚点不能早于今天；不重复待办不受限 */
+const anchorLimit = computed(() =>
+  props.todoRepeat === 'none' ? '' : todayStr(),
+);
+
+const anchorCheck = computed(() =>
+  validateAnchor(anchorDate.value, {
+    endDate: endDate.value,
+    repeatType: props.todoRepeat,
+    minDate: anchorLimit.value,
+  }),
+);
+
+const ANCHOR_ERROR_TEXT = {
+  INVALID_DATE: '日期无效',
+  END_BEFORE_START: '结束日期不能早于开始日期',
+  BEFORE_TODAY: '重复待办的日期不能早于今天',
+};
+
+const anchorError = computed(() =>
+  anchorCheck.value.valid
+    ? ''
+    : t(ANCHOR_ERROR_TEXT[anchorCheck.value.code] || '日期无效'),
+);
+
+/** 套用补丁并按重复类型收敛下限；返回是否被自动调整过 */
+const setAnchor = (patch) => {
+  const raw = applyAnchorPatch(anchorDate.value, patch, { repeatType: 'none' });
+  const next = applyAnchorPatch(anchorDate.value, patch, {
+    repeatType: props.todoRepeat,
+    minDate: anchorLimit.value,
+  });
+  anchorAdjusted.value = next !== raw;
+  anchorDate.value = next;
+};
+
+const onDateInput = (value) => {
+  if (!value) return;
+  setAnchor({ dateStr: value });
+};
+
+const stepDay = (delta) => {
+  const raw = addDaysStr(anchorDate.value, delta);
+  if (!raw) return;
+  anchorDate.value = stepDateStr(anchorDate.value, delta, { minDate: anchorLimit.value });
+  anchorAdjusted.value = anchorDate.value !== raw;
+};
+
+const pickWeekday = (weekday) => setAnchor({ weekday });
+
+const stepMonthDay = (delta) => {
+  const day = Math.min(31, Math.max(1, anchorDay.value + delta));
+  setAnchor({ monthDay: day });
+};
+
+const pickMonth = (month) => setAnchor({ month });
+
+const stepYearDay = (delta) => {
+  const day = Math.min(31, Math.max(1, anchorDay.value + delta));
+  setAnchor({ day });
+};
 const endDate = ref('');
 const skipHolidays = ref(true);
 const reminder = ref(0);
@@ -263,6 +496,8 @@ const resetForm = () => {
   reminder.value = 0;
   todoTime.value = '09:00';
   showReminderOptions.value = false;
+  anchorDate.value = props.initialTodo?.date || props.selectedDate || todayStr();
+  anchorAdjusted.value = false;
   applyInitialTodo();
 };
 
@@ -272,6 +507,7 @@ applyInitialTodo();
 const handleSave = () => {
   if (!props.todoText?.trim()) return;
   if (props.todoRepeat !== 'none') validateInterval(props.todoRepeat);
+  if (!anchorCheck.value.valid) return; // 界面已提示具体原因
   emit('save', {
     repeatType: props.todoRepeat,
     repeatInterval: currentInterval.value,
@@ -279,6 +515,7 @@ const handleSave = () => {
     skipHolidays: skipHolidays.value,
     reminder: reminder.value,
     todoTime: todoTime.value,
+    date: anchorDate.value,
   });
   resetForm();
 };
@@ -521,15 +758,122 @@ onMounted(() => {
   background: var(--hover-color);
 }
 
-.date-badge {
+/* ---- 锚点日期：前后一天 + 日期输入 + 规则说明 ---- */
+.date-section {
   margin: 10px 18px 0;
-  padding: 5px 10px;
-  background: var(--hover-color);
-  border-radius: 7px;
-  font-size: 0.8rem;
+}
+.date-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.date-step {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 38px;
+  flex-shrink: 0;
+  border: 1.5px solid var(--border-color);
+  border-radius: 10px;
+  background: var(--card-background);
   color: var(--text-secondary);
-  display: inline-block;
-  width: fit-content;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.date-step:hover {
+  background: var(--hover-color);
+  color: var(--primary-color);
+}
+.date-step:active {
+  transform: scale(0.92);
+}
+.date-main-input {
+  flex: 1;
+  min-width: 0;
+  height: 38px;
+  padding: 8px 10px;
+  border: 1.5px solid var(--border-color);
+  border-radius: 10px;
+  background: var(--card-background);
+  color: var(--text-primary);
+  font-size: 0.88rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.date-main-input:focus {
+  outline: none;
+  border-color: var(--form-input-focus-border);
+  box-shadow: 0 0 0 3px var(--form-input-focus-shadow);
+}
+.date-summary {
+  margin: 7px 2px 0;
+  font-size: 0.76rem;
+  color: var(--primary-color);
+  font-weight: 600;
+}
+.date-hint {
+  margin: 4px 2px 0;
+  font-size: 0.72rem;
+  color: var(--other-month-text);
+}
+.date-error {
+  margin: 4px 2px 0;
+  font-size: 0.74rem;
+  color: var(--danger-color);
+  font-weight: 600;
+}
+
+/* ---- 语义化锚点选择：星期 chip / 月 chip / 日号步进器 ---- */
+.anchor-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+.anchor-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.anchor-chips .repeat-chip {
+  min-width: 32px;
+  text-align: center;
+}
+.month-chips .repeat-chip {
+  min-width: 40px;
+  padding: 7px 6px;
+}
+.stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border: 1.5px solid var(--border-color);
+  border-radius: 10px;
+  background: var(--card-background);
+}
+.stepper-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.stepper-btn:hover {
+  background: var(--hover-color);
+  color: var(--primary-color);
+}
+.stepper-value {
+  min-width: 34px;
+  text-align: center;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
 }
 
 .todo-input {
@@ -739,9 +1083,26 @@ onMounted(() => {
   .popup-header h2 {
     font-size: 1.05rem;
   }
-  .date-badge {
+  .date-section {
     margin: 8px 16px 0;
-    font-size: 0.78rem;
+  }
+  .date-step {
+    width: 40px;
+    height: 42px;
+  }
+  .date-main-input {
+    height: 42px;
+    font-size: 0.95rem;
+  }
+  .anchor-chips .repeat-chip {
+    min-width: 38px;
+  }
+  .month-chips .repeat-chip {
+    min-width: 44px;
+  }
+  .stepper-btn {
+    width: 34px;
+    height: 34px;
   }
   .todo-input {
     width: calc(100% - 32px);

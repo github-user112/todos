@@ -548,7 +548,8 @@ const saveTodo = async (eventData) => {
       await emit('update-todo', {
         id: editingTodoId.value,
         text,
-        date: selectedDate.value,
+        // 弹窗里可改锚点日期（每周五→每周日），没改就用当前选中日
+        date: eventData?.date || selectedDate.value,
         repeatType: eventData?.repeatType || todoRepeat.value,
         repeatInterval: eventData?.repeatInterval || 1,
         endDate: eventData?.endDate,
@@ -561,7 +562,7 @@ const saveTodo = async (eventData) => {
     }
     await emit('add-todo', {
       text,
-      date: selectedDate.value,
+      date: eventData?.date || selectedDate.value,
       repeatType: eventData?.repeatType || todoRepeat.value,
       repeatInterval: eventData?.repeatInterval || 1,
       endDate: eventData?.endDate,

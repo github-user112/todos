@@ -197,6 +197,27 @@ export default {
   已删除所有重复事件: 'All recurring events deleted',
   '🎉 完成一项待办！': '🎉 Todo completed!',
 
+  // ---- 重复锚点日期（编辑弹窗） ----
+  日期: 'Date',
+  前一天: 'Previous day',
+  后一天: 'Next day',
+  几号: 'Day of month',
+  几月: 'Month',
+  星期: 'Weekday',
+  '每天执行，日期只作为起始日': 'Runs daily; the date only sets the start',
+  '每周{wd}执行': 'Every {wd}',
+  '每 {n} 周的{wd}执行': 'Every {n} weeks on {wd}',
+  '每月 {d} 号': 'On day {d} of every month',
+  '每 {n} 个月的 {d} 号': 'On day {d} every {n} months',
+  '每年 {m} 月 {d} 日': 'Every year on {m}/{d}',
+  '仅这一天执行': 'Only on this day',
+  '该月无 {d} 号，按月末': 'No {d}th in that month; using month end',
+  '已自动调整到 {date}（重复待办不能早于今天）':
+    'Adjusted to {date} (recurring todos cannot start before today)',
+  日期无效: 'Invalid date',
+  '结束日期不能早于开始日期': 'End date cannot be earlier than the start date',
+  '重复待办的日期不能早于今天': 'A recurring todo cannot start before today',
+
   // ---- 日历头部/设置抽屉 ----
   上一月: 'Previous month',
   下一月: 'Next month',

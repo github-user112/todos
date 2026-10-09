@@ -317,6 +317,83 @@ describe('handleUpdateTodo', () => {
   });
 });
 
+describe('改锚点日期（每周五 → 每周日）', () => {
+  const update = async (body, db = createDb({ row: ROW })) => {
+    const res = await handleUpdateTodo(jsonRequest(body), { DB: db }, 'u1');
+    return { status: res.status, body: await res.json(), db };
+  };
+
+  it('只改日期：其余字段沿用原值', async () => {
+    const { status, body, db } = await update({ id: 7, date: '2026-10-11' });
+    assert.equal(status, 200);
+    assert.equal(body.success, true);
+    const args = db.find('UPDATE todos').args;
+    assert.equal(args[4], '2026-10-11', 'date 落到第 5 个绑定参数');
+    assert.equal(args[6], ROW.text);
+    assert.equal(args[7], ROW.repeat_type);
+    assert.equal(args[8], ROW.repeat_interval);
+  });
+
+  it('日期 + 重复规则一起改', async () => {
+    const { db } = await update({
+      id: 7,
+      date: '2026-10-11',
+      repeatType: 'weekly',
+      repeatInterval: 2,
+    });
+    const args = db.find('UPDATE todos').args;
+    assert.equal(args[4], '2026-10-11');
+    assert.equal(args[7], 'weekly');
+    assert.equal(args[8], 2);
+  });
+
+  it('日期格式非法 → 400', async () => {
+    for (const bad of ['2026-13-01', '2026-02-30', '2026/10/11', '2026-10-9', '', 'bad']) {
+      const { status, body } = await update({ id: 7, date: bad });
+      assert.equal(status, 400, `date=${JSON.stringify(bad)}`);
+      assert.equal(body.error, '日期格式无效');
+    }
+  });
+
+  it('结束日期早于开始日期 → 400', async () => {
+    const { status, body } = await update({
+      id: 7,
+      date: '2026-10-11',
+      endDate: '2026-10-01',
+    });
+    assert.equal(status, 400);
+    assert.equal(body.error, '结束日期不能早于开始日期');
+  });
+
+  it('结束日期等于开始日期是合法的', async () => {
+    const { status } = await update({ id: 7, date: '2026-10-11', endDate: '2026-10-11' });
+    assert.equal(status, 200);
+  });
+
+  it('只改文本时不动日期，也不因历史脏 end_date 被拦', async () => {
+    const { status, db } = await update(
+      { id: 7, text: '只改文字' },
+      createDb({ row: { ...ROW, end_date: '1999-01-01', date: '2020-01-01' } }),
+    );
+    assert.equal(status, 200, '未传 date 时不校验 end_date');
+    const args = db.find('UPDATE todos').args;
+    assert.equal(args[4], '2020-01-01');
+    assert.equal(args[1], '1999-01-01');
+  });
+
+  it('创建时日期格式非法 → 400', async () => {
+    const db = createDb({ row: ROW });
+    const res = await handleCreateTodo(
+      jsonRequest({ text: '买菜', date: '2026-02-30' }, { method: 'POST' }),
+      { DB: db },
+      'u1',
+    );
+    assert.equal(res.status, 400);
+    assert.deepEqual(await res.json(), { error: '日期格式无效' });
+    assert.equal(db.calls.length, 0, '校验失败不应打到 DB');
+  });
+});
+
 describe('handleDeleteTodo', () => {
   const remove = async (url, db = createDb({ row: ROW })) =>
     handleDeleteTodo(new Request(url, { method: 'DELETE' }), { DB: db }, 'u1');

@@ -29,4 +29,12 @@ function validateRepeatInterval(repeatType, interval) {
   return { valid: true };
 }
 
-export { jsonResponse, validateRepeatInterval };
+/** YYYY-MM-DD 且真实存在（排除 2026-02-30 这类） */
+function isValidDateStr(dateStr) {
+  if (typeof dateStr !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return false;
+  const parsed = new Date(`${dateStr}T00:00:00Z`);
+  if (Number.isNaN(parsed.getTime())) return false;
+  return parsed.toISOString().slice(0, 10) === dateStr;
+}
+
+export { jsonResponse, validateRepeatInterval, isValidDateStr };

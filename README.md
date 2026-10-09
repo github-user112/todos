@@ -78,6 +78,7 @@ moonlight 月白 · bamboo 竹青；全部为浅色，深色玻璃变体已下�
 | `quick-jump.test.mjs` | 左上角快速跳转：年月校验、闰年与月天数、十年区间、跳转时保留原“日”并月末收敛 |
 | `date-utils.test.mjs` | `formatDate`、ISO 8601 周数（含跨年周、全年单调性） |
 | `repeat-utils.test.mjs` | 重复事件：日/周/月/年 + 间隔、月末与闰日、结束日期、间隔上下界、后续日期、老数据缺省间隔的向后兼容 |
+| `repeat-anchor.test.mjs` | 重复待办的锚点日期：本地日期解析、每周几/每月几号/每年几月几日切换、月末与闰日收敛、「重复待办不能早于今天」下限、结束日期校验 |
 | `holiday-adjustment.test.mjs` | 工作日/节假日/调休判断与“往前找最近工作日” |
 | `i18n.test.mjs` | `t`/`tf`/`tMonth` 行为，以及**翻译完整性**（源码里每个中文 key 必须有英文词条、占位符 `{x}` 中英一致） |
 | `loading-confirm.test.mjs` | 全局 loading 并发计数（全部结束才关闭、不为负）、确认弹窗 Promise 契约（含重入不悬挂） |
