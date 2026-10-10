@@ -138,6 +138,83 @@ html.liquid-glass-theme body {
   color: var(--primary-dark) !important;
 }
 
+/* ---- 休息日语义：格面玻璃底色带 !important，会盖掉日历格子的休/班语义色，
+   这里按「法定节假日 > 普通周末 > 工作日」显式补回，8 个玻璃家族统一 ---- */
+.glass-theme .calendar-day.holiday-rest-day,
+.ios-glass-theme .calendar-day.holiday-rest-day,
+.persimmon-glass-theme .calendar-day.holiday-rest-day,
+.moonlight-glass-theme .calendar-day.holiday-rest-day,
+.bamboo-glass-theme .calendar-day.holiday-rest-day,
+.liquid-glass-theme .calendar-day.holiday-rest-day,
+.ios26-glass-theme .calendar-day.holiday-rest-day,
+.liquid-aurora-glass-theme .calendar-day.holiday-rest-day,
+.fluid-glass-theme .calendar-day.holiday-rest-day {
+  background: var(--calendar-day-holiday-rest-bg) !important;
+  border-color: var(--calendar-day-holiday-rest-border) !important;
+}
+.glass-theme .calendar-day.holiday-rest-day:hover,
+.ios-glass-theme .calendar-day.holiday-rest-day:hover,
+.persimmon-glass-theme .calendar-day.holiday-rest-day:hover,
+.moonlight-glass-theme .calendar-day.holiday-rest-day:hover,
+.bamboo-glass-theme .calendar-day.holiday-rest-day:hover,
+.liquid-glass-theme .calendar-day.holiday-rest-day:hover,
+.ios26-glass-theme .calendar-day.holiday-rest-day:hover,
+.liquid-aurora-glass-theme .calendar-day.holiday-rest-day:hover,
+.fluid-glass-theme .calendar-day.holiday-rest-day:hover {
+  background: var(--calendar-day-holiday-rest-bg) !important;
+  border-color: var(--calendar-day-holiday-rest-border) !important;
+}
+.glass-theme .calendar-day.holiday-work-day,
+.ios-glass-theme .calendar-day.holiday-work-day,
+.persimmon-glass-theme .calendar-day.holiday-work-day,
+.moonlight-glass-theme .calendar-day.holiday-work-day,
+.bamboo-glass-theme .calendar-day.holiday-work-day,
+.liquid-glass-theme .calendar-day.holiday-work-day,
+.ios26-glass-theme .calendar-day.holiday-work-day,
+.liquid-aurora-glass-theme .calendar-day.holiday-work-day,
+.fluid-glass-theme .calendar-day.holiday-work-day {
+  background: var(--calendar-day-holiday-work-bg) !important;
+  border-color: var(--calendar-day-holiday-work-border) !important;
+}
+.glass-theme .calendar-day.holiday-work-day:hover,
+.ios-glass-theme .calendar-day.holiday-work-day:hover,
+.persimmon-glass-theme .calendar-day.holiday-work-day:hover,
+.moonlight-glass-theme .calendar-day.holiday-work-day:hover,
+.bamboo-glass-theme .calendar-day.holiday-work-day:hover,
+.liquid-glass-theme .calendar-day.holiday-work-day:hover,
+.ios26-glass-theme .calendar-day.holiday-work-day:hover,
+.liquid-aurora-glass-theme .calendar-day.holiday-work-day:hover,
+.fluid-glass-theme .calendar-day.holiday-work-day:hover {
+  background: var(--calendar-day-holiday-work-bg) !important;
+  border-color: var(--calendar-day-holiday-work-border) !important;
+}
+.glass-theme .calendar-day.weekend-day,
+.ios-glass-theme .calendar-day.weekend-day,
+.persimmon-glass-theme .calendar-day.weekend-day,
+.moonlight-glass-theme .calendar-day.weekend-day,
+.bamboo-glass-theme .calendar-day.weekend-day,
+.liquid-glass-theme .calendar-day.weekend-day,
+.ios26-glass-theme .calendar-day.weekend-day,
+.liquid-aurora-glass-theme .calendar-day.weekend-day,
+.fluid-glass-theme .calendar-day.weekend-day {
+  background: var(--calendar-day-weekend-bg) !important;
+  border-color: var(--calendar-day-weekend-border) !important;
+  border-style: dashed !important;
+}
+.glass-theme .calendar-day.weekend-day:hover,
+.ios-glass-theme .calendar-day.weekend-day:hover,
+.persimmon-glass-theme .calendar-day.weekend-day:hover,
+.moonlight-glass-theme .calendar-day.weekend-day:hover,
+.bamboo-glass-theme .calendar-day.weekend-day:hover,
+.liquid-glass-theme .calendar-day.weekend-day:hover,
+.ios26-glass-theme .calendar-day.weekend-day:hover,
+.liquid-aurora-glass-theme .calendar-day.weekend-day:hover,
+.fluid-glass-theme .calendar-day.weekend-day:hover {
+  background: var(--calendar-day-weekend-bg) !important;
+  border-color: var(--calendar-day-weekend-border) !important;
+  border-style: dashed !important;
+}
+
 /* ---- 今天 / 选中：沿用全局令牌配方，玻璃下同样成立 ---- */
 
 /* ---- 星期标题：安静的实色文字（壁纸已足够浅） ---- */
@@ -1991,4 +2068,120 @@ html:not(.dark-mode)[class*="glass-theme"] body .calendar-day.current-day:hover 
       --fg-y: 20%;
     }
   }
+}
+
+/* ---- 休 / 班 / 周末语义底色：必须压过玻璃面全部 !important 配方 ----
+   竞争者（按特异性）：
+     html:not(.dark-mode)[class*="glass-theme"] body .calendar-day.calendar-day        (0,4,2)
+     html:not(.dark-mode)[class*="glass-theme"] body.dynamic-background .calendar-day…  (0,5,2)
+     …:hover / :is(.selected-day, .current-day) 变体                                   (0,5,2)
+   这里逐一给出同级或更具体的匹配；因为位于文件末尾，同级时以「后置」取胜。
+   法定节假日(休)=红系 · 调休上班(班)=琥珀系 · 普通周末=弱红+虚线，层级一眼可辨。 */
+
+/* ---- 今天/选中 + 休/班/周末：语义色压过 accent 边框（后置同级取胜） ----
+   今天/选中格：accent 边框（1961 行 .selected-day/.current-day，0,5,2）也要让位给语义色，
+   否则「今天恰逢班/休」会失去颜色区分；今天的辨识由 box-shadow 环保留。 */
+html[class*="glass-theme"] body .calendar-day.calendar-day:is(.current-day, .selected-day).holiday-rest-day {
+  background: var(--calendar-day-holiday-rest-bg) !important;
+  border-color: var(--calendar-day-holiday-rest-border) !important;
+}
+html[class*="glass-theme"] body .calendar-day.calendar-day:is(.current-day, .selected-day).holiday-rest-day:hover {
+  background: var(--calendar-day-holiday-rest-bg) !important;
+  border-color: var(--calendar-day-holiday-rest-border) !important;
+}
+html[class*="glass-theme"] body.dynamic-background .calendar-day.calendar-day:is(.current-day, .selected-day).holiday-rest-day {
+  background: var(--calendar-day-holiday-rest-bg) !important;
+  border-color: var(--calendar-day-holiday-rest-border) !important;
+}
+html[class*="glass-theme"] body.dynamic-background .calendar-day.calendar-day:is(.current-day, .selected-day).holiday-rest-day:hover {
+  background: var(--calendar-day-holiday-rest-bg) !important;
+  border-color: var(--calendar-day-holiday-rest-border) !important;
+}
+html[class*="glass-theme"] body .calendar-day.calendar-day:is(.current-day, .selected-day).holiday-work-day {
+  background: var(--calendar-day-holiday-work-bg) !important;
+  border-color: var(--calendar-day-holiday-work-border) !important;
+}
+html[class*="glass-theme"] body .calendar-day.calendar-day:is(.current-day, .selected-day).holiday-work-day:hover {
+  background: var(--calendar-day-holiday-work-bg) !important;
+  border-color: var(--calendar-day-holiday-work-border) !important;
+}
+html[class*="glass-theme"] body.dynamic-background .calendar-day.calendar-day:is(.current-day, .selected-day).holiday-work-day {
+  background: var(--calendar-day-holiday-work-bg) !important;
+  border-color: var(--calendar-day-holiday-work-border) !important;
+}
+html[class*="glass-theme"] body.dynamic-background .calendar-day.calendar-day:is(.current-day, .selected-day).holiday-work-day:hover {
+  background: var(--calendar-day-holiday-work-bg) !important;
+  border-color: var(--calendar-day-holiday-work-border) !important;
+}
+html[class*="glass-theme"] body .calendar-day.calendar-day:is(.current-day, .selected-day).weekend-day {
+  background: var(--calendar-day-weekend-bg) !important;
+  border-color: var(--calendar-day-weekend-border) !important;
+  border-style: dashed !important;
+}
+html[class*="glass-theme"] body .calendar-day.calendar-day:is(.current-day, .selected-day).weekend-day:hover {
+  background: var(--calendar-day-weekend-bg) !important;
+  border-color: var(--calendar-day-weekend-border) !important;
+  border-style: dashed !important;
+}
+html[class*="glass-theme"] body.dynamic-background .calendar-day.calendar-day:is(.current-day, .selected-day).weekend-day {
+  background: var(--calendar-day-weekend-bg) !important;
+  border-color: var(--calendar-day-weekend-border) !important;
+  border-style: dashed !important;
+}
+html[class*="glass-theme"] body.dynamic-background .calendar-day.calendar-day:is(.current-day, .selected-day).weekend-day:hover {
+  background: var(--calendar-day-weekend-bg) !important;
+  border-color: var(--calendar-day-weekend-border) !important;
+  border-style: dashed !important;
+}
+html[class*="glass-theme"] body .calendar-day.calendar-day.holiday-rest-day {
+  background: var(--calendar-day-holiday-rest-bg) !important;
+  border-color: var(--calendar-day-holiday-rest-border) !important;
+}
+html[class*="glass-theme"] body .calendar-day.calendar-day.holiday-rest-day:hover {
+  background: var(--calendar-day-holiday-rest-bg) !important;
+  border-color: var(--calendar-day-holiday-rest-border) !important;
+}
+html[class*="glass-theme"] body.dynamic-background .calendar-day.calendar-day.holiday-rest-day {
+  background: var(--calendar-day-holiday-rest-bg) !important;
+  border-color: var(--calendar-day-holiday-rest-border) !important;
+}
+html[class*="glass-theme"] body.dynamic-background .calendar-day.calendar-day.holiday-rest-day:hover {
+  background: var(--calendar-day-holiday-rest-bg) !important;
+  border-color: var(--calendar-day-holiday-rest-border) !important;
+}
+html[class*="glass-theme"] body .calendar-day.calendar-day.holiday-work-day {
+  background: var(--calendar-day-holiday-work-bg) !important;
+  border-color: var(--calendar-day-holiday-work-border) !important;
+}
+html[class*="glass-theme"] body .calendar-day.calendar-day.holiday-work-day:hover {
+  background: var(--calendar-day-holiday-work-bg) !important;
+  border-color: var(--calendar-day-holiday-work-border) !important;
+}
+html[class*="glass-theme"] body.dynamic-background .calendar-day.calendar-day.holiday-work-day {
+  background: var(--calendar-day-holiday-work-bg) !important;
+  border-color: var(--calendar-day-holiday-work-border) !important;
+}
+html[class*="glass-theme"] body.dynamic-background .calendar-day.calendar-day.holiday-work-day:hover {
+  background: var(--calendar-day-holiday-work-bg) !important;
+  border-color: var(--calendar-day-holiday-work-border) !important;
+}
+html[class*="glass-theme"] body .calendar-day.calendar-day.weekend-day {
+  background: var(--calendar-day-weekend-bg) !important;
+  border-color: var(--calendar-day-weekend-border) !important;
+  border-style: dashed !important;
+}
+html[class*="glass-theme"] body .calendar-day.calendar-day.weekend-day:hover {
+  background: var(--calendar-day-weekend-bg) !important;
+  border-color: var(--calendar-day-weekend-border) !important;
+  border-style: dashed !important;
+}
+html[class*="glass-theme"] body.dynamic-background .calendar-day.calendar-day.weekend-day {
+  background: var(--calendar-day-weekend-bg) !important;
+  border-color: var(--calendar-day-weekend-border) !important;
+  border-style: dashed !important;
+}
+html[class*="glass-theme"] body.dynamic-background .calendar-day.calendar-day.weekend-day:hover {
+  background: var(--calendar-day-weekend-bg) !important;
+  border-color: var(--calendar-day-weekend-border) !important;
+  border-style: dashed !important;
 }

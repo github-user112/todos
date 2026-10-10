@@ -36,6 +36,19 @@ html.webgl-glass-theme:root:not(.dark-mode) body .calendar-day.calendar-day:is(.
   border-color: var(--primary-color) !important;
   box-shadow: inset 0 0 0 1px var(--primary-color), 0 0 0 2px var(--form-input-focus-shadow) !important;
 }
+html.webgl-glass-theme:root:not(.dark-mode) body .calendar-day.calendar-day.holiday-rest-day {
+  background: var(--calendar-day-holiday-rest-bg) !important;
+  border-color: var(--calendar-day-holiday-rest-border) !important;
+}
+html.webgl-glass-theme:root:not(.dark-mode) body .calendar-day.calendar-day.holiday-work-day {
+  background: var(--calendar-day-holiday-work-bg) !important;
+  border-color: var(--calendar-day-holiday-work-border) !important;
+}
+html.webgl-glass-theme:root:not(.dark-mode) body .calendar-day.calendar-day.weekend-day {
+  background: var(--calendar-day-weekend-bg) !important;
+  border-color: var(--calendar-day-weekend-border) !important;
+  border-style: dashed !important;
+}
 html.webgl-glass-theme:root:not(.dark-mode) .calendar-day.current-day:hover .day-number { color: #fff !important; }
 html.webgl-glass-theme:root:not(.dark-mode):not(.webgl-glass-ready) .webgl-glass-canvas { visibility: hidden; }
 @media (prefers-reduced-transparency: reduce) {

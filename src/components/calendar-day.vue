@@ -377,29 +377,55 @@ function getHolidayName(holiday) {
   z-index: 5;
 }
 
-/* ---- 周末：仅日期数字着红色，不再铺色块，保持画面安静 ---- */
+/* ---- 休息日三级层次：法定节假日(强) > 普通周末(弱) > 工作日 ---- */
+
+/* 普通周末：极弱红调 + 虚线边框——一眼看出「不工作」，但安静 */
+.weekend-day {
+  background: var(--calendar-day-weekend-bg);
+  border-color: var(--calendar-day-weekend-border);
+  border-style: dashed;
+}
 .weekend-day .day-number {
   color: var(--danger-color);
+  font-weight: 700;
 }
 
-/* ---- 法定休息日：恒定红色系（跨主题一致） ---- */
+/* 法定节假日：恒定红色系（跨主题一致），最重的一档 */
 .holiday-rest-day {
   background: var(--calendar-day-holiday-rest-bg);
   border-color: var(--calendar-day-holiday-rest-border);
+  border-style: solid;
 }
 .holiday-rest-day .day-number,
 .holiday-rest-day .day-lunar {
   color: var(--danger-color);
+  font-weight: 700;
 }
 
-/* ---- 调休上班日：恒定琥珀色系（跨主题一致） ---- */
+/* 调休上班日：恒定琥珀色系（跨主题一致）——虽在周末，但明确是「上班」 */
 .holiday-work-day {
   background: var(--calendar-day-holiday-work-bg);
   border-color: var(--calendar-day-holiday-work-border);
+  border-style: solid;
+}
+.holiday-work-day .day-number,
+.holiday-work-day .day-lunar {
+  color: var(--warning-color);
+  font-weight: 700;
 }
 .holiday-work-day .work-badge {
   background: var(--badge-work-bg);
   color: var(--badge-work-text);
+}
+
+/* 今天/选中会盖掉底色，用边框把语义色兜回来 */
+.current-day.holiday-rest-day,
+.selected-day.holiday-rest-day {
+  border-color: var(--calendar-day-holiday-rest-border);
+}
+.current-day.holiday-work-day,
+.selected-day.holiday-work-day {
+  border-color: var(--calendar-day-holiday-work-border);
 }
 
 /* ---- 非当前月 ---- */
@@ -502,12 +528,14 @@ function getHolidayName(holiday) {
 }
 
 .holiday-badge {
-  font-size: 0.6rem;
-  font-weight: 700;
-  padding: 1.5px 6px;
+  font-size: 0.64rem;
+  font-weight: 800;
+  padding: 2px 7px;
   border-radius: 999px;
   line-height: 1.3;
   letter-spacing: 0.02em;
+  /* 徽章是休/班最直观的标识，加一圈内描边保证在玻璃面上也立得住 */
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
 }
 .rest-badge {
   background: var(--badge-rest-bg);

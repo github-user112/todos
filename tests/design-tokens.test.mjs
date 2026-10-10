@@ -46,6 +46,27 @@ function contrast(a, b) {
   return (l1 + 0.05) / (l2 + 0.05);
 }
 
+/** 解析令牌为 [r,g,b]（实色 hex 或 rgba 都支持） */
+function channels(v) {
+  if (/^rgba?\(/.test(v)) {
+    const m = v.match(/rgba?\(([^)]+)\)/);
+    return m[1].split(',').map((x) => parseFloat(x));
+  }
+  return hexToRgb(v);
+}
+const redOf = (v) => channels(v)[0];
+/**
+ * 「着色强度」：把令牌折算成叠在表面上的有效着色量。
+ * 实色 = 与白色的距离；rgba = 距离 × alpha。两种实现都随配方浓度线性变化，
+ * 因此可以用来比较同一主题内「谁的底色更重」。
+ */
+function tintStrength(v) {
+  if (v === 'transparent') return 0;
+  const c = channels(v);
+  const a = c.length === 4 ? c[3] : 1;
+  return a * Math.hypot(255 - c[0], 255 - c[1], 255 - c[2]);
+}
+
 const isGlassId = (id) => id.includes('glass');
 /** 是否为可计算亮度的实色 hex */
 const isSolidHex = (v) => /^#[0-9a-fA-F]{6}$/.test(v);
@@ -147,9 +168,48 @@ describe('亮色主题配方不变量（含玻璃）', () => {
         assert.notEqual(vars['button-primary-bg'], vars['button-primary-hover-bg']);
       });
 
-      it('周末不铺设色块（仅日期数字着色，保持画面安静）', () => {
-        assert.equal(vars['calendar-day-weekend-bg'], 'transparent');
-        assert.equal(vars['calendar-day-weekend-border'], 'transparent');
+      it('休息日三级层次：法定节假日(强) > 普通周末(弱) > 工作日(无)', () => {
+        const rest = tintStrength(vars['calendar-day-holiday-rest-bg']);
+        const weekend = tintStrength(vars['calendar-day-weekend-bg']);
+        assert.ok(rest > 20, `法定节假日底色要够醒目（着色强度 ${rest.toFixed(0)}）`);
+        assert.ok(weekend > 0, '普通周末也要与工作日有可见差异');
+        assert.ok(
+          rest > weekend,
+          `法定节假日(${rest.toFixed(0)}) 必须强于普通周末(${weekend.toFixed(0)})`,
+        );
+      });
+
+      it('休息日边框与工作日不同（休/班/周末都要能看出边界）', () => {
+        const dayBorder = vars['calendar-day-border'];
+        assert.notEqual(vars['calendar-day-holiday-rest-border'], dayBorder);
+        assert.notEqual(vars['calendar-day-holiday-work-border'], dayBorder);
+        assert.notEqual(vars['calendar-day-weekend-border'], dayBorder);
+        assert.ok(tintStrength(vars['calendar-day-holiday-rest-border']) > 40);
+        assert.ok(tintStrength(vars['calendar-day-holiday-work-border']) > 40);
+      });
+
+      it('休（红）与班（琥珀）底色不同色，不会互相看错', () => {
+        assert.notEqual(
+          vars['calendar-day-holiday-rest-bg'],
+          vars['calendar-day-holiday-work-bg'],
+        );
+        // 底色都被稀释得很淡，原始通道大小没意义，要看色相方向：
+        // 琥珀偏黄 → 蓝分量更低；红 → 红绿差更大
+        const blueOf = (v) => channels(v)[2];
+        const redGreenGap = (v) => {
+          const c = channels(v);
+          return c[0] - c[1];
+        };
+        assert.ok(
+          blueOf(vars['calendar-day-holiday-work-bg']) <
+            blueOf(vars['calendar-day-holiday-rest-bg']),
+          '补班底色应偏琥珀（蓝分量低于休息日）',
+        );
+        assert.ok(
+          redGreenGap(vars['calendar-day-holiday-rest-bg']) >
+            redGreenGap(vars['calendar-day-holiday-work-bg']),
+          '休息日底色应偏红（红绿差大于补班）',
+        );
       });
 
       it('边框是弱化的发丝线（远浅于次级文字）', () => {

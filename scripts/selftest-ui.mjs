@@ -16,6 +16,7 @@
  *  7. 一格内同一待办只渲染一条（节假日提前 / 历史完成 都不重复）
  *  8. 移动端：底部抽屉操作菜单 + 底部式删除确认弹窗
  *  9. 玻璃主题下确认弹窗遮罩与「添加待办」弹窗同款（共用 .add-todo-popup 主题规则）
+ * 10. 跨主题：工作日 / 普通周末 / 法定节假日(休) / 周末补班(班) 四类格子的语义区分
  */
 import { spawn } from 'node:child_process';
 import { mkdirSync, writeFileSync } from 'node:fs';
@@ -587,7 +588,7 @@ try {
       }
       // 表面不透明度：玻璃家族与其它弹窗一样用 0.82 厚玻璃，普通主题则完全不透明
       const parseAlpha = (css) => {
-        const m = css.match(/rgba?\(([^)]+)\)/);
+        const m = css.match(/rgba?\\(([^)]+)\\)/);
         if (!m) return 1;
         const p = m[1].split(',').map((s) => parseFloat(s));
         return p.length === 4 ? p[3] : 1;
@@ -657,10 +658,11 @@ try {
   console.log('\n[6] 编辑重复待办：改重复日期（每周五 → 每周日）');
   const fmtDate = (d) =>
     `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-  // 最近一个周五作为锚点；两三天后的周日就是「同一周里的周日」
+  // 下一个周五（含今天）作为锚点：锚点不允许早于今天（产品设计），
+  // 两三天后的周日就是「同一周里的周日」
   const anchorFridayDate = (() => {
     const d = new Date();
-    while (d.getDay() !== 5) d.setDate(d.getDate() - 1);
+    while (d.getDay() !== 5) d.setDate(d.getDate() + 1);
     return d;
   })();
   const anchorFriday = fmtDate(anchorFridayDate);
@@ -1128,6 +1130,136 @@ try {
   ok(
     themed.popupBg === themed.bg,
     `与「添加待办」弹窗遮罩同值（添加=${themed.popupBg}）`,
+  );
+
+  // ---- 10. 跨主题：休/班/周末 语义区分 ----
+  console.log('\n[10] 跨主题 休/班/周末 语义区分');
+  await send('Emulation.setDeviceMetricsOverride', {
+    width: 1440,
+    height: 900,
+    deviceScaleFactor: 1,
+    mobile: false,
+  });
+  await wait(400);
+
+  const THEME10 = ['default', 'dark-mode', 'glass-theme', 'ios26-glass-theme', 'webgl-glass-theme'];
+  const results10 = [];
+  for (const theme of THEME10) {
+    const r = await ev(`(async () => {
+      const root = document.documentElement;
+      root.className = ${JSON.stringify(theme === 'default' ? '' : theme)};
+      // headless 不产帧 → transition 冻结在起始值，先 finish 到终值再取样
+      const finish = () => { for (const a of document.getAnimations()) { try { a.finish(); } catch {} } };
+      await new Promise((r) => setTimeout(r, 250)); finish();
+      await new Promise((r) => setTimeout(r, 120)); finish();
+      const cells = [...document.querySelectorAll('.calendar-day')];
+      const isPinned = (c) => c.classList.contains('current-day') || c.classList.contains('selected-day');
+      // 网格补位空格（empty-day，无日期）不算有效样本
+      const hasDate = (c) => !!c.dataset.date && !c.classList.contains('empty-day');
+      const okCell = (c) => hasDate(c) && !isPinned(c) && !c.classList.contains('other-month');
+      const pick = (pred) => cells.find((c) => pred(c) && okCell(c))
+        || cells.find((c) => hasDate(c) && pred(c));
+      const read = (c) => {
+        if (!c) return null;
+        const cs = getComputedStyle(c);
+        const badge = c.querySelector('.holiday-badge');
+        const m = cs.backgroundColor.match(/rgba?\\(([^)]+)\\)/);
+        const p = m ? m[1].split(',').map(Number) : [0, 0, 0, 1];
+        const bm = cs.borderTopColor.match(/rgba?\\(([^)]+)\\)/);
+        const bp = bm ? bm[1].split(',').map(Number) : [0, 0, 0, 1];
+        return {
+          date: c.dataset.date || '',
+          pinned: isPinned(c),
+          rgb: p.slice(0, 3),
+          alpha: p.length > 3 ? p[3] : 1,
+          border: bp.slice(0, 3),
+          bdStyle: cs.borderTopStyle,
+          badge: badge ? badge.textContent.trim() : '',
+          raw: cs.backgroundColor,
+          rawB: cs.borderTopColor,
+        };
+      };
+      const work = read(pick((c) => !c.classList.contains('weekend-day')
+        && !c.classList.contains('holiday-rest-day') && !c.classList.contains('holiday-work-day')));
+      const weekend = read(pick((c) => c.classList.contains('weekend-day')));
+      const rest = read(pick((c) => c.classList.contains('holiday-rest-day')));
+      const off = read(pick((c) => c.classList.contains('holiday-work-day')));
+      // 着色距离：a 叠在 b 之上后与 b 的欧氏距离（rgba 按 alpha 折算）
+      const dist = (a, b) => {
+        if (!a || !b) return -1;
+        const comp = [0, 1, 2].map((i) => a.rgb[i] * a.alpha + b.rgb[i] * (1 - a.alpha));
+        return Math.hypot(comp[0] - b.rgb[0], comp[1] - b.rgb[1], comp[2] - b.rgb[2]);
+      };
+      return {
+        html: root.className,
+        work, weekend, rest, off,
+        restDist: dist(rest, work),
+        weekendDist: dist(weekend, work),
+        offDist: dist(off, work),
+      };
+    })()`);
+    results10.push({ theme, ...r });
+    const amber = (x) => x && x.border[0] > 150 && x.border[1] > 80 && x.border[2] < 130;
+    const red = (x) => x && x.rgb[0] - x.rgb[1] >= 8;
+
+    ok(
+      r.work && r.rest && r.weekend && r.off,
+      `${theme}: 四类格子样本齐全`,
+      JSON.stringify({
+        w: r.work?.date, r: r.rest?.date, e: r.weekend?.date, o: r.off?.date,
+        restRaw: r.rest?.raw, restB: r.rest?.rawB, cls: r.rest && undefined,
+      }),
+    );
+    ok(
+      r.rest && !r.rest.pinned && r.restDist >= 12,
+      `${theme}: 法定节假日底色明显区别于工作日（着色距离 ${r.restDist?.toFixed(1)} ≥ 12）`,
+    );
+    ok(red(r.rest), `${theme}: 休息日底色为红系`, JSON.stringify(r.rest?.rgb));
+    ok(
+      (r.rest?.badge || '').includes('休'),
+      `${theme}: 休息日带「休」徽标`,
+      r.rest?.badge,
+    );
+    ok(
+      r.weekend && r.weekendDist >= 3,
+      `${theme}: 普通周末与工作日有可见差异（${r.weekendDist?.toFixed(1)} ≥ 3）`,
+    );
+    ok(
+      r.restDist > r.weekendDist,
+      `${theme}: 层级正确 休(${r.restDist?.toFixed(0)}) > 周末(${r.weekendDist?.toFixed(0)})`,
+    );
+    ok(r.weekend?.bdStyle === 'dashed', `${theme}: 普通周末为虚线边框`, r.weekend?.bdStyle);
+    ok(
+      red(r.weekend),
+      `${theme}: 普通周末数字/底色偏红系`,
+      JSON.stringify(r.weekend?.rgb),
+    );
+    if (r.off && r.off.pinned) {
+      // 今天恰逢补班：底色让位给「今天」高亮是设计行为，语义由徽标+边框承担
+      ok((r.off.badge || '').includes('班'), `${theme}: 今天=班 仍有「班」徽标`, r.off.badge);
+      ok(amber(r.off), `${theme}: 今天=班 边框为琥珀语义色`, JSON.stringify(r.off.border));
+    } else {
+      ok(
+        r.off && r.offDist >= 12,
+        `${theme}: 补班日底色明显区别于工作日（${r.offDist?.toFixed(1)} ≥ 12）`,
+      );
+      ok(
+        r.rest && r.off && r.off.rgb[2] < r.rest.rgb[2]
+          && r.rest.rgb[0] - r.rest.rgb[1] > r.off.rgb[0] - r.off.rgb[1],
+        `${theme}: 休(红)与班(琥珀)色相不混`,
+        `rest=${JSON.stringify(r.rest?.rgb)} off=${JSON.stringify(r.off?.rgb)}`,
+      );
+      ok(
+        (r.off?.badge || '').includes('班'),
+        `${theme}: 补班日带「班」徽标`,
+        r.off?.badge,
+      );
+    }
+  }
+  await ev(`(() => { document.documentElement.className = ''; return 1; })()`);
+  ok(
+    results10.length === THEME10.length,
+    `跨主题共检测 ${results10.length}/${THEME10.length} 套主题`,
   );
 
   console.log(
