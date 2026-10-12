@@ -17,6 +17,7 @@
  *  8. 移动端：底部抽屉操作菜单 + 底部式删除确认弹窗
  *  9. 玻璃主题下确认弹窗遮罩与「添加待办」弹窗同款（共用 .add-todo-popup 主题规则）
  * 10. 跨主题：工作日 / 普通周末 / 法定节假日(休) / 周末补班(班) 四类格子的语义区分
+ * 11. 默认日期 = 今天：进入页面即选中今天；切回本页面（visibilitychange）回到今天
  */
 import { spawn } from 'node:child_process';
 import { mkdirSync, writeFileSync } from 'node:fs';
@@ -110,7 +111,7 @@ try {
     }
     return r.result.value;
   };
-  const shot = async (name) => {
+    const shot = async (name) => {
     const { data } = await send('Page.captureScreenshot', { format: 'png' });
     writeFileSync(`${SHOT_DIR}/${name}.png`, Buffer.from(data, 'base64'));
   };
@@ -139,7 +140,23 @@ try {
   const today = new Date();
   const y = today.getFullYear();
   const m = String(today.getMonth() + 1).padStart(2, '0');
-  const dates = [1, 5, 8, 15, 20, 25, 31].map((d) => `${y}-${m}-${String(d).padStart(2, '0')}`);
+  // 今日优先视图的窗口 = 「本周周一 - 7 天」起 35 天；种子日期按窗口取，
+  // 保证 7 条待办都落在当前视图里（月末/周一开窗时含首末两行）
+  const winStart = (() => {
+    const d = new Date();
+    const dow = d.getDay() === 0 ? 6 : d.getDay() - 1;
+    const monday = new Date(d);
+    monday.setDate(d.getDate() - dow - 7);
+    monday.setHours(0, 0, 0, 0);
+    return monday;
+  })();
+  const fmt = (d) =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  const dates = [0, 3, 6, 10, 15, 22, 34].map((off) => {
+    const d = new Date(winStart);
+    d.setDate(d.getDate() + off);
+    return fmt(d);
+  });
   for (const [i, date] of dates.entries()) {
     const res = await fetch(`${API}/api/todos`, {
       method: 'POST',
@@ -876,14 +893,20 @@ try {
   ok(dupTodo.success, `造「每天重复 + 避开节假日」待办（${dupAnchorStr}）`);
   await jumpClick(`document.querySelector('.today-btn')`);
   await wait(1500);
-  // 完成其中一天：从当前视图里挑一个 >= 锚点且可见的日期（月末跨天格子也可能带出下月）
+  // 完成其中一天：挑当前视图里真实渲染出该待办（且未完成）的那一格。
+  // 「避开节假日」会把实例提前挪到节前，写死日期会踩空
   const visiblePick = await ev(`(() => {
-    const dates = [...document.querySelectorAll('.calendar-day')]
-      .map((c) => c.getAttribute('data-date'))
-      .filter(Boolean)
-      .sort();
-    return dates.find((d) => d >= ${JSON.stringify(dupAnchorStr)}) || dates[0];
+    const cells = [...document.querySelectorAll('.calendar-day')]
+      .filter((c) => c.getAttribute('data-date') && !c.classList.contains('other-month'));
+    for (const c of cells) {
+      const hit = [...c.querySelectorAll('.todo-item')].some(
+        (el) => el.textContent.includes('重复渲染检查') && !el.classList.contains('completed'),
+      );
+      if (hit) return c.getAttribute('data-date');
+    }
+    return '';
   })()`);
+  ok(!!visiblePick, `视图里有未完成的重复实例可取（${visiblePick || '未找到'}）`);
   await fetch(`${API}/api/completed-instances`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'X-User-ID': uid },
@@ -1261,6 +1284,64 @@ try {
     results10.length === THEME10.length,
     `跨主题共检测 ${results10.length}/${THEME10.length} 套主题`,
   );
+
+  // ---- 11. 默认日期 = 今天：进入页面即选中；切回本页面回到今天 ----
+  console.log('\n[11] 默认日期选中今天（进入页面 + 切回页面）');
+  await send('Page.navigate', { url: `${APP}/?uid=${uid}` });
+  await wait(2500);
+  await dismissOverlays();
+
+  const fresh = await ev(`(() => {
+    const cell = document.querySelector('.calendar-day.current-day');
+    return {
+      todayKey: cell?.dataset.date || '',
+      selected: cell ? cell.classList.contains('selected-day') : false,
+      isCurrent: cell ? cell.classList.contains('current-day') : false,
+      title: document.querySelector('.header-title')?.textContent.trim() || '',
+    };
+  })()`);
+  const thisMonth = new Date();
+  const wantTitle = `${thisMonth.getMonth() + 1}月${thisMonth.getFullYear()}`;
+  ok(
+    fresh.todayKey && fresh.selected && fresh.isCurrent,
+    `进入页面：今天默认选中（${fresh.todayKey}，current-day+selected-day）`,
+  );
+  ok(
+    fresh.title.includes(wantTitle),
+    `进入页面：视图停在今天所在月（${fresh.title} 含 ${wantTitle}）`,
+  );
+
+  // 先浏览到下个月，再模拟「标签页切回本页面」→ 应回到今天
+  const away = await ev(`(async () => {
+    const btn = [...document.querySelectorAll('.nav-btn')]
+      .find((b) => (b.getAttribute('aria-label') || '').includes('下'));
+    if (!btn) return { err: '找不到下一月按钮' };
+    btn.click();
+    await new Promise((r) => setTimeout(r, 600));
+    return { title: document.querySelector('.header-title')?.textContent.trim() || '' };
+  })()`);
+  ok(
+    !away.err && !away.title.includes(wantTitle),
+    `已浏览到别的月份（${away.title}）`,
+  );
+
+  const back = await ev(`(async () => {
+    Object.defineProperty(document, 'visibilityState', {
+      configurable: true,
+      get: () => 'visible',
+    });
+    document.dispatchEvent(new Event('visibilitychange', { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 400));
+    return {
+      title: document.querySelector('.header-title')?.textContent.trim() || '',
+      todaySelected: !!document.querySelector('.calendar-day.current-day.selected-day'),
+    };
+  })()`);
+  ok(
+    back.title.includes(wantTitle),
+    `切回本页面：视图回到今天（${away.title} → ${back.title}）`,
+  );
+  ok(back.todaySelected, '切回本页面：今天为选中态');
 
   console.log(
     failures === 0

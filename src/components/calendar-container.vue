@@ -272,7 +272,13 @@ const weekdays = ['一', '二', '三', '四', '五', '六', '日'];
 const showAddTodoPopup = ref(false);
 const todoText = ref('');
 const todoRepeat = ref('none');
-const selectedDate = ref(null);
+// 默认选中「今天」：进入本页面即落在今天
+const selectedDate = ref(formatDate(new Date()));
+
+// 切回本页面（标签页可见）时回到今天 —— 复用「今天」按钮的回调
+const handlePageShow = () => {
+  if (document.visibilityState === 'visible') goToToday();
+};
 // 编辑模式：非空表示当前弹窗用于修改已有待办
 const editingTodo = ref(null);
 const editingTodoId = ref(null);
@@ -832,10 +838,13 @@ onMounted(() => {
   todayTickTimer = setInterval(() => {
     todayTick.value = Date.now();
   }, 60_000);
+
+  window.addEventListener('visibilitychange', handlePageShow);
 });
 
 onUnmounted(() => {
   clearInterval(todayTickTimer);
+  window.removeEventListener('visibilitychange', handlePageShow);
 });
 </script>
 
