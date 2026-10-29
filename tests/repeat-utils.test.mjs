@@ -141,10 +141,10 @@ describe('shouldShowRepeatingTodo · 守卫条件', () => {
 describe('validateRepeatInterval', () => {
   it('各类型上下界', () => {
     for (const [type, min, max] of [
-      ['daily', 1, 365],
-      ['weekly', 1, 52],
-      ['monthly', 1, 12],
-      ['yearly', 1, 10],
+      ['daily', 1, 3650],
+      ['weekly', 1, 520],
+      ['monthly', 1, 120],
+      ['yearly', 1, 100],
     ]) {
       assert.equal(validateRepeatInterval(type, min).valid, true, `${type}=${min}`);
       assert.equal(validateRepeatInterval(type, max).valid, true, `${type}=${max}`);
@@ -152,10 +152,10 @@ describe('validateRepeatInterval', () => {
       assert.equal(validateRepeatInterval(type, max + 1).valid, false, `${type}=${max + 1}`);
       assert.equal(validateRepeatInterval(type, 1.5).valid, false, `${type}=1.5`);
     }
-    assert.equal(validateRepeatInterval('daily', 366).valid, false);
-    assert.equal(validateRepeatInterval('weekly', 53).valid, false);
-    assert.equal(validateRepeatInterval('monthly', 13).valid, false);
-    assert.equal(validateRepeatInterval('yearly', 11).valid, false);
+    assert.equal(validateRepeatInterval('daily', 3651).valid, false);
+    assert.equal(validateRepeatInterval('weekly', 521).valid, false);
+    assert.equal(validateRepeatInterval('monthly', 121).valid, false);
+    assert.equal(validateRepeatInterval('yearly', 101).valid, false);
   });
 
   it('none 恒通过，未知类型拒绝', () => {
@@ -166,13 +166,13 @@ describe('validateRepeatInterval', () => {
   });
 
   it('错误信息带上下界', () => {
-    const msg = validateRepeatInterval('daily', 366).message;
+    const msg = validateRepeatInterval('daily', 3651).message;
     assert.match(msg, /每日/);
-    assert.match(msg, /1-365/);
+    assert.match(msg, /1-3650/);
     assert.match(msg, /天/);
     const monthly = validateRepeatInterval('monthly', 0).message;
     assert.match(monthly, /每月/);
-    assert.match(monthly, /1-12/);
+    assert.match(monthly, /1-120/);
   });
 });
 

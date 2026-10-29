@@ -99,17 +99,18 @@ describe('worker/utils · jsonResponse', () => {
 describe('worker/utils · validateRepeatInterval', () => {
   it('各类型上下界与错误文案', () => {
     assert.deepEqual(validateRepeatInterval('none', 0), { valid: true });
-    assert.equal(validateRepeatInterval('daily', 365).valid, true);
-    assert.deepEqual(validateRepeatInterval('daily', 366), {
+    assert.equal(validateRepeatInterval('daily', 3650).valid, true);
+    assert.deepEqual(validateRepeatInterval('daily', 3651), {
       valid: false,
-      message: '每日间隔必须在1-365天之间',
+      message: '每日间隔必须在1-3650天之间',
     });
-    assert.equal(validateRepeatInterval('weekly', 52).valid, true);
-    assert.equal(validateRepeatInterval('weekly', 53).valid, false);
-    assert.equal(validateRepeatInterval('monthly', 12).valid, true);
-    assert.equal(validateRepeatInterval('monthly', 13).valid, false);
-    assert.equal(validateRepeatInterval('yearly', 10).valid, true);
-    assert.equal(validateRepeatInterval('yearly', 11).valid, false);
+    assert.equal(validateRepeatInterval('weekly', 520).valid, true);
+    assert.equal(validateRepeatInterval('weekly', 521).valid, false);
+    assert.equal(validateRepeatInterval('monthly', 120).valid, true);
+    assert.equal(validateRepeatInterval('monthly', 13).valid, true);
+    assert.equal(validateRepeatInterval('monthly', 121).valid, false);
+    assert.equal(validateRepeatInterval('yearly', 100).valid, true);
+    assert.equal(validateRepeatInterval('yearly', 101).valid, false);
     assert.equal(validateRepeatInterval('daily', 0).valid, false);
     assert.equal(validateRepeatInterval('daily', 1.5).valid, false);
     assert.equal(validateRepeatInterval('hourly', 1).valid, false);
@@ -178,10 +179,10 @@ describe('handleCreateTodo', () => {
       text: '买菜',
       date: '2026-10-08',
       repeatType: 'daily',
-      repeatInterval: 400,
+      repeatInterval: 4000,
     });
     assert.equal(status, 400);
-    assert.match(body.error, /1-365/);
+    assert.match(body.error, /1-3650/);
   });
 
   it('成功插入并回填默认值', async () => {
@@ -262,10 +263,10 @@ describe('handleUpdateTodo', () => {
     const { status, body } = await update({
       id: 7,
       repeatType: 'monthly',
-      repeatInterval: 99,
+      repeatInterval: 121,
     });
     assert.equal(status, 400);
-    assert.match(body.error, /1-12/);
+    assert.match(body.error, /1-120/);
   });
 
   it('只改文本时沿用原有重复规则与提醒设置', async () => {

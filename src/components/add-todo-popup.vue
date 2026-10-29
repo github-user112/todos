@@ -528,10 +528,10 @@ watch(
 );
 
 const INTERVAL_LIMITS = {
-  daily: { min: 1, max: 365, unit: '天' },
-  weekly: { min: 1, max: 52, unit: '周' },
-  monthly: { min: 1, max: 12, unit: '个月' },
-  yearly: { min: 1, max: 10, unit: '年' },
+  daily: { min: 1, max: 3650, unit: '天' },
+  weekly: { min: 1, max: 520, unit: '周' },
+  monthly: { min: 1, max: 120, unit: '个月' },
+  yearly: { min: 1, max: 100, unit: '年' },
 };
 
 const repeatOptions = [
