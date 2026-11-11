@@ -30,7 +30,6 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted, provide } from 'vue';
-import HolidayCalendar from 'holiday-calendar';
 import CalendarContainer from '../components/calendar-container.vue';
 import SolarTermPopup from '../components/SolarTermPopup.vue';
 import { formatDate } from '../utils/dateUtils';
@@ -115,7 +114,7 @@ import { addReminder } from '../utils/reminderState';
 const fetchHolidayData = async (currentYear) => {
   try {
     let result = {};
-    const calendar = new HolidayCalendar({ baseUrl: '/holiday-data' });
+    const calendar = new HolidayCalendar();
     let ps = [
       calendar.getDates('CN', currentYear - 1),
       calendar.getDates('CN', currentYear),
