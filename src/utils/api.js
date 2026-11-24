@@ -40,11 +40,13 @@ export const getUserId = () => {
   if (urlUid && UID_RE.test(urlUid)) {
     localStorage.setItem(UID_KEY, urlUid);
     params.delete('uid');
+    // 保留 hash 路由，否则从 #/settings 之类的页面恢复身份会被重置到首页
     const qs = params.toString();
+    const hash = location.hash || '';
     window.history.replaceState(
       null,
       '',
-      qs ? `${location.pathname}?${qs}` : location.pathname,
+      qs ? `${location.pathname}?${qs}${hash}` : `${location.pathname}${hash}`,
     );
     return urlUid;
   }

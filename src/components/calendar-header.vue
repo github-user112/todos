@@ -160,14 +160,31 @@
               </div>
               <div class="setting-group">
                 <label class="setting-label">{{ t('👁️ 视图模式') }}</label>
-                <div class="view-mode-chips">
+                <div class="view-mode-list" role="radiogroup" :aria-label="t('👁️ 视图模式')">
                   <button
                     v-for="v in viewModeOptions"
                     :key="v.value"
-                    :class="['theme-chip', { active: viewMode === v.value }]"
+                    type="button"
+                    role="radio"
+                    :aria-checked="viewMode === v.value"
+                    :class="['view-mode-option', { active: viewMode === v.value }]"
                     @click="$emit('changeViewMode', v.value)"
                   >
-                    {{ t(v.label) }}
+                    <span class="view-mode-label">{{ t(v.label) }}</span>
+                    <span class="view-mode-check" aria-hidden="true">
+                      <svg
+                        width="13"
+                        height="13"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="3.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                    </span>
                   </button>
                 </div>
               </div>
@@ -340,6 +357,7 @@
 import { ref, computed, onUnmounted } from 'vue';
 import { t, tf, tMonth, locale, setLocale } from '../utils/i18n.js';
 import { apiRequest, getUserId } from '../utils/api';
+import { showToast } from '../utils/toast.js';
 import FestivalCountdown from './FestivalCountdown.vue';
 import DateJumpPopup from './date-jump-popup.vue';
 import {
@@ -610,16 +628,48 @@ const handleImport = async (e) => {
   }
 };
 
-const copyUrlToClipboard = () => {
+/**
+ * 复制文本：优先 Clipboard API，失败或不可用（非 HTTPS / 权限被拒）时回退 execCommand。
+ * 避免在受限环境下静默失败。
+ */
+const copyText = async (text) => {
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch {
+    // 落到下面的回退方案
+  }
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0';
+    document.body.appendChild(ta);
+    ta.select();
+    ta.setSelectionRange(0, text.length);
+    const ok = document.execCommand('copy');
+    document.body.removeChild(ta);
+    return ok;
+  } catch {
+    return false;
+  }
+};
+
+const copyUrlToClipboard = async () => {
   // 日常浏览 URL 不含 uid（防泄露）；点「分享」时主动拼上 uid，
   // 让接收端（自己的另一台设备）能继承身份。此链接 = 完全权限，仅分享给信任设备。
   const uid = getUserId();
   const url = new URL(window.location.href);
   if (uid) url.searchParams.set('uid', uid);
-  navigator.clipboard
-    .writeText(url.toString())
-    .then(() => alert(t('链接已复制（含身份凭证，请仅分享给自己信任的设备）')))
-    .catch(() => alert(t('复制失败')));
+  const ok = await copyText(url.toString());
+  showToast(
+    ok
+      ? t('链接已复制（含身份凭证，请仅分享给自己信任的设备）')
+      : t('复制失败'),
+    { type: ok ? 'success' : 'error' },
+  );
 };
 
 onUnmounted(() => {
@@ -908,37 +958,85 @@ onUnmounted(() => {
   box-shadow: 0 0 0 3px var(--form-input-focus-shadow);
 }
 
-/* ---- 视图模式胶囊 ---- */
-.view-mode-chips {
-  display: flex;
+/* ---- 视图模式（竖排单选卡，抽屉宽度 300px 下横排会把长标签挤断行） ---- */
+.view-mode-list {
+  display: grid;
+  grid-template-columns: 1fr;
   gap: 8px;
 }
 
-.theme-chip {
-  flex: 1;
-  padding: 9px 8px;
-  border-radius: 999px;
+.view-mode-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  padding: 11px 13px;
+  border-radius: 11px;
   border: 1px solid var(--border-color);
   background: transparent;
   color: var(--text-secondary);
-  font-size: 0.78rem;
+  font-size: 0.84rem;
   font-weight: 500;
-  transition: all 0.15s ease;
+  line-height: 1.3;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.1s ease;
   -webkit-tap-highlight-color: transparent;
 }
-.theme-chip:hover {
+
+.view-mode-label {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.view-mode-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  color: var(--primary-color);
+  opacity: 0;
+  transform: scale(0.6);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.view-mode-option:hover {
   border-color: var(--primary-color);
   color: var(--primary-dark);
 }
-.theme-chip:active {
-  transform: scale(0.96);
+
+.view-mode-option:active {
+  transform: scale(0.985);
 }
-.theme-chip.active {
+
+.view-mode-option:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--form-input-focus-shadow);
+}
+
+.view-mode-option.active {
   border-color: var(--primary-color);
   background: var(--primary-light);
   color: var(--primary-dark);
-  font-weight: 700;
+  font-weight: 600;
   box-shadow: 0 0 0 3px var(--form-input-focus-shadow);
+}
+
+.view-mode-option.active .view-mode-check {
+  opacity: 1;
+  transform: scale(1);
 }
 
 /* ---- 开关 ---- */
