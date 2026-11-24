@@ -1,31 +1,24 @@
 <template>
-  <n-config-provider
-    :theme="naiveDark ? darkTheme : undefined"
-    :theme-overrides="naiveOverrides"
-  >
-    <n-message-provider>
-      <calendar-container
-        :todos="todos"
-        :completedInstances="completedInstances"
-        :deletedInstances="deletedInstances"
-        :holidayData="holidayData"
-        :userId="userId"
-        @fetch-calendar-data="fetchCalendarData"
-        @fetch-holiday-data="fetchHolidayData"
-        @add-todo="handleAddTodo"
-        @update-todo="handleUpdateTodo"
-        @complete-todo="handleCompleteTodo"
-        @delete-todo="handleDeleteTodo"
-        @moveTodoDate="handleMoveTodoDate"
-        @reorderTodos="handleReorderTodos"
-    />
-    <SolarTermPopup
-      :visible="showSolarTermPopup"
-      :termInfo="solarTermInfo"
-      @close="closeSolarTermPopup"
-    />
-    </n-message-provider>
-  </n-config-provider>
+  <calendar-container
+    :todos="todos"
+    :completedInstances="completedInstances"
+    :deletedInstances="deletedInstances"
+    :holidayData="holidayData"
+    :userId="userId"
+    @fetch-calendar-data="fetchCalendarData"
+    @fetch-holiday-data="fetchHolidayData"
+    @add-todo="handleAddTodo"
+    @update-todo="handleUpdateTodo"
+    @complete-todo="handleCompleteTodo"
+    @delete-todo="handleDeleteTodo"
+    @moveTodoDate="handleMoveTodoDate"
+    @reorderTodos="handleReorderTodos"
+  />
+  <SolarTermPopup
+    :visible="showSolarTermPopup"
+    :termInfo="solarTermInfo"
+    @close="closeSolarTermPopup"
+  />
 </template>
 
 <script setup>
@@ -33,34 +26,10 @@ import { ref, onMounted, onUnmounted, provide } from 'vue';
 import CalendarContainer from '../components/calendar-container.vue';
 import SolarTermPopup from '../components/SolarTermPopup.vue';
 import { formatDate } from '../utils/dateUtils';
-import {
-  NConfigProvider,
-  NMessageProvider,
-  darkTheme,
-} from 'naive-ui';
-import { buildNaiveThemeOverrides } from '../utils/naiveTheme';
 import { apiRequest, getUserId } from '../utils/api';
 import { t } from '../utils/i18n.js';
+import { showToast } from '../utils/toast.js';
 import HolidayCalendar from 'holiday-calendar';
-
-// ---- naive-ui 弹层跟随主题（Dialog / Message 等） ----
-const naiveDark = ref(false);
-const naiveOverrides = ref(buildNaiveThemeOverrides());
-const refreshNaiveTheme = () => {
-  naiveDark.value = document.documentElement.classList.contains('dark-mode');
-  naiveOverrides.value = buildNaiveThemeOverrides();
-};
-let naiveThemeObserver;
-onMounted(() => {
-  refreshNaiveTheme();
-  // html 根类的 class 变化即主题切换（applyTheme 切换 theme class / dark-mode）
-  naiveThemeObserver = new MutationObserver(refreshNaiveTheme);
-  naiveThemeObserver.observe(document.documentElement, {
-    attributes: true,
-    attributeFilter: ['class'],
-  });
-});
-onUnmounted(() => naiveThemeObserver?.disconnect());
 import { loading, setLoading } from '../utils/loading';
 import {
   initReminderManager,
@@ -154,7 +123,8 @@ const initCalendar = async () => {
     setLoading(false);
   } catch (error) {
     console.error('初始化日历失败:', error);
-    alert(t('加载日历数据失败，请刷新页面重试'));
+    setLoading(false);
+    showToast(t('加载日历数据失败，请刷新页面重试'), { type: 'error' });
   }
 };
 

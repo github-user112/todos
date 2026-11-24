@@ -90,7 +90,7 @@ import {
   onUnmounted,
   nextTick,
 } from 'vue';
-import { useMessage } from 'naive-ui';
+import { showToast } from '../utils/toast.js';
 import CalendarHeader from './calendar-header.vue';
 import CalendarGrid from './calendar-grid.vue';
 import AddTodoPopup from './add-todo-popup.vue';
@@ -115,7 +115,6 @@ import { apiRequest } from '../utils/api';
 import { confirmDialog } from '../utils/confirm.js';
 import { t, tf } from '../utils/i18n.js';
 import { normalizeTheme } from '../utils/theme-selection.js';
-const message = useMessage();
 
 const props = defineProps({
   todos: { type: Array, required: true },
@@ -720,8 +719,9 @@ const deleteTodo = async () => {
       date: selectedTodoDate.value,
       allInstances,
     });
-    message.success(
+    showToast(
       allInstances ? t('已删除所有重复事件') : t('已删除当前事件'),
+      { type: 'success' },
     );
     showTodoActions.value = false;
     return;

@@ -247,7 +247,7 @@
 <script setup>
 import { computed, ref, watch, nextTick, inject, onMounted, onUnmounted } from 'vue';
 import { t, tf } from '../utils/i18n.js';
-import { useMessage } from 'naive-ui';
+import { showToast } from '../utils/toast.js';
 import { confirmDialog } from '../utils/confirm.js';
 import { formatDate } from '../utils/dateUtils';
 import { shouldShowRepeatingTodo } from '../utils/repeatUtils';
@@ -269,7 +269,6 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['close', 'complete-todo', 'delete-todo', 'celebrate']);
-const message = useMessage();
 
 const scrollBody = ref(null);
 const scrollBody2 = ref(null);
@@ -588,7 +587,7 @@ function showCompletionFeedback(todoText) {
   try {
     feedback = getCompletionFeedback(todoText, almanac.value);
   } catch {}
-  message.success(feedback, { duration: 3000 });
+  showToast(feedback, { duration: 3000, type: 'success' });
 }
 
 async function handleDelete(item) {
@@ -610,8 +609,9 @@ async function handleDelete(item) {
       date: item.date,
       allInstances,
     });
-    message.success(
+    showToast(
       allInstances ? t('已删除所有重复事件') : t('已删除当前事件'),
+      { type: 'success' },
     );
   } else {
     const confirmed = await confirmDialog({
@@ -629,7 +629,7 @@ async function handleDelete(item) {
       date: item.date,
       allInstances: false,
     });
-    message.success(t('已删除'));
+    showToast(t('已删除'), { type: 'success' });
   }
 }
 

@@ -4,8 +4,7 @@
  *   1. theme-selection：下线主题映射到对应浅色玻璃；
  *   2. hashUtils：用户 ID 生成格式与离散性；
  *   3. celebrationUtils：完成动效偏好读写与非法值过滤；
- *   4. reminderState：提醒条目增删与 15s 自动消散（mock 定时器）；
- *   5. naiveTheme：SSR 无 window 兜底、按设计令牌派生 overrides。
+ *   4. reminderState：提醒条目增删与 15s 自动消散（mock 定时器）。
  *
  * 运行：npm test
  */
@@ -24,7 +23,6 @@ import {
   addReminder,
   dismissReminder,
 } from '../src/utils/reminderState.js';
-import { buildNaiveThemeOverrides } from '../src/utils/naiveTheme.js';
 
 describe('normalizeTheme', () => {
   it('下线的深色玻璃映射到浅色版本', () => {
@@ -145,66 +143,5 @@ describe('reminderState', () => {
     mock.timers.tick(1_000);
     assert.ok(!activeReminders.value.some((r) => r.key === key), '到期自动消失');
     assert.equal(activeReminders.value.length, 0, '所有提醒都已消散');
-  });
-});
-
-describe('naiveTheme', () => {
-  it('无 window 时返回空对象（SSR 兜底）', () => {
-    assert.deepEqual(buildNaiveThemeOverrides(), {});
-  });
-
-  it('按设计令牌派生主题覆盖', () => {
-    const tokens = {
-      '--primary-color': '#6e56cf',
-      '--button-primary-hover-bg': '#5b45b5',
-      '--success-color': '#16a34a',
-      '--danger-color': '#dc2626',
-      '--warning-color': '#d97706',
-      '--info-color': '#2563eb',
-    };
-    globalThis.window = {};
-    globalThis.document = { documentElement: {} };
-    globalThis.getComputedStyle = (el) => ({
-      getPropertyValue: (name) => tokens[name] ?? '',
-    });
-    try {
-      const overrides = buildNaiveThemeOverrides();
-      const c = overrides.common;
-      // 强调色四组都要落到 naive 的 `xxxColor` 键上（曾因裸 `color` 被忽略而互相覆盖）
-      assert.equal(c.primaryColor, '#6e56cf');
-      assert.equal(c.primaryColorHover, '#5b45b5');
-      assert.equal(c.primaryColorPressed, '#5b45b5');
-      assert.equal(c.primaryColorSuppl, '#6e56cf');
-      assert.equal(c.successColor, '#16a34a');
-      assert.equal(c.warningColor, '#d97706');
-      assert.equal(c.infoColor, '#2563eb');
-      assert.equal(c.errorColor, '#dc2626');
-      assert.equal(c.errorColorHover, '#dc2626');
-      assert.equal('color' in c, false, '裸 color 不是 naive 支持的键');
-      assert.equal(c.borderRadius, '10px');
-      assert.equal(c.borderRadiusSmall, '8px');
-      assert.equal(overrides.Dialog.borderRadius, '16px');
-      assert.equal(overrides.Message.borderRadius, '12px');
-    } finally {
-      delete globalThis.window;
-      delete globalThis.document;
-      delete globalThis.getComputedStyle;
-    }
-  });
-
-  it('读不到令牌时回退到默认色', () => {
-    globalThis.window = {};
-    globalThis.document = { documentElement: {} };
-    globalThis.getComputedStyle = () => ({ getPropertyValue: () => '' });
-    try {
-      const c = buildNaiveThemeOverrides().common;
-      assert.equal(c.primaryColor, '#6e56cf');
-      assert.equal(c.successColor, '#16a34a');
-      assert.equal(c.errorColor, '#dc2626');
-    } finally {
-      delete globalThis.window;
-      delete globalThis.document;
-      delete globalThis.getComputedStyle;
-    }
   });
 });
