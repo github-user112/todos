@@ -41,6 +41,7 @@ import {
 import { buildNaiveThemeOverrides } from '../utils/naiveTheme';
 import { apiRequest, getUserId } from '../utils/api';
 import { t } from '../utils/i18n.js';
+import HolidayCalendar from 'holiday-calendar';
 
 // ---- naive-ui 弹层跟随主题（Dialog / Message 等） ----
 const naiveDark = ref(false);

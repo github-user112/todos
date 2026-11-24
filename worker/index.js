@@ -30,6 +30,10 @@ import {
   handleCheckAdminAccess,
 } from './handlers/weekly-summary.js';
 
+// 合法 uid：6-128 位字母数字 / 连字符 / 下划线
+// 前端 getUserId 生成的强随机 uid 满足此格式；非法格式直接拒绝（防越权探测）
+const UID_RE = /^[A-Za-z0-9_-]{6,128}$/;
+
 function jsonResponse(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
@@ -65,7 +69,9 @@ export default {
       const path = url.pathname;
 
       const userId = request.headers.get('X-User-ID');
-      if (!userId) return jsonResponse({ error: '缺少用户 ID' }, 401);
+      if (!userId || !UID_RE.test(userId)) {
+        return jsonResponse({ error: '无效的用户凭证' }, 401);
+      }
 
       const handler = routes[`${method} ${path}`];
       if (handler) {

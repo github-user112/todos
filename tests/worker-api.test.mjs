@@ -34,7 +34,7 @@ const ROW = {
   completed: 0,
   sort_order: 3,
   skip_holidays: 1,
-  user_id: 'u1',
+  user_id: 'testuid',
 };
 
 /** 假 D1：记录每次 prepare/bind，按 SQL 形态返回夹具 */
@@ -74,13 +74,15 @@ function createDb({ row = null, allResults = [] } = {}) {
 
 const jsonRequest = (
   body,
-  { method = 'PUT', url = 'https://todos.local/api/todos', userId = 'u1' } = {},
+  { method = 'PUT', url = 'https://todos.local/api/todos', userId = 'testuid' } = {},
 ) =>
   new Request(url, {
     method,
     body: JSON.stringify(body),
     headers: { 'Content-Type': 'application/json', 'X-User-ID': userId },
   });
+
+/** 合法 uid 必须匹配 worker 的 UID_RE（6-128 位字母数字/_/-），testuid 满足 */
 
 describe('worker/utils · jsonResponse', () => {
   it('默认 200 且返回 JSON', async () => {
@@ -121,12 +123,24 @@ describe('worker/utils · validateRepeatInterval', () => {
 describe('路由分发', () => {
   const env = { DB: createDb({ row: ROW }) };
   const get = (url, headers = {}) =>
-    worker.fetch(new Request(url, { headers: { 'X-User-ID': 'u1', ...headers } }), env, {});
+    worker.fetch(new Request(url, { headers: { 'X-User-ID': 'testuid', ...headers } }), env, {});
 
   it('缺少 X-User-ID → 401', async () => {
     const res = await worker.fetch(new Request('https://todos.local/api/todos'), env, {});
     assert.equal(res.status, 401);
-    assert.deepEqual(await res.json(), { error: '缺少用户 ID' });
+    assert.deepEqual(await res.json(), { error: '无效的用户凭证' });
+  });
+
+  it('X-User-ID 格式非法 → 401（短于 6 位 / 含非法字符 / 超长）', async () => {
+    for (const bad of ['ab', 'a!b', 'a'.repeat(129)]) {
+      const res = await worker.fetch(
+        new Request('https://todos.local/api/todos', { headers: { 'X-User-ID': bad } }),
+        env,
+        {},
+      );
+      assert.equal(res.status, 401, `uid=${JSON.stringify(bad)}`);
+      assert.deepEqual(await res.json(), { error: '无效的用户凭证' });
+    }
   });
 
   it('未知路径 → 404', async () => {
@@ -165,7 +179,7 @@ describe('路由分发', () => {
 
 describe('handleCreateTodo', () => {
   const create = async (body, db = createDb({ row: ROW })) => {
-    const res = await handleCreateTodo(jsonRequest(body, { method: 'POST' }), { DB: db }, 'u1');
+    const res = await handleCreateTodo(jsonRequest(body, { method: 'POST' }), { DB: db }, 'testuid');
     return { status: res.status, body: await res.json(), db };
   };
 
@@ -209,7 +223,7 @@ describe('handleCreateTodo', () => {
       1, // skipHolidays：前端布尔 → 存库 1
       0, // reminder 默认 0
       '09:00', // todoTime 默认 09:00
-      'u1',
+      'testuid',
     ]);
     assert.match(insert.sql, /completed, skip_holidays, reminder, todo_time, user_id/);
   });
@@ -234,7 +248,7 @@ describe('handleCreateTodo', () => {
 
 describe('handleUpdateTodo', () => {
   const update = async (body, db = createDb({ row: ROW })) => {
-    const res = await handleUpdateTodo(jsonRequest(body), { DB: db }, 'u1');
+    const res = await handleUpdateTodo(jsonRequest(body), { DB: db }, 'testuid');
     return { status: res.status, body: await res.json(), db };
   };
 
@@ -320,7 +334,7 @@ describe('handleUpdateTodo', () => {
 
 describe('改锚点日期（每周五 → 每周日）', () => {
   const update = async (body, db = createDb({ row: ROW })) => {
-    const res = await handleUpdateTodo(jsonRequest(body), { DB: db }, 'u1');
+    const res = await handleUpdateTodo(jsonRequest(body), { DB: db }, 'testuid');
     return { status: res.status, body: await res.json(), db };
   };
 
@@ -387,7 +401,7 @@ describe('改锚点日期（每周五 → 每周日）', () => {
     const res = await handleCreateTodo(
       jsonRequest({ text: '买菜', date: '2026-02-30' }, { method: 'POST' }),
       { DB: db },
-      'u1',
+      'testuid',
     );
     assert.equal(res.status, 400);
     assert.deepEqual(await res.json(), { error: '日期格式无效' });
@@ -397,7 +411,7 @@ describe('改锚点日期（每周五 → 每周日）', () => {
 
 describe('handleDeleteTodo', () => {
   const remove = async (url, db = createDb({ row: ROW })) =>
-    handleDeleteTodo(new Request(url, { method: 'DELETE' }), { DB: db }, 'u1');
+    handleDeleteTodo(new Request(url, { method: 'DELETE' }), { DB: db }, 'testuid');
 
   it('缺 id → 400', async () => {
     const res = await remove('https://todos.local/api/todos');

@@ -36,21 +36,15 @@ import { onMounted } from 'vue';
 import LoadingComponent from './components/LoadingComponent.vue';
 import ConfirmDialog from './components/ConfirmDialog.vue';
 import WebglGlass from './components/WebglGlass.vue';
-import { generateHash } from './utils/hashUtils';
 import { getUserId } from './utils/api';
 import { loading } from './utils/loading';
 import { activeReminders, dismissReminder } from './utils/reminderState';
 import { initFluidGlassLight, stopFluidGlassLight, watchFluidGlassTheme } from './utils/fluid-glass-light';
 
+// 触发 uid 初始化：getUserId 内部完成
+// 「URL 恢复 → localStorage 固化 → 强随机生成」全流程，无需此处重复生成
 const initializeUserId = () => {
-  let uid = getUserId();
-
-  if (!uid) {
-    uid = generateHash();
-    const url = new URL(window.location);
-    url.searchParams.set('uid', uid);
-    window.history.replaceState({}, '', url);
-  }
+  getUserId();
 };
 
 onMounted(() => {

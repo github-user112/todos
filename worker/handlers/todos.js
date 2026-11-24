@@ -76,8 +76,11 @@ async function handleCreateTodo(request, env, userId) {
       .run();
 
     if (result.success) {
-      const todo = await env.DB.prepare(`SELECT * FROM todos WHERE id = ?`)
-        .bind(result.meta.last_row_id)
+      // 回查带上 user_id，防御深度（即便 id 自增唯一，也不让越权读取成为可能）
+      const todo = await env.DB.prepare(
+        `SELECT * FROM todos WHERE id = ? AND user_id = ?`,
+      )
+        .bind(result.meta.last_row_id, userId)
         .first();
 
       return jsonResponse({

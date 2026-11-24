@@ -188,7 +188,15 @@ const renderedPreview = computed(() => {
     .replace('{todo_count}', String(sampleTodos.length))
     .replace('{todo_list}', todoLines || '（无待办）');
 
-  return preview
+  // 先 escape HTML 再做 ** / ` 格式化，避免模板内容注入 <script> / onerror 等
+  const escapeHtml = (s) =>
+    s
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  return escapeHtml(preview)
     .replace(/\n/g, '<br>')
     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
     .replace(/`(.*?)`/g, '<code>$1</code>');

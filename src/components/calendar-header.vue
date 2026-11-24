@@ -337,9 +337,9 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onUnmounted } from 'vue';
 import { t, tf, tMonth, locale, setLocale } from '../utils/i18n.js';
-import { apiRequest } from '../utils/api';
+import { apiRequest, getUserId } from '../utils/api';
 import FestivalCountdown from './FestivalCountdown.vue';
 import DateJumpPopup from './date-jump-popup.vue';
 import {
@@ -396,6 +396,7 @@ const celebrationEffect = ref(getCelebrationEffect());
 const dynamicBgEnabled = ref(isDynamicBackgroundEnabled());
 const customCity = ref(getCustomCity());
 const cityMessage = ref(null);
+let cityMessageTimer = null;
 
 const changeCelebrationEffect = (effect) => {
   setCelebrationEffect(effect);
@@ -429,7 +430,7 @@ const saveCity = () => {
   } else {
     cityMessage.value = { success: true, text: t('✅ 已清除自定义城市') };
   }
-  setTimeout(() => { cityMessage.value = null; }, 3000);
+  cityMessageTimer = setTimeout(() => { cityMessage.value = null; }, 3000);
 };
 const webhookUrl = ref('');
 const webhookTesting = ref(false);
@@ -610,11 +611,20 @@ const handleImport = async (e) => {
 };
 
 const copyUrlToClipboard = () => {
+  // 日常浏览 URL 不含 uid（防泄露）；点「分享」时主动拼上 uid，
+  // 让接收端（自己的另一台设备）能继承身份。此链接 = 完全权限，仅分享给信任设备。
+  const uid = getUserId();
+  const url = new URL(window.location.href);
+  if (uid) url.searchParams.set('uid', uid);
   navigator.clipboard
-    .writeText(window.location.href)
-    .then(() => alert(t('链接已复制到剪贴板')))
+    .writeText(url.toString())
+    .then(() => alert(t('链接已复制（含身份凭证，请仅分享给自己信任的设备）')))
     .catch(() => alert(t('复制失败')));
 };
+
+onUnmounted(() => {
+  if (cityMessageTimer) clearTimeout(cityMessageTimer);
+});
 </script>
 
 <style scoped>

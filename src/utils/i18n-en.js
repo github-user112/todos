@@ -136,6 +136,8 @@ export default {
   未知错误: 'Unknown error',
   '暂无待办事项': 'No todos yet',
   '链接已复制到剪贴板': 'Link copied to clipboard',
+  '链接已复制（含身份凭证，请仅分享给自己信任的设备）':
+    'Link copied (contains your credential — share only with your own trusted devices)',
   '加载日历数据失败，请刷新页面重试': 'Failed to load calendar data. Please refresh and try again',
 
   // ---- 重复 ----

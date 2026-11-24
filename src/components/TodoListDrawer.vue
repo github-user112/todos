@@ -285,6 +285,8 @@ onMounted(() => {
 });
 onUnmounted(() => {
   window.removeEventListener('resize', onResize);
+  clearTimeout(scrollTimer);
+  clearTimeout(almanacRetryTimer);
 });
 
 const PAGE_SIZE = 15;
@@ -311,7 +313,7 @@ const loadAlmanac = async () => {
   } catch (e) {
     console.warn('加载今日宜忌失败:', e);
     // 兜底：3秒后重试一次
-    setTimeout(() => {
+    almanacRetryTimer = setTimeout(() => {
       if (!almanac.value) {
         try {
           almanac.value = getDailyAlmanac(new Date());
@@ -329,6 +331,10 @@ const hasHolidayData = computed(
 
 const todayKey = computed(() => formatDate(new Date()));
 const baseDate = computed(() => props.selectedDate || todayKey.value);
+// 点击"今天"按钮时的锚点日期，优先于 baseDate 作为列表起点，
+// 确保今天的待办排在第一个（紧贴今日黄历下方）
+const anchorDate = ref(null);
+const rangeBase = computed(() => anchorDate.value || baseDate.value);
 
 let cachedRange = ''
 let cachedResult = null
@@ -485,7 +491,7 @@ function generateTodosInRange(startDate, endDate) {
 }
 
 const visibleRange = computed(() => {
-  const base = parseLocalDate(baseDate.value);
+  const base = parseLocalDate(rangeBase.value);
   const start = new Date(base);
   start.setDate(start.getDate() - pastOffset.value);
   const end = new Date(base);
@@ -628,10 +634,11 @@ async function handleDelete(item) {
 }
 
 let scrollTimer = null;
+let almanacRetryTimer = null;
 function onScroll(e) {
   if (loading.value) return;
   const el = e.target;
-  if (el.scrollTop <= 60 && hasMorePast.value) {
+  if (el.scrollTop <= 60 && hasMorePast.value && !anchorDate.value) {
     loading.value = true;
     clearTimeout(scrollTimer);
     scrollTimer = setTimeout(() => {
@@ -669,10 +676,14 @@ function scrollToTarget(el) {
 }
 
 function jumpToToday() {
+  // 以今天为列表起点，确保今天的待办排在第一个（紧贴今日黄历下方）
+  anchorDate.value = todayKey.value;
   pastOffset.value = 0;
   futureOffset.value = PAGE_SIZE;
   nextTick(() => {
-    if (todayEl.value) scrollToTarget(todayEl.value);
+    // 今天已排第一，直接回到顶部即可，不依赖 todayEl（避免 ref 时机问题）
+    const scrollEl = scrollBody.value || scrollBody2.value;
+    if (scrollEl) scrollEl.scrollTo({ top: 0, behavior: 'smooth' });
   });
 }
 
@@ -691,6 +702,7 @@ watch(
   () => props.show,
   (val) => {
     if (val) {
+      anchorDate.value = null;
       pastOffset.value = 0;
       futureOffset.value = PAGE_SIZE;
       scrollToBase();
@@ -701,6 +713,7 @@ watch(
   () => props.selectedDate,
   () => {
     if (props.show) {
+      anchorDate.value = null;
       pastOffset.value = 0;
       futureOffset.value = PAGE_SIZE;
       scrollToBase();

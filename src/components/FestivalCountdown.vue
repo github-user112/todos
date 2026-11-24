@@ -21,7 +21,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { t, tf } from '../utils/i18n.js';
 import { ensureLunarLoaded } from '../utils/lunarUtils';
 import { getUpcomingFestival } from '../utils/festivalUtils';
@@ -92,8 +92,12 @@ function formatDateKey(date) {
   return `${y}-${m}-${d}`;
 }
 
+let festivalTimer = null;
 onMounted(() => {
-  setTimeout(checkFestival, 1000);
+  festivalTimer = setTimeout(checkFestival, 1000);
+});
+onUnmounted(() => {
+  if (festivalTimer) clearTimeout(festivalTimer);
 });
 </script>
 

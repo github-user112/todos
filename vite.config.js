@@ -32,9 +32,8 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks(id) {
-          if (id.includes('lunar-javascript')) {
-            return 'lunar';
-          }
+          if (id.includes('lunar-javascript')) return 'lunar';
+          if (id.includes('naive-ui')) return 'naive-ui';
         },
       },
     },
