@@ -30,6 +30,7 @@ import { apiRequest, getUserId } from '../utils/api';
 import { t } from '../utils/i18n.js';
 import { showToast } from '../utils/toast.js';
 import HolidayCalendar from 'holiday-calendar';
+import { normalizeYears } from '../utils/holidayYears.js';
 import { loading, setLoading } from '../utils/loading';
 import {
   initReminderManager,
@@ -81,29 +82,49 @@ const closeSolarTermPopup = () => {
 
 import { addReminder } from '../utils/reminderState';
 
-const fetchHolidayData = async (currentYear) => {
+// 已成功加载过的节假日年份，避免同一份数据被反复请求
+const loadedHolidayYears = new Set();
+
+/**
+ * 加载节假日数据
+ * @param {number|number[]} target - 需要加载的年份，或年份数组
+ *
+ * 视图会跨年（今日优先窗口固定 35 天，年末伸到次年 1 月），所以调用方会传入
+ * 「窗口覆盖的年份集合」，这里逐年请求，任一年失败都不影响其余年份。
+ */
+const fetchHolidayData = async (target) => {
+  const years = normalizeYears(target).filter(
+    (year) => !loadedHolidayYears.has(year),
+  );
+  if (!years.length) return;
+
   try {
-    let result = {};
     const calendar = new HolidayCalendar();
-    let ps = [
-      calendar.getDates('CN', currentYear - 1),
-      calendar.getDates('CN', currentYear),
-    ];
-    if (currentYear < new Date().getFullYear()) {
-      ps.push(calendar.getDates('CN', currentYear + 1));
-    }
-    const cnDates = await Promise.all(ps);
+    const results = await Promise.allSettled(
+      years.map((year) => calendar.getDates('CN', year)),
+    );
 
-    result.dates = cnDates.flat();
-
-    if (result && result.dates) {
-      const holidayMap = {};
-      result.dates.forEach((item) => {
+    const holidayMap = {};
+    results.forEach((result, index) => {
+      const year = years[index];
+      if (result.status !== 'fulfilled') {
+        console.warn(`节假日数据加载失败：${year}`, result.reason);
+        return; // 不记入已加载，下次切回该年时会重试
+      }
+      if (!Array.isArray(result.value)) {
+        console.warn(`节假日数据格式异常：${year}`);
+        return;
+      }
+      loadedHolidayYears.add(year);
+      result.value.forEach((item) => {
         holidayMap[item.date] = {
           name: item.name_cn,
           type: item.type,
         };
       });
+    });
+
+    if (Object.keys(holidayMap).length > 0) {
       holidayData.value = { ...holidayData.value, ...holidayMap };
     }
   } catch (error) {
@@ -115,9 +136,11 @@ provide('holidayData', holidayData);
 const initCalendar = async () => {
   try {
     const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
     setLoading(true);
     await Promise.allSettled([
-      fetchHolidayData(currentDate.getFullYear()),
+      // 前后各一年：首页视图可能跨年（12 月的今日优先窗口会伸到次年 1 月）
+      fetchHolidayData([currentYear - 1, currentYear, currentYear + 1]),
       fetchCalendarData(currentDate),
     ]);
     setLoading(false);

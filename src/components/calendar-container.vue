@@ -100,6 +100,7 @@ import CelebrationEffect from './CelebrationEffect.vue';
 import { getCelebrationEffect } from '../utils/celebrationUtils';
 import { formatDate, getWeekNumber } from '../utils/dateUtils';
 import { jumpToYM } from '../utils/quickJump.js';
+import { collectYears } from '../utils/holidayYears.js';
 import {
   isDynamicBackgroundEnabled,
   applyDynamicBackground,
@@ -418,6 +419,13 @@ const weekNumbers = computed(() => {
   return weeks;
 });
 
+// 当前视图窗口覆盖到的年份（逗号串，便于 watch 做值比较）
+// 「今日优先」窗口固定 35 天，年末会伸到次年 1 月，例如 2026 年 12 月的视图
+// 覆盖 2026-12-07 ~ 2027-01-10，需要 2026、2027 两年的节假日数据。
+const visibleHolidayYears = computed(() =>
+  collectYears(calendarDays.value.map((day) => day.date)).join(','),
+);
+
 // ---- 导航 ----
 const prevMonth = () => {
   const d = new Date(currentDate.value);
@@ -438,11 +446,18 @@ const jumpToDate = ({ year, month }) => {
   currentDate.value = jumpToYM(currentDate.value, year, month);
 };
 
-watch(currentDate, (newDate, oldValue) => {
+watch(currentDate, (newDate) => {
   emit('fetch-calendar-data', newDate);
-  if (oldValue && newDate.getFullYear() !== oldValue.getFullYear()) {
-    emit('fetch-holiday-data', newDate.getFullYear());
-  }
+});
+
+// 节假日按「视图窗口覆盖的年份」加载，而不是只比较 currentDate 的年份：
+// 12 月的视图窗口会伸到次年 1 月，只比年份会漏掉元旦那份数据。
+watch(visibleHolidayYears, (value) => {
+  if (!value) return;
+  emit(
+    'fetch-holiday-data',
+    value.split(',').map((year) => Number(year)),
+  );
 });
 
 // ---- 设置 ----
